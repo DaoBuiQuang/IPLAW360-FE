@@ -1,0 +1,329 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.text-input {
+  border: 1px solid #333333;
+  /* Màu xám nhạt */
+  padding: 8px 12px;
+  /* border-radius: 4px; */
+  outline: none;
+  /* Loại bỏ viền khi focus */
+  height: 38px;
+}
+textarea {
+  border: 1px solid #333333;
+  padding: 8px 12px;
+  outline: none;
+  height: 38px;
+}
+textarea:focus {
+  border: 2px solid #009999;
+}
+input:focus {
+  border: 2px solid #009999;
+}
+
+input.error {
+  border-color: #f87171;
+  /* Màu đỏ */
+}
+
+.css-13cymwt-control {
+  border-radius: 0.5rem !important;
+  border: 1px solid #333333 !important;
+  /* height: 40px; */
+}
+
+.css-t3ipsp-control {
+  border-radius: 0.5rem !important;
+  border-color: #333333 !important;
+  box-shadow: none !important;
+}
+
+.css-t3ipsp-control:hover {
+  border: 2px solid #009999 !important;
+  box-shadow: none !important;
+}
+
+.css-3iigni-container {
+  border-radius: 0.5rem !important;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1)) !important;
+  border: 1px solid #333333 !important;
+}
+
+.ant-picker {
+  height: 38px;
+  border-radius: 0.5rem;
+  border: 1px solid #333333 !important;
+}
+
+.ant-picker:focus {
+  border-color: #009999;
+}
+
+.ant-picker-input {
+  font-size: 16px !important;
+}
+
+.ant-picker-input input {
+  font-size: 16px !important;
+}
+
+/* input{
+  font-size: 14px !important;
+}
+.css-1dimb5e-singleValue{
+  font-size: 14px !important;
+} */
+.css-3iigni-container div {
+  border-radius: 0.5rem !important;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1)) !important;
+}
+
+/* Ghi đè style của ô input trong DatePicker */
+.ant-picker-disabled {
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1)) !important;
+}
+
+.ant-picker-input input[disabled] {
+  color: #000 !important;
+  /* Màu chữ đen */
+}
+
+.css-b62m3t-container {
+  height: fit-content;
+}
+
+.don-progress .ant-steps-horizontal {
+  flex-wrap: wrap;
+  /* Cho phép xuống dòng */
+}
+
+.don-progress .ant-steps-item {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+
+.don-progress .ant-steps-horizontal {
+  flex-wrap: wrap;
+  row-gap: 8px;
+  column-gap: 12px;
+  justify-content: center;
+}
+
+.don-progress .ant-steps-item {
+  flex: 1 1 auto;
+  /* Cho phép các bước co giãn linh hoạt */
+  min-width: 100px;
+  /* Giới hạn tối thiểu chiều rộng mỗi bước */
+}
+
+.don-progress .ant-steps-item-title {
+  white-space: normal !important;
+  /* Cho phép xuống dòng trong tiêu đề */
+  text-align: center;
+}
+
+.css-hlgwow .css-olqui2-singleValue {
+  color: #333333 !important;
+}
+
+/* Đặt ở file CSS hoặc trong style global */
+aside::-webkit-scrollbar {
+  width: 2px;
+  /* Chiều rộng thanh cuộn dọc */
+}
+
+aside::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  /* Màu thanh kéo */
+  border-radius: 4px;
+}
+
+aside::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.css-1jqq78o-placeholder {
+  color: #888888 !important;
+  /* Màu xám nhạt */
+}
+
+tr {
+  line-height: 1rem;
+  /* Khoảng cách dòng */
+}
+
+.text-table {
+  text-align: left !important;
+}
+
+/* th{
+  text-align: left !important;
+}
+td{
+  text-align: left !important;
+} */
+
+table {
+  border-collapse: collapse;
+  border-radius: 10px;
+}
+
+thead tr {
+  /* border:1px solid #AAAAAA !important; */
+  background-color: #009999;
+  color: #fff;
+}
+
+thead tr th {
+  color: #FFFFFF;
+}
+
+tbody tr {
+  border-color: #CCCCCC !important;
+}
+
+tbody tr td {
+  color: #333333;
+}
+
+.text-input {}
+
+input {
+  font-weight: 600;
+  color: #333333 !important;
+  /* Màu chữ đen */
+}
+
+.css-1dimb5e-singleValue {
+  font-weight: 600 !important;
+  color: #333333 !important;
+  /* Màu chữ đen */
+}
+
+.css-olqui2-singleValue {
+  font-weight: 600 !important;
+  color: #333333 !important;
+  /* Màu chữ đen */
+}
+
+.text-blue-500 {
+  color: #3b82f6 !important;
+  /* Màu xanh dương */
+}
+
+.search-input {
+  border: 1px solid #333333;
+}
+
+:where(.css-dev-only-do-not-override-18afz5u).ant-pagination .ant-pagination-item-active {
+  border-color: #009999 !important;
+}
+
+.text-blue-700 {
+  color: #009999 !important;
+  /* Màu xanh dương đậm */
+}
+
+:where(.css-dev-only-do-not-override-18afz5u).ant-pagination .ant-pagination-item-active a {
+  color: #009999;
+}
+
+:where(.css-dev-only-do-not-override-18afz5u).ant-steps .ant-steps-item-finish>.ant-steps-item-container>.ant-steps-item-tail::after {
+  background-color: #009999 !important;
+  /* Màu xanh dương */
+}
+
+.ant-steps-icon {
+  color: #fff !important;
+  /* Màu xanh dương */
+}
+
+.ant-steps-item-icon {
+  background-color: #009999 !important;
+  /* Màu xanh dương */
+  color: #fff !important;
+  /* Màu chữ trắng */
+}
+
+@media print {
+  /* 1. Giữ màu khi in */
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 2. Mặc định ẩn TẤT CẢ mọi thứ trên trang */
+  body * {
+    visibility: hidden;
+  }
+
+  /* 3. Chỉ hiển thị phần cần in (#print-area) */
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+
+  /* 4. Đưa #print-area lên full trang giấy, không dính layout ngoài */
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 5. Ẩn riêng những thứ gắn class no-print (nút, modal...) */
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Tuỳ chọn: set khổ giấy + lề */
+@page {
+  size: A4;
+  margin: 10mm;
+}
