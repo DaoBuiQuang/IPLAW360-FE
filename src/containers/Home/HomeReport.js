@@ -81,9 +81,7 @@ const AssigneeTable = ({ title, items, onRowClick }) => {
                 >
                   <td className="px-3 py-2 border-b">
                     <div className="font-medium text-gray-800">{it.hoTen}</div>
-                    {it.phongBan && (
-                      <div className="text-xs text-gray-500">{it.phongBan}</div>
-                    )}
+                    {it.phongBan && <div className="text-xs text-gray-500">{it.phongBan}</div>}
                   </td>
 
                   <td className="px-3 py-2 text-center border-b font-semibold text-red-600">
@@ -97,16 +95,13 @@ const AssigneeTable = ({ title, items, onRowClick }) => {
               );
             })}
           </tbody>
-
         </table>
       </div>
     </div>
   );
 };
 
-/**
- * DeadlineRow: click từng pill để đi list theo filter bucket
- */
+/** DeadlineRow */
 const DeadlineRow = ({ title, data, onClickBucket }) => {
   if (!data) return null;
 
@@ -115,23 +110,31 @@ const DeadlineRow = ({ title, data, onClickBucket }) => {
       <div className="text-sm font-semibold text-gray-800">{title}</div>
 
       <div className="grid grid-cols-4 gap-2">
-        <KpiPill label="Quá hạn" value={data.overdue} tone="red" onClick={onClickBucket?.("overdue")} />
+        <KpiPill
+          label="Quá hạn"
+          value={data.overdue}
+          tone="red"
+          onClick={onClickBucket?.("overdue")}
+        />
         <KpiPill label="7 ngày" value={data.d7} tone="orange" onClick={onClickBucket?.("<7")} />
-        <KpiPill label="15 ngày" value={data.d15} tone="yellow" onClick={onClickBucket?.("<15")} />
-        <KpiPill label="30 ngày" value={data.d30} tone="green" onClick={onClickBucket?.("<30")} />
+        <KpiPill
+          label="15 ngày"
+          value={data.d15}
+          tone="yellow"
+          onClick={onClickBucket?.("<15")}
+        />
+        <KpiPill
+          label="30 ngày"
+          value={data.d30}
+          tone="green"
+          onClick={onClickBucket?.("<30")}
+        />
       </div>
     </div>
   );
 };
 
-/**
- * items: [{ month:'YYYY-MM', total:number, chuaHoanThanhTaiLieu:number }, ...]
- * Click tháng -> qua list, tự set:
- *  - Trạng thái TL = 1 (Chưa hoàn thành)
- *  - Trường ngày = Ngày nộp đơn
- *  - Từ ngày = đầu tháng
- *  - Đến ngày = cuối tháng
- */
+/** MonthMini: 3 tháng gần nhất */
 const MonthMini = ({ items, onClick }) => {
   if (!items || !Array.isArray(items) || items.length === 0) return null;
 
@@ -157,7 +160,9 @@ const MonthMini = ({ items, onClick }) => {
 
           <div className="mt-1 flex items-baseline justify-between">
             <div className="text-[11px] text-gray-600">Chưa HTTL</div>
-            <div className="text-base font-bold text-red-600">{Number(it.chuaHoanThanhTaiLieu ?? 0)}</div>
+            <div className="text-base font-bold text-red-600">
+              {Number(it.chuaHoanThanhTaiLieu ?? 0)}
+            </div>
           </div>
         </ClickCard>
       ))}
@@ -165,45 +170,77 @@ const MonthMini = ({ items, onClick }) => {
   );
 };
 
-const VuViecStatusCard = ({ data, onClickStatus }) => {
-  const items = data?.byLabel;
-  if (!items || !Array.isArray(items)) return null;
+/** ✅ YearMonthGrid: hiển thị danh sách tháng (FE cắt tới tháng hiện tại) */
+const YearMonthGrid = ({ title, items, onClickMonth }) => {
+  if (!items || !Array.isArray(items) || items.length === 0) return null;
 
-  const total = items.reduce((s, x) => s + Number(x.count ?? 0), 0);
-
-  const badgeClass = (code) => {
-    if (code === 3) return "bg-green-50 text-green-700 border-green-200";
-    if (code === 2) return "bg-red-50 text-red-700 border-red-200";
-    if (code === 1) return "bg-yellow-50 text-yellow-800 border-yellow-200";
-    return "bg-gray-50 text-gray-700 border-gray-200";
+  const pretty = (m) => {
+    const [y, mm] = String(m).split("-");
+    return `T${mm}/${y}`;
   };
 
   return (
-    <div className="bg-white rounded-xl border shadow-sm p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-gray-800">📌 Vụ việc theo trạng thái yêu cầu thanh toán</h3>
-        <div className="text-xs text-gray-500">
-          Tổng: <span className="font-semibold">{total}</span>
-        </div>
-      </div>
+    <div className="bg-white rounded-xl border p-3">
+      <div className="text-sm font-semibold text-gray-800 mb-2">{title}</div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
         {items.map((it) => (
           <ClickCard
-            key={it.code}
-            onClick={onClickStatus ? () => onClickStatus(it) : undefined}
-            className={`rounded-lg border p-3 ${badgeClass(it.code)}`}
+            key={it.month}
+            onClick={onClickMonth ? () => onClickMonth(it) : undefined}
+            className="rounded-lg border bg-gray-50 p-2"
           >
-            <div className="text-xs">{it.label}</div>
-            <div className="text-2xl font-extrabold mt-1">{Number(it.count ?? 0)}</div>
+            <div className="text-[11px] text-gray-500">{pretty(it.month)}</div>
+
+            <div className="mt-1 flex items-baseline justify-between">
+              <div className="text-[11px] text-gray-600">Đơn nộp</div>
+              <div className="text-lg font-extrabold text-gray-800">{Number(it.total ?? 0)}</div>
+            </div>
+
+            <div className="text-[10px] text-gray-400 mt-1">Bấm để xem</div>
           </ClickCard>
         ))}
       </div>
-
-      <div className="text-xs text-gray-500 mt-3">Quy ước: 0=Chưa đề nghị, 1=Chờ duyệt, 2=Từ chối, 3=Đã duyệt</div>
     </div>
   );
 };
+
+/** ✅ Year3Bar: 3 năm gần nhất */
+const Year3Bar = ({ title, items, onClickYear }) => {
+  if (!items || !Array.isArray(items) || items.length === 0) return null;
+
+  const yearNow = new Date().getFullYear();
+
+  const badgeCls = (y) => {
+    if (y === yearNow) return "bg-blue-50 border-blue-200 text-blue-800";
+    return "bg-gray-50 border-gray-200 text-gray-800";
+  };
+
+  return (
+    <div className="bg-white rounded-xl border p-3">
+      <div className="text-sm font-semibold text-gray-800 mb-2">{title}</div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {items.map((it) => (
+          <ClickCard
+            key={it.year}
+            onClick={onClickYear ? () => onClickYear(it) : undefined}
+            className={`rounded-lg border p-3 ${badgeCls(Number(it.year))}`}
+          >
+            <div className="text-xs opacity-70">Năm</div>
+            <div className="text-lg font-bold">{it.year}</div>
+
+            <div className="mt-2 flex items-baseline justify-between">
+              <div className="text-xs opacity-70">Đơn nộp</div>
+              <div className="text-2xl font-extrabold">{Number(it.total ?? 0)}</div>
+            </div>
+          </ClickCard>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 
 /* ================== MAIN DASHBOARD ================== */
 
@@ -213,9 +250,6 @@ function HomeReport() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Rule điều hướng:
-  // VN -> /applicationlist
-  // KH -> /applicationlist_kh
   const gotoApplicationList = (country, state = {}) => {
     const path = country === "KH" ? "/applicationlist_kh" : "/applicationlist";
     navigate(path, { state });
@@ -228,7 +262,7 @@ function HomeReport() {
           method: "post",
           endpoint: "/deadline-dashboard",
         });
-        setData(res);
+        setData(res?.data ?? res);
       } catch (err) {
         console.error("Dashboard error:", err);
       } finally {
@@ -264,6 +298,42 @@ function HomeReport() {
     );
   }, [data]);
 
+  const vn = data?.donDangKy?.VN;
+  const kh = data?.donDangKy?.KH;
+
+  // ✅ Cắt list tháng năm nay tới THÁNG HIỆN TẠI (backend đang trả đủ 12 tháng)
+  const filterUpToCurrentMonth = (items) => {
+    if (!Array.isArray(items)) return [];
+    const now = new Date();
+    const curKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    return items.filter((x) => String(x.month) <= curKey);
+  };
+
+  const vnMonthsUpToNow = useMemo(
+    () => filterUpToCurrentMonth(vn?.tongDonTheoThangNamNay),
+    [vn?.tongDonTheoThangNamNay]
+  );
+
+  const khMonthsUpToNow = useMemo(
+    () => filterUpToCurrentMonth(kh?.tongDonTheoThangNamNay),
+    [kh?.tongDonTheoThangNamNay]
+  );
+
+  const currentMonthKey = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }, []);
+
+  const vnCurrentMonth = useMemo(() => {
+    const found = vnMonthsUpToNow.find((x) => x.month === currentMonthKey);
+    return found ?? { month: currentMonthKey, total: 0 };
+  }, [vnMonthsUpToNow, currentMonthKey]);
+
+  const khCurrentMonth = useMemo(() => {
+    const found = khMonthsUpToNow.find((x) => x.month === currentMonthKey);
+    return found ?? { month: currentMonthKey, total: 0 };
+  }, [khMonthsUpToNow, currentMonthKey]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
@@ -272,32 +342,40 @@ function HomeReport() {
     );
   }
 
-  const vn = data?.donDangKy?.VN;
-  const kh = data?.donDangKy?.KH;
+  /* ================== PRESETS ================== */
 
-  /* ================== PRESETS (SẼ ĐƯỢC LIST TỰ SEARCH) ================== */
-
-  // Hồ sơ tài liệu chưa hoàn thành
   const presetOutstandingDocs = (country) => ({
     preset: "OUTSTANDING_DOCS",
-    selectedTrangThaiHTTL: 1, // ✅ Chưa hoàn thành
+    selectedTrangThaiHTTL: 1,
     _fromDashboard: true,
     _country: country,
   });
 
-  // Deadline: hạn trả lời / hạn xử lý
   const presetDeadline = (country, typeKey, bucketValue) => ({
     preset: "DEADLINE_BUCKET",
-    deadlineType: typeKey, // "hanTraLoi" | "hanXuLy"
-    bucket: bucketValue, // "overdue" | "<7" | "<15" | "<30"
+    deadlineType: typeKey,
+    bucket: bucketValue,
     _fromDashboard: true,
     _country: country,
   });
 
-  // 3 tháng gần nhất: click tháng -> tự set TL=1 + ngày nộp đơn + from/to theo tháng
   const presetMonthOutstanding = (country, month) => ({
     preset: "MONTH_OUTSTANDING_DOCS",
-    month, // "YYYY-MM"
+    month,
+    _fromDashboard: true,
+    _country: country,
+  });
+
+  const presetMonthTotalSubmissions = (country, month) => ({
+    preset: "MONTH_TOTAL_SUBMISSIONS",
+    month,
+    _fromDashboard: true,
+    _country: country,
+  });
+
+  const presetYearTotalSubmissions = (country, year) => ({
+    preset: "YEAR_TOTAL_SUBMISSIONS",
+    year,
     _fromDashboard: true,
     _country: country,
   });
@@ -312,16 +390,16 @@ function HomeReport() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* LEFT: Quá hạn */}
           <ClickCard
             onClick={() => gotoApplicationList("VN", presetDeadline("VN", "hanXuLy", "overdue"))}
             className="rounded-xl p-6 bg-red-50 border border-red-200 flex flex-col justify-center min-h-[130px]"
           >
             <div className="text-sm font-semibold text-red-700">Quá hạn</div>
-            <div className="text-5xl font-extrabold text-red-600 leading-none mt-2">{totalDeadline.overdue}</div>
+            <div className="text-5xl font-extrabold text-red-600 leading-none mt-2">
+              {totalDeadline.overdue}
+            </div>
           </ClickCard>
 
-          {/* RIGHT: Còn hạn */}
           <div className="rounded-xl p-4 bg-white border border-gray-200 min-h-[130px]">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold text-gray-700">Sắp hết hạn</div>
@@ -362,20 +440,12 @@ function HomeReport() {
         </div>
       </div>
 
-      {/* ================== VỤ VIỆC ================== */}
-      <VuViecStatusCard
-        data={data?.vuViec?.trangThaiYCTT}
-        onClickStatus={(it) =>
-          gotoApplicationList("VN", { preset: "VU_VIEC_STATUS", statusCode: it.code, _fromDashboard: true })
-        }
-      />
-
       {/* ================== ĐƠN ĐĂNG KÝ ================== */}
       <div className="bg-white rounded-2xl border shadow-sm p-5">
         <div className="mb-4">
           <div className="text-lg font-bold">📁 Đơn đăng ký</div>
           <div className="text-sm text-gray-500">
-            VN & Campuchia: deadline + hồ sơ tài liệu + thống kê nộp đơn & chưa HTTL theo tháng
+            VN & Campuchia: deadline + hồ sơ tài liệu + thống kê nộp đơn theo tháng/năm
           </div>
         </div>
 
@@ -386,7 +456,21 @@ function HomeReport() {
               <div className="font-semibold text-blue-700">Việt Nam</div>
               <div className="text-xs text-gray-500">Tổng quan</div>
             </div>
+            {/* ✅ THÁNG HIỆN TẠI + THEO THÁNG NĂM NAY + THEO NĂM 3 NĂM */}
+            <div className="mt-3 space-y-3">
+              <YearMonthGrid
+                title="Tổng đơn nộp theo tháng (năm nay)"
+                items={vnMonthsUpToNow}
+                onClickMonth={(it) => gotoApplicationList("VN", presetMonthTotalSubmissions("VN", it.month))}
+              />
 
+              {/* ✅ NEW: 3 năm gần nhất */}
+              <Year3Bar
+                title="Tổng đơn nộp theo năm (3 năm gần nhất)"
+                items={vn?.tongDonTheoNam3NamGanNhat}
+                onClickYear={(it) => gotoApplicationList("VN", presetYearTotalSubmissions("VN", it.year))}
+              />
+            </div>
             <div className="bg-white rounded-xl border p-3">
               <DeadlineRow
                 title="Hạn trả lời Cục"
@@ -411,13 +495,17 @@ function HomeReport() {
               </ClickCard>
 
               <div className="bg-white rounded-xl border p-3">
-                <div className="text-sm font-semibold text-gray-800 mb-2">3 tháng gần nhất (Đơn nộp / Chưa HTTL)</div>
+                <div className="text-sm font-semibold text-gray-800 mb-2">
+                  3 tháng gần nhất (Đơn nộp / Chưa HTTL)
+                </div>
                 <MonthMini
                   items={vn?.thongKe3Thang}
                   onClick={(it) => gotoApplicationList("VN", presetMonthOutstanding("VN", it.month))}
                 />
               </div>
             </div>
+
+
           </div>
 
           {/* KH */}
@@ -426,7 +514,20 @@ function HomeReport() {
               <div className="font-semibold text-green-700">Campuchia</div>
               <div className="text-xs text-gray-500">Tổng quan</div>
             </div>
+            <div className="mt-3 space-y-3">
+              <YearMonthGrid
+                title="Tổng đơn nộp theo tháng (năm nay)"
+                items={khMonthsUpToNow}
+                onClickMonth={(it) => gotoApplicationList("KH", presetMonthTotalSubmissions("KH", it.month))}
+              />
 
+              {/* ✅ NEW: 3 năm gần nhất */}
+              <Year3Bar
+                title="Tổng đơn nộp theo năm (3 năm gần nhất)"
+                items={kh?.tongDonTheoNam3NamGanNhat}
+                onClickYear={(it) => gotoApplicationList("KH", presetYearTotalSubmissions("KH", it.year))}
+              />
+            </div>
             <div className="bg-white rounded-xl border p-3">
               <DeadlineRow
                 title="Hạn trả lời Cục"
@@ -451,7 +552,9 @@ function HomeReport() {
               </ClickCard>
 
               <div className="bg-white rounded-xl border p-3">
-                <div className="text-sm font-semibold text-gray-800 mb-2">3 tháng gần nhất (Đơn nộp  / Chưa HTTL)</div>
+                <div className="text-sm font-semibold text-gray-800 mb-2">
+                  3 tháng gần nhất (Đơn nộp / Chưa HTTL)
+                </div>
                 <MonthMini
                   items={kh?.thongKe3Thang}
                   onClick={(it) => gotoApplicationList("KH", presetMonthOutstanding("KH", it.month))}
@@ -478,7 +581,7 @@ function HomeReport() {
             onRowClick={(it) =>
               gotoApplicationList("VN", {
                 preset: "ASSIGNEE",
-                selectedNhanSu: it.maNhanSu, // ✅ mã nhân sự
+                selectedNhanSu: it.maNhanSu,
                 _fromDashboard: true,
                 _country: "VN",
               })

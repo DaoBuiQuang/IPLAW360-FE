@@ -60,6 +60,62 @@ function ApplicationList_KH() {
     );
   };
 
+  // ===== CLICK THÁNG (TỔNG ĐƠN NỘP) =====
+  const applyMonthTotalFilterAndSearch = (month) => {
+    const start = dayjs(`${month}-01`).startOf("month").format("YYYY-MM-DD");
+    const end = dayjs(`${month}-01`).endOf("month").format("YYYY-MM-DD");
+
+    const fieldObj = { value: "ngayNopDon", label: "Ngày nộp đơn" };
+
+    // set UI filter
+    setSelectedField(fieldObj);
+    setFromDate(start);
+    setToDate(end);
+    setSelectedTrangThaiHTTL(null); // ✅ không lọc HTTL
+
+    // filterCondition gửi backend
+    const customFilterCondition = {
+      ...filterCondition,
+      selectedField: "ngayNopDon",
+      fromDate: start,
+      toDate: end,
+    };
+
+    // gọi API ngay
+    fetchApplications("", 1, pageSize, customFilterCondition, {
+      selectedTrangThaiHTTL: null,
+      selectedField: fieldObj,
+      fromDate: start,
+      toDate: end,
+    });
+  };
+
+  // ===== CLICK NĂM (TỔNG ĐƠN NỘP) =====
+  const applyYearTotalFilterAndSearch = (year) => {
+    const start = dayjs(`${year}-01-01`).startOf("year").format("YYYY-MM-DD");
+    const end = dayjs(`${year}-12-31`).endOf("year").format("YYYY-MM-DD");
+
+    const fieldObj = { value: "ngayNopDon", label: "Ngày nộp đơn" };
+
+    setSelectedField(fieldObj);
+    setFromDate(start);
+    setToDate(end);
+    setSelectedTrangThaiHTTL(null); // ✅ không lọc HTTL
+
+    const customFilterCondition = {
+      ...filterCondition,
+      selectedField: "ngayNopDon",
+      fromDate: start,
+      toDate: end,
+    };
+
+    fetchApplications("", 1, pageSize, customFilterCondition, {
+      selectedTrangThaiHTTL: null,
+      selectedField: fieldObj,
+      fromDate: start,
+      toDate: end,
+    });
+  };
   useEffect(() => {
     const st = location.state;
 
@@ -101,6 +157,17 @@ function ApplicationList_KH() {
           selectedNhanSu: staffId,
         });
 
+        return;
+      }
+      // ✅ MONTH_TOTAL_SUBMISSIONS: tổng đơn nộp theo tháng (KHÔNG ép HTTL)
+      if (st.preset === "MONTH_TOTAL_SUBMISSIONS") {
+        applyMonthTotalFilterAndSearch(st.month); // "YYYY-MM"
+        return;
+      }
+
+      // ✅ YEAR_TOTAL_SUBMISSIONS: tổng đơn nộp theo năm
+      if (st.preset === "YEAR_TOTAL_SUBMISSIONS") {
+        applyYearTotalFilterAndSearch(st.year); // ví dụ 2026
         return;
       }
 

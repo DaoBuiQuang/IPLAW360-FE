@@ -17,6 +17,7 @@ function PowerOfAttorneyList() {
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [customerName, setCustomerName] = useState("");
+  const [partnerName, setPartnerName] = useState("");
 
   const navigate = useNavigate();
 
@@ -33,6 +34,7 @@ function PowerOfAttorneyList() {
         data: {
           soDonGoc: searchValue,
           tenKhachHang: customerName,
+          tenDoiTac: partnerName,
           pageIndex: page,
           pageSize: size,
         },
@@ -86,7 +88,7 @@ function PowerOfAttorneyList() {
                 fetchPowerOfAttorney(searchTerm, 1, pageSize);
               }
             }}
-            placeholder="🔍 Nhập số đơn gốc"
+            placeholder="🔍 Nhập số đơn gốc hoặc số giấy ủy quyền"
             className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
           />
 
@@ -122,7 +124,18 @@ function PowerOfAttorneyList() {
                 className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
-
+            <div className="w-full md:w-1/6">
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Đối tác
+              </label>
+              <input
+                type="text"
+                value={partnerName || ""}
+                onChange={(e) => setPartnerName(e.target.value)}
+                placeholder="Nhập tên đối tác"
+                className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
+              />
+            </div>
           </div>
         </div>
       </div>

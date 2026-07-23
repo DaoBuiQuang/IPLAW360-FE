@@ -129,7 +129,7 @@ function PowerOfAttorneyAdd() {
                     soDonGoc,
                     ngayUyQuyen,
                     ngayHetHan,
-                    linkAnh, // ✅ filename
+                    linkAnh,
                     ghiChu,
                     soGUQ,
                     loaiGUQ,
