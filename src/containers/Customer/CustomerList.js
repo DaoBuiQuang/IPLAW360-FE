@@ -32,13 +32,17 @@ function CustomerList() {
   const [industries, setIndustries] = useState([]);
   const [selectedIndustry, setSelectedIndustry] = useState("");
 
+  // ✅ THÊM MỚI: State cho người phụ trách
+  const [staffs, setStaffs] = useState([]);
+  const [selectedStaff, setSelectedStaff] = useState("");
+
   const [showFieldModal, setShowFieldModal] = useState(false);
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
 
   const navigate = useNavigate();
-  const navigationType = useNavigationType(); // POP / PUSH / REPLACE
+  const navigationType = useNavigationType();
 
   const [selectedFields, setSelectedFields] = useState([
     "maKhachHang",
@@ -51,6 +55,7 @@ function CustomerList() {
     "ghiChu",
     "tenNganhNghe",
     "tenNhom",
+    "tenNhanSu",
   ]);
 
   const allFieldOptions = [
@@ -64,6 +69,7 @@ function CustomerList() {
     { key: "tenNganhNghe", label: t("tenNganhNghe"), labelEn: "Industry" },
     {key: "tenNhom", label: t("Nhóm"), labelEn: "Group by" },
     { key: "ghiChu", label: t("ghiChu"), labelEn: "Note" },
+    { key: "tenNhanSu", label: "Người phụ trách", labelEn: "Staff in charge" },
   ];
 
   const columns = allFieldOptions
@@ -82,6 +88,7 @@ function CustomerList() {
     partnerId,
     countryId,
     industryId,
+    staffId,
     page = 1,
     size = 10
   ) => {
@@ -97,6 +104,7 @@ function CustomerList() {
           maDoiTac: partnerId,
           maQuocGia: countryId,
           maNganhNghe: industryId,
+          maNhanSu: staffId,
           fields: selectedFields,
           pageIndex: page,
           pageSize: size,
@@ -145,7 +153,20 @@ function CustomerList() {
     setIndustries(res);
   };
 
-  // Khởi tạo: phân biệt vào mới / back
+  // ✅ THÊM MỚI: Fetch danh sách nhân sự
+  const fetchStaffs = async () => {
+    try {
+      const res = await callAPI({
+        method: "post",
+        endpoint: "/staff/basiclist",
+        data: {},
+      });
+      setStaffs(res);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách nhân sự:", error);
+    }
+  };
+
   useEffect(() => {
     const savedPage = parseInt(
       localStorage.getItem(PAGE_STORAGE_KEY_CUSTOMER) || "1",
@@ -156,13 +177,12 @@ function CustomerList() {
     );
     const savedStateString = localStorage.getItem(STATE_STORAGE_KEY_CUSTOMER);
 
-    // Luôn fetch các list dropdown
     fetchCountries();
     fetchPartners();
     fetchIndustries();
+    fetchStaffs(); // ✅ THÊM MỚI
 
     if (navigationType === "POP" && savedStateString) {
-      // 👉 Back từ trang detail về: lấy state từ localStorage, không gọi API
       try {
         const savedFilters = savedFiltersString
           ? JSON.parse(savedFiltersString)
@@ -173,6 +193,7 @@ function CustomerList() {
         setSelectedCountry(savedFilters.selectedCountry || "");
         setSelectedPartner(savedFilters.selectedPartner || "");
         setSelectedIndustry(savedFilters.selectedIndustry || "");
+        setSelectedStaff(savedFilters.selectedStaff || ""); // ✅ THÊM MỚI
 
         setCustomers(savedState.customers || []);
         setTotalItems(savedState.totalItems || 0);
@@ -180,10 +201,9 @@ function CustomerList() {
         setPageSize(savedState.pageSize || 10);
       } catch (e) {
         console.error("Error parsing saved state/filters (CUSTOMER)", e);
-        fetchCustomers("", null, null, null, savedPage, pageSize);
+        fetchCustomers("", null, null, null, null, savedPage, pageSize);
       }
     } else {
-      // 👉 Vào mới/PUSH/F5: khôi phục filters (nếu có) rồi gọi API
       if (savedFiltersString) {
         try {
           const savedFilters = JSON.parse(savedFiltersString);
@@ -192,46 +212,45 @@ function CustomerList() {
           setSelectedCountry(savedFilters.selectedCountry || "");
           setSelectedPartner(savedFilters.selectedPartner || "");
           setSelectedIndustry(savedFilters.selectedIndustry || "");
+          setSelectedStaff(savedFilters.selectedStaff || ""); // ✅ THÊM MỚI
 
           fetchCustomers(
             savedFilters.searchTerm || "",
             savedFilters.selectedPartner || null,
             savedFilters.selectedCountry || null,
             savedFilters.selectedIndustry || null,
+            savedFilters.selectedStaff || null, // ✅ THÊM MỚI
             savedPage,
             pageSize
           );
         } catch (e) {
           console.error("Error parsing saved filters (CUSTOMER)", e);
-          fetchCustomers("", null, null, null, savedPage, pageSize);
+          fetchCustomers("", null, null, null, null, savedPage, pageSize);
         }
       } else {
-        fetchCustomers("", null, null, null, savedPage, pageSize);
+        fetchCustomers("", null, null, null, null, savedPage, pageSize);
       }
     }
 
     if (!localStorage.getItem(PAGE_STORAGE_KEY_CUSTOMER)) {
       localStorage.setItem(PAGE_STORAGE_KEY_CUSTOMER, "1");
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigationType]);
 
-  // Lưu filters vào localStorage
   useEffect(() => {
     const filtersToSave = {
       searchTerm,
       selectedCountry,
       selectedPartner,
       selectedIndustry,
+      selectedStaff, // ✅ THÊM MỚI
     };
     localStorage.setItem(
       FILTER_STORAGE_KEY_CUSTOMER,
       JSON.stringify(filtersToSave)
     );
-  }, [searchTerm, selectedCountry, selectedPartner, selectedIndustry]);
+  }, [searchTerm, selectedCountry, selectedPartner, selectedIndustry, selectedStaff]);
 
-  // Lưu list + paging vào localStorage
   useEffect(() => {
     const stateToSave = {
       customers,
@@ -254,12 +273,12 @@ function CustomerList() {
       });
       setShowDeleteModal(false);
       setCustomerToDelete(null);
-      // Sau khi xóa thì load lại với filter hiện tại
       fetchCustomers(
         searchTerm,
         selectedPartner,
         selectedCountry,
         selectedIndustry,
+        selectedStaff, // ✅ THÊM MỚI
         pageIndex,
         pageSize
       );
@@ -275,7 +294,6 @@ function CustomerList() {
           {t("danhSachKhachHang")}
         </h2>
 
-        {/* Hàng search chính */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
           <input
             type="text"
@@ -288,6 +306,7 @@ function CustomerList() {
                   selectedPartner,
                   selectedCountry,
                   selectedIndustry,
+                  selectedStaff,
                   1,
                   pageSize
                 );
@@ -305,6 +324,7 @@ function CustomerList() {
                   selectedPartner,
                   selectedCountry,
                   selectedIndustry,
+                  selectedStaff,
                   1,
                   pageSize
                 )
@@ -334,7 +354,7 @@ function CustomerList() {
           </div>
         </div>
 
-        {/* Hàng filter nâng cao */}
+        {/* ✅ THÊM dropdown Người phụ trách */}
         <div className="flex flex-wrap gap-3">
           <div className="w-full md:w-1/6">
             <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
@@ -395,16 +415,35 @@ function CustomerList() {
               className="text-left"
             />
           </div>
+
+          {/* ✅ THÊM MỚI: Dropdown Người phụ trách */}
+          <div className="w-full md:w-1/6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              Người phụ trách
+            </label>
+            <Select
+              options={formatOptions(staffs, "maNhanSu", "hoTen")}
+              value={
+                selectedStaff
+                  ? formatOptions(staffs, "maNhanSu", "hoTen").find(
+                      (opt) => opt.value === selectedStaff
+                    )
+                  : null
+              }
+              onChange={(opt) => setSelectedStaff(opt?.value || "")}
+              placeholder="Chọn người phụ trách"
+              isClearable
+              className="text-left"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Tổng số kết quả */}
       <div className="mb-2 text-left text-gray-600 text-xl">
         {t("Tìm thấy")} <b className="text-blue-600">{totalItems}</b>{" "}
         {t("kết quả")}
       </div>
 
-      {/* Bảng */}
       <div className="overflow-x-auto mt-4 overflow-hidden rounded-lg border shadow">
         <Spin spinning={loading} tip="Loading..." size="large">
           <table className="w-full border-collapse bg-white text-sm">
@@ -500,7 +539,6 @@ function CustomerList() {
         </Spin>
       </div>
 
-      {/* Pagination */}
       <div className="mt-4 flex flex-col items-center space-y-2">
         {totalItems > 0 && (
           <div className="text-sm text-gray-500 text-center ">
@@ -524,6 +562,7 @@ function CustomerList() {
               selectedPartner,
               selectedCountry,
               selectedIndustry,
+              selectedStaff,
               page,
               size
             );

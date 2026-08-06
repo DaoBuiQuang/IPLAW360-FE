@@ -439,220 +439,59 @@ function Application_KHListReport() {
   const [reportFileName, setReportFileName] = useState("");
 
   const handleExportExcel = async (customTitle, customFileName) => {
-    if (!applications || applications.length === 0) {
-      alert("Không có dữ liệu để xuất.");
-      return;
-    }
+    setLoading(true);
+    try {
+      const baseName =
+        (customFileName && customFileName.trim()) ||
+        `bao_cao_don_KH_${dayjs().format("YYYYMMDD_HHmmss")}`;
+      const downloadName = baseName.toLowerCase().endsWith(".xlsx")
+        ? baseName
+        : `${baseName}.xlsx`;
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Bao_cao_don_VN");
+      const token = localStorage.getItem("token");
+      const maNhanSu = localStorage.getItem("maNhanSu");
 
-    const totalColumns = 1 + columns.length; // STT + số cột dữ liệu
-
-    // ===== Row 1: TIÊU ĐỀ BÁO CÁO =====
-    const title =
-      (customTitle && customTitle.trim()) ||
-      "BÁO CÁO DANH SÁCH ĐƠN ĐĂNG KÝ NHÃN HIỆU CAMPUCHIA";
-
-    const titleRow = worksheet.addRow([title]);
-    worksheet.mergeCells(1, 1, 1, totalColumns);
-    titleRow.font = { bold: true, size: 14 };
-    titleRow.alignment = { horizontal: "center" };
-
-    // ===== Row 2: NGÀY XUẤT BÁO CÁO =====
-    const exportTime = dayjs().format("DD/MM/YYYY HH:mm:ss");
-    const infoRow = worksheet.addRow([`Ngày xuất báo cáo: ${exportTime}`]);
-    worksheet.mergeCells(2, 1, 2, totalColumns);
-    infoRow.font = { italic: true };
-    infoRow.alignment = { horizontal: "left" };
-
-    // ===== Định nghĩa cột =====
-    const excelColumns = [
-      { key: "stt", width: 6 },
-      ...columns.map((col) => ({
-        key: col.key,
-        width: 25,
-      })),
-    ];
-    worksheet.columns = excelColumns;
-
-    // ===== Row 3: HEADER =====
-    const headerValues = ["STT", ...columns.map((col) => col.label || col.key)];
-    const headerRow = worksheet.addRow(headerValues);
-    headerRow.font = { bold: true };
-    headerRow.alignment = { horizontal: "center" };
-
-    // ===== Các hàm format dùng lại =====
-    const dateFields = [
-      "ngayNopDon",
-      "ngayHoanThanhHoSoTaiLieu",
-      "ngayKQThamDinhHinhThuc",
-      "ngayCongBoDon",
-      "ngayKQThamDinhND",
-      "ngayTraLoiKQThamDinhND",
-      "ngayThongBaoCapBang",
-      "ngayNopPhiCapBang",
-      "ngayNhanBang",
-      "ngayCapBang",
-      "ngayHetHanBang",
-      "ngayGuiBangChoKhachHang",
-      "hanNopPhiCapBang",
-    ];
-
-    const formatLoaiDon = (value) => {
-      switch (value) {
-        case 1:
-          return "Đơn gốc";
-        case 2:
-          return "Đơn sửa đổi";
-        case 3:
-          return "Đơn tách";
-        case 4:
-          return "Đơn chuyển nhượng";
-        default:
-          return "Không xác định";
-      }
-    };
-
-    const formatTrangThaiVuViec = (value) => {
-      switch (value) {
-        case "1":
-          return "Đang giải quyết";
-        case "2":
-          return "Cấp bằng";
-        case "3":
-          return "Từ chối";
-        case "4":
-          return "Rút đơn";
-        case "5":
-          return "Đóng đơn";
-        case "6":
-          return "Ngừng theo đuổi";
-        default:
-          return "Không xác định";
-      }
-    };
-
-    const getHanText = (dateValue, trangThaiVuViec) => {
-      if (trangThaiVuViec === "5") return "";
-
-      if (!dateValue) return "";
-      const today = new Date();
-      const deadline = new Date(dateValue);
-      if (isNaN(deadline.getTime())) return "";
-
-      today.setHours(0, 0, 0, 0);
-      deadline.setHours(0, 0, 0, 0);
-
-      const diffTime = deadline - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays < 0) return `Quá hạn ${Math.abs(diffDays)} ngày`;
-      if (diffDays === 0) return "Hạn là hôm nay";
-      return `Còn ${diffDays} ngày`;
-    };
-
-    const getTenSPDVChuoi = (spdvList) => {
-      if (!Array.isArray(spdvList) || spdvList.length === 0) return "";
-
-      return spdvList
-        .map((sp) => {
-          const found = productAndService.find((p) => p.maSPDV === sp.maSPDV);
-          return found?.tenSPDV || `${sp.maSPDV}`;
-        })
-        .join(", ");
-    };
-
-    // ===== DỮ LIỆU: bắt đầu từ row 4 =====
-    applications.forEach((app, index) => {
-      const rowValues = [];
-
-      // STT
-      rowValues.push((pageIndex - 1) * pageSize + index + 1);
-
-      columns.forEach((col) => {
-        let value = app[col.key];
-
-        if (dateFields.includes(col.key)) {
-          value = value ? dayjs(value).format("DD/MM/YYYY") : "";
-        }
-
-        if (col.key === "loaiDon") {
-          value = formatLoaiDon(app.loaiDon);
-        }
-
-        if (col.key === "trangThaiVuViec") {
-          value = formatTrangThaiVuViec(app.trangThaiVuViec);
-        }
-
-        if (col.key === "hanXuLy") {
-          value = getHanText(app.hanXuLy, app.trangThaiVuViec);
-        }
-
-        if (col.key === "hanTraLoi") {
-          value = getHanText(app.hanTraLoi, app.trangThaiVuViec);
-        }
-
-        if (col.key === "trangThaiHoanThienHoSoTaiLieu") {
-          if (app.ngayHoanThanhHoSoTaiLieu) {
-            value = "Hoàn thành";
-          } else {
-            value = app.trangThaiHoanThienHoSoTaiLieu || "Chưa hoàn thành";
-          }
-        }
-
-        if (col.key === "dsSPDV") {
-          value = getTenSPDVChuoi(app.dsSPDV);
-        }
-
-        if (col.key === "linkAnh") {
-          if (typeof value === "string" && value.startsWith("data:image/")) {
-            value = "Có hình ảnh";
-          } else {
-            value = "Không có ảnh";
-          }
-        }
-
-        if (col.key === "soDon") {
-          const maDon = app.maDonDangKy;
-          const hasDon = !!maDon;
-          const hasSoDon = !!value;
-
-          if (hasDon) {
-            value = hasSoDon ? value : "Chưa có số đơn";
-          } else {
-            value = "Không có đơn đăng ký";
-          }
-        }
-
-        rowValues.push(value ?? "");
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/application_kh/export-excel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          searchText: searchTerm,
+          customerName,
+          partnerName,
+          brandName,
+          maSPDVList: selectedProductAndService,
+          trangThaiDon: selectedTrangThaiDon,
+          trangThaiVuViec: selectedTrangThaiVV,
+          loaiDon: selectedLoaiDon,
+          fields: selectedFields,
+          filterCondition: filterCondition,
+          reportTitle: customTitle || "BÁO CÁO DANH SÁCH ĐƠN ĐĂNG KÝ NHÃN HIỆU CAMPUCHIA",
+          maNhanSuCapNhap: maNhanSu,
+        }),
       });
 
-      worksheet.addRow(rowValues);
-    });
+      if (!response.ok) {
+        throw new Error("Export failed");
+      }
 
-    // ===== Xuất file =====
-    const baseName =
-      (customFileName && customFileName.trim()) ||
-      `bao_cao_don_KH_${dayjs().format("YYYYMMDD_HHmmss")}`;
-    const downloadName = baseName.toLowerCase().endsWith(".xlsx")
-      ? baseName
-      : `${baseName}.xlsx`;
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", downloadName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", downloadName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Lỗi khi xuất Excel:", error);
+      alert("Không thể xuất file Excel. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="p-1 bg-gray-100 min-h-screen">

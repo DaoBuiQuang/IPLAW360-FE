@@ -120,7 +120,7 @@ function PowerOfAttorneyList() {
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Nhập tên khách hàng"
+                placeholder="Nhập tên khách hàng hoặc mã khách hàng"
                 className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
@@ -132,7 +132,7 @@ function PowerOfAttorneyList() {
                 type="text"
                 value={partnerName || ""}
                 onChange={(e) => setPartnerName(e.target.value)}
-                placeholder="Nhập tên đối tác"
+                placeholder="Nhập tên đối tác hoặc mã đối tác"
                 className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
