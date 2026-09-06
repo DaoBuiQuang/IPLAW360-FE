@@ -23,7 +23,8 @@ function FormHoSo({
     loaiDon, setLoaiDon,
     daiDienSHTT,
     setDaiDienSHTT,
-    nguoiXuLyChinh, setNguoiXuLyChinh
+    nguoiXuLyChinh, setNguoiXuLyChinh,
+    nguoiXuLyPhu, setNguoiXuLyPhu
 }) {
     const navigate = useNavigate();
     const [customers, setCustomers] = useState([]);
@@ -323,7 +324,7 @@ function FormHoSo({
                     />
                 </div> */}
                 <div>
-                    <label className="block text-gray-700 text-left">Người xử lý</label>
+                    <label className="block text-gray-700 text-left">Người xử lý chính</label>
                     <Select
                         options={staffOptions}
                         value={staffOptions.find(opt => opt.value === nguoiXuLyChinh) || null}
@@ -336,22 +337,21 @@ function FormHoSo({
                     />
                 </div>
 
-
-                {/* <div>
-                    <label className="block text-gray-700 text-left">Người xử lí phụ</label>
+                <div>
+                    <label className="block text-gray-700 text-left">Người xử lý phụ</label>
                     <Select
-                        options={formatOptions(staffs, "", "maNhanSu", "hoTen").filter(
+                        options={staffOptions.filter(
                             (opt) => opt.value !== nguoiXuLyChinh
                         )}
-                        value={formatOptions(staffs, "", "maNhanSu", "hoTen").find(
+                        value={staffOptions.find(
                             (opt) => opt.value === nguoiXuLyPhu
-                        )}
+                        ) || null}
                         onChange={(selectedOption) => setNguoiXuLyPhu(selectedOption?.value || null)}
-                        placeholder="Chọn người xử lí phụ"
+                        placeholder="Chọn người xử lý phụ"
                         className="w-full mt-1 rounded-lg text-left"
                         isClearable
                     />
-                </div> */}
+                </div>
                 <div>
                     <label className="block text-gray-700 text-left">
                         Trạng thái đơn (trangThaiVuViec)

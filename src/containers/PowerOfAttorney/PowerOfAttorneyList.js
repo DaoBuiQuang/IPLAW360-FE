@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import callAPI from "../../utils/api";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Pagination } from "antd";
+import { Modal, Pagination } from "antd";
 
 
 function PowerOfAttorneyList() {
@@ -18,6 +18,7 @@ function PowerOfAttorneyList() {
   const [totalItems, setTotalItems] = useState(0);
   const [customerName, setCustomerName] = useState("");
   const [partnerName, setPartnerName] = useState("");
+  const [previewFile, setPreviewFile] = useState(null);
 
   const navigate = useNavigate();
 
@@ -186,18 +187,22 @@ function PowerOfAttorneyList() {
               <td className="p-2 text-table">
                 {item.linkAnh ? (
                   <div className="flex items-center justify-center gap-3">
-                    <a
-                      href={`${process.env.REACT_APP_API_URL.replace(
-                        "/api",
-                        ""
-                      )}/api/files/view/${item.linkAnh}`}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
                       className="text-blue-500 underline"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewFile({
+                          name: item.linkAnh,
+                          url: `${process.env.REACT_APP_API_URL.replace(
+                            "/api",
+                            ""
+                          )}/api/files/view/${item.linkAnh}`,
+                        });
+                      }}
                     >
                       Xem
-                    </a>
+                    </button>
 
                     <a
                       href={`${process.env.REACT_APP_API_URL.replace(
@@ -319,6 +324,24 @@ function PowerOfAttorneyList() {
           pageSizeOptions={["5", "10", "20", "50"]}
         />
       </div>
+
+      <Modal
+        title={`Xem trước file${previewFile?.name ? `: ${previewFile.name}` : ""}`}
+        open={Boolean(previewFile)}
+        onCancel={() => setPreviewFile(null)}
+        footer={null}
+        width="90vw"
+        destroyOnClose
+        centered
+      >
+        {previewFile && (
+          <iframe
+            src={previewFile.url}
+            title={`Xem trước ${previewFile.name}`}
+            className="w-full h-[75vh] border-0"
+          />
+        )}
+      </Modal>
     </div>
   );
 }

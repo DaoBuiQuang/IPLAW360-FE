@@ -380,7 +380,8 @@ function ApplicationAdd() {
                     idGUQ: idGUQ,
                     daiDienSHTT: daiDienSHTT,
                     expense_notes: expenseNotes,
-                      maNguoiXuLy1: nguoiXuLyChinh,
+                    maNguoiXuLy1: nguoiXuLyChinh,
+                    maNguoiXuLy2: nguoiXuLyPhu,
                 },
             });
             await showSuccess("Thành công!", "Thêm đơn đăng ký nhãn hiệu thành công!");
