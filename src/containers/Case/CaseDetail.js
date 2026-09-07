@@ -6,7 +6,8 @@ import { showSuccess, showError } from "../../components/commom/Notification";
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { Spin } from "antd";
+import { Spin, Tabs } from "antd";
+import TimesheetForm from "../Timesheet/TimesheetForm";
 function CaseDetail() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -35,6 +36,8 @@ function CaseDetail() {
     const [partners, setPartners] = useState([]);
     const [staffs, setStaffs] = useState([]);
     const [applicationtypes, setApplicationTypes] = useState([]);
+    const [timesheets, setTimesheets] = useState([]);
+    const [timesheetSummary, setTimesheetSummary] = useState({ totalHours: 0, totalAmount: 0 });
 
     const [errors, setErrors] = useState({});
     const isFormValid =
@@ -193,6 +196,14 @@ function CaseDetail() {
             console.error("Lỗi khi lấy dữ liệu nhân sự:", error);
         }
     };
+    const fetchTimesheets = async () => {
+        if (!maHoSoVuViec) return;
+        try {
+            const response = await callAPI({ method: "post", endpoint: "/timesheet/by-case", data: { caseCode: maHoSoVuViec } });
+            setTimesheets(response?.data || []);
+            setTimesheetSummary(response?.summary || { totalHours: 0, totalAmount: 0 });
+        } catch (error) { console.error("Lỗi khi lấy log time:", error); }
+    };
     const fetchApplicationTypes = async () => {
         try {
             const response = await callAPI({
@@ -214,7 +225,7 @@ function CaseDetail() {
         fetchStaffs();
         fetchApplicationTypes();
     }, []);
-
+    useEffect(() => { fetchTimesheets(); }, [maHoSoVuViec]);
 
     const handleApplicationAdd = () => {
         if (!maDonDangKy) {
@@ -289,6 +300,7 @@ function CaseDetail() {
 
                     </div>
                 </Spin>
+                <Tabs className="mt-6" items={[{ key: "timesheet", label: "Timesheet / Log time", children: <div><div className="flex gap-6 mb-4 text-sm"><span>Tổng số giờ: <strong>{Number(timesheetSummary.totalHours || 0)} giờ</strong></span><span>Tổng chi phí: <strong>{Number(timesheetSummary.totalAmount || 0).toLocaleString("vi-VN")}</strong></span></div><div className="overflow-x-auto mb-6"><table className="w-full text-sm border"><thead><tr className="bg-gray-50"><th className="p-2">Ngày</th><th className="p-2">Nhân sự</th><th className="p-2">Hoạt động</th><th className="p-2">Số giờ</th><th className="p-2">Thành tiền</th><th className="p-2">Trạng thái</th></tr></thead><tbody>{timesheets.map((item) => <tr key={item.id} className="border-t text-center"><td className="p-2">{item.workDate}</td><td className="p-2">{item.employee?.hoTen || item.employeeCode}</td><td className="p-2">{item.activity}</td><td className="p-2">{Number(item.hours || 0)}</td><td className="p-2">{Number(item.totalAmount || 0).toLocaleString("vi-VN")}</td><td className="p-2">{{ DRAFT: "Nháp", SUBMITTED: "Chờ duyệt", APPROVED: "Đã duyệt", REJECTED: "Từ chối", LOCKED: "Đã chốt" }[item.status] || item.status}</td></tr>)}</tbody></table></div><TimesheetForm initialValues={{ caseCode: maHoSoVuViec }} lockedCaseCode onSaved={fetchTimesheets} /></div> }]} />
                 <div className="flex justify-center gap-4 mt-4">
                     <button onClick={() => navigate(-1)} className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg">
                         Quay lại

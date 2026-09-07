@@ -93,6 +93,7 @@ function StaffList() {
             <th className="p-2 text-table">{t("department")}</th>
             <th className="p-2 text-table">{t("phoneNumber")}</th>
             <th className="p-2 text-table">{t("email")}</th>
+            <th className="p-2 text-table">Đơn giá/giờ</th>
             <th className="p-2 text-table">{t("username")}</th>
             <th className="p-2 text-table">{t("role")}</th>
             <th className="p-2 text-center"></th>
@@ -111,6 +112,7 @@ function StaffList() {
               <td className="p-2 text-table">{staff.phongBan}</td>
               <td className="p-2 text-table">{staff.sdt}</td>
               <td className="p-2 text-table">{staff.email}</td>
+              <td className="p-2 text-table">{Number(staff.hourlyRate || 0).toLocaleString("vi-VN")}</td>
               <td className="p-2 text-table">
                 {staff.Username ? staff.Username : "Chưa có tài khoản"}
               </td>

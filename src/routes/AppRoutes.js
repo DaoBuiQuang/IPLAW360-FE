@@ -135,6 +135,10 @@ import VuViec_BillDaDuyetList_ALL from "../containers/BillFull/VuViec_BillDaDuye
 import VuViec_BillChuaDuyetList_ALL from "../containers/BillFull/VuViec_BillChuaDuyetList_ALL.js";
 import DebitNoteList_ALL from "../containers/DebitNote/debitNoteList_ALL.js";
 import HomeReport from "../containers/Home/HomeReport.js";
+import TimesheetList from "../containers/Timesheet/TimesheetList";
+import TimesheetAdd from "../containers/Timesheet/TimesheetAdd";
+import TimesheetEdit from "../containers/Timesheet/TimesheetEdit";
+import TimesheetDetail from "../containers/Timesheet/TimesheetDetail";
 const MainLayout = ({ notification, setNotification }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   useEffect(() => {
@@ -204,6 +208,10 @@ const AppRoutes = ({ notification, setNotification }) => {
           <Route path="/staffadd" element={<StaffAdd></StaffAdd>} />
           <Route path="/staffedit/:maNhanSu" element={<StaffEdit></StaffEdit>} />
           <Route path="/staffdetail/:maNhanSu" element={<StaffDetail></StaffDetail>} />
+          <Route path="/timesheetlist" element={<TimesheetList />} />
+          <Route path="/timesheetadd" element={<TimesheetAdd />} />
+          <Route path="/timesheetedit/:id" element={<TimesheetEdit />} />
+          <Route path="/timesheetdetail/:id" element={<TimesheetDetail />} />
           <Route path="/registerstaff/:maNhanSu" element={<RegisterStaff></RegisterStaff>} />
 
           <Route path="/countrylist" element={<CountryList></CountryList>} />

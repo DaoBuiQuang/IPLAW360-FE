@@ -18,6 +18,7 @@ function StaffAdd() {
   const [ngayThangNamSinh, setNgayThangNamSinh] = useState(null);
   const [cccd, setCccd] = useState("");
   const [bangCap, setBangCap] = useState("");
+  const [hourlyRate, setHourlyRate] = useState("0");
 
   const [errors, setErrors] = useState({});
   const isFormValid = maNhanSu.trim() !== "" && hoTen.trim() !== "";
@@ -47,6 +48,7 @@ function StaffAdd() {
           ngayThangNamSinh: ngayThangNamSinh || null,
           cccd: cccd || null,
           bangCap,
+          hourlyRate: Number(hourlyRate) || 0,
         },
       });
       await showSuccess(t("successTitle"), t("addStaffSuccess"));
@@ -59,6 +61,7 @@ function StaffAdd() {
       setNgayThangNamSinh("");
       setCccd("");
       setBangCap("");
+      setHourlyRate("0");
     } catch (error) {
       showError(t("errorTitle"), t("genericError"), error);
       console.error(t("addStaffError"), error);
@@ -184,6 +187,17 @@ function StaffAdd() {
               value={bangCap}
               onChange={(e) => setBangCap(e.target.value)}
               placeholder={t("degreePlaceholder")}
+              className="w-full p-2 mt-1 border rounded-lg text-input"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 text-left">Đơn giá theo giờ</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={hourlyRate}
+              onChange={(e) => setHourlyRate(e.target.value)}
               className="w-full p-2 mt-1 border rounded-lg text-input"
             />
           </div>

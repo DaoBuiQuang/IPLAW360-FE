@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   PieChart, Users, Briefcase, Handshake, Globe, UserCheck,
   FileText, Settings, Tag, ShoppingCart, LayoutDashboard,
-  Key, User, ChevronDown, ChevronUp, DollarSign, Search, FileSignature, BarChart3, Stamp
+  Key, User, ChevronDown, ChevronUp, DollarSign, Search, FileSignature, BarChart3, Stamp, Timer
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -425,6 +425,15 @@ function MenuLeft() {
             </>
           )}
 
+          {(role === "admin" || role === "staff") && (
+            <li>
+              <NavLink to="/timesheetlist" className={navLinkClass}>
+                <Timer size={14} />
+                <span className="text-left w-full">Log time nhân sự</span>
+              </NavLink>
+            </li>
+          )}
+
           {/* HỆ THỐNG */}
           {renderMenuGroup(
             "root",
@@ -487,12 +496,14 @@ function MenuLeft() {
                 </NavLink>
               </li>
               {(role === "admin" || role === "staff") && (
-                <li>
-                  <NavLink to="/stafflist" className={navLinkClass}>
-                    <UserCheck size={14} />
-                    <span className="text-left w-full">{t("nhanSu")}</span>
-                  </NavLink>
-                </li>
+                <>
+                  <li>
+                    <NavLink to="/stafflist" className={navLinkClass}>
+                      <UserCheck size={14} />
+                      <span className="text-left w-full">{t("nhanSu")}</span>
+                    </NavLink>
+                  </li>
+                </>
               )}
             </>
           )}

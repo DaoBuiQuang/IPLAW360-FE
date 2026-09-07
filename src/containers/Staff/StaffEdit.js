@@ -19,6 +19,7 @@ function StaffEdit() {
     const [ngayThangNamSinh, setNgayThangNamSinh] = useState("");
     const [cccd, setCccd] = useState("");
     const [bangCap, setBangCap] = useState("");
+    const [hourlyRate, setHourlyRate] = useState("0");
 
     const [errors, setErrors] = useState({});
     const isFormValid = maNhanSu.trim() !== "" && hoTen.trim() !== "";
@@ -52,6 +53,7 @@ function StaffEdit() {
                 setNgayThangNamSinh(response.ngayThangNamSinh);
                 setCccd(response.cccd);
                 setBangCap(response.bangCap);
+                setHourlyRate(String(response.hourlyRate ?? 0));
             } catch (error) {
                 console.error("Lỗi khi lấy thông tin nhân sự!", error);
             }
@@ -74,6 +76,7 @@ function StaffEdit() {
                     ngayThangNamSinh,
                     cccd: cccd || null,
                     bangCap,
+                    hourlyRate: Number(hourlyRate) || 0,
                 },
             });
             await showSuccess(t("successTitle"), 'Cập nhật nhân sự thành công!');
@@ -150,6 +153,17 @@ function StaffEdit() {
                     <div>
                         <label className="block text-gray-700 text-left">Bằng cấp</label>
                         <input type="text" value={bangCap} onChange={(e) => setBangCap(e.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input" placeholder={t("degreePlaceholder")}/>
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 text-left">Đơn giá theo giờ</label>
+                        <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={hourlyRate}
+                            onChange={(e) => setHourlyRate(e.target.value)}
+                            className="w-full p-2 mt-1 border rounded-lg text-input"
+                        />
                     </div>
                 </div>
                 <div className="flex justify-center gap-4 mt-4">

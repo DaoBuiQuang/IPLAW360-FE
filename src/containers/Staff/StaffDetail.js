@@ -20,6 +20,7 @@ const StaffDetail = () => {
         ngayThangNamSinh: "",
         cccd: "",
         bangCap: "",
+        hourlyRate: 0,
         tenTaiKhoan: ""
     });
 
@@ -44,6 +45,7 @@ const StaffDetail = () => {
                     ngayThangNamSinh: response.ngayThangNamSinh,
                     cccd: response.cccd,
                     bangCap: response.bangCap,
+                    hourlyRate: response.hourlyRate,
                     tenTaiKhoan: response.tenTaiKhoan
                 });
             } catch (error) {
@@ -94,6 +96,7 @@ const StaffDetail = () => {
                 <InfoItem icon={<Calendar size={20} />} label="Ngày sinh" value={formatDate(profile.ngayThangNamSinh)} />
                 <InfoItem icon={<IdCard size={20} />} label="CCCD" value={profile.cccd} />
                 <InfoItem icon={<GraduationCap size={20} />} label="Bằng cấp" value={profile.bangCap} />
+                <InfoItem icon={<Briefcase size={20} />} label="Đơn giá theo giờ" value={`${Number(profile.hourlyRate || 0).toLocaleString("vi-VN")}/giờ`} />
                 <InfoItem icon={<User size={20} />} label="Tên tài khoản" value={profile.tenTaiKhoan} />
             </div>
 
