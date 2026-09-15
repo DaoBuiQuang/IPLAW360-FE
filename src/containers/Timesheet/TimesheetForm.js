@@ -12,21 +12,26 @@ const emptyValues = { employeeCode: "", caseCode: "", workDate: dayjs().format("
 
 export default function TimesheetForm({ mode = "add", initialValues = emptyValues, lockedCaseCode = false, onSaved }) {
   const navigate = useNavigate();
-  const [values, setValues] = useState({ ...emptyValues, ...initialValues });
+  const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
+  const [values, setValues] = useState({ ...emptyValues, ...initialValues, employeeCode: mode === "add" ? currentEmployeeCode : initialValues.employeeCode });
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }).then(setStaffs).catch(() => setStaffs([]));
+    callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }).then((response) => {
+      const list = Array.isArray(response) ? response : response?.data || [];
+      setStaffs(list);
+    }).catch(() => setStaffs([]));
   }, []);
 
   const selectedStaff = staffs.find((staff) => staff.maNhanSu === values.employeeCode);
+  const employeeOptions = staffs.filter((staff) => mode === "edit" || staff.maNhanSu === currentEmployeeCode);
   const setField = (field, value) => setValues((previous) => ({ ...previous, [field]: value }));
   const validate = () => {
     const nextErrors = {};
-    if (!values.employeeCode) nextErrors.employeeCode = "Vui lòng chọn nhân sự";
-    if (!String(values.caseCode).trim()) nextErrors.caseCode = "Mã hồ sơ không được để trống";
+    if (!values.employeeCode) nextErrors.employeeCode = "Không xác định được nhân sự đăng nhập";
+    if (mode === "add" && values.employeeCode !== currentEmployeeCode) nextErrors.employeeCode = "Chỉ được tạo time record cho tài khoản đang đăng nhập";
     if (!values.workDate) nextErrors.workDate = "Vui lòng chọn ngày làm việc";
     const hours = Number(values.hours);
     if (!Number.isFinite(hours) || hours <= 0 || hours > 24) nextErrors.hours = "Số giờ phải lớn hơn 0 và không quá 24";
@@ -60,16 +65,16 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
 
   return <Spin spinning={loading}>
     <form onSubmit={submit} className="bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-4">{mode === "edit" ? "Chỉnh sửa log time" : "Thêm log time"}</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-4">{mode === "edit" ? "Chỉnh sửa time record" : "Thêm time record"}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Field label="Nhân sự" error={errors.employeeCode}>
-          <Select className="text-left" options={staffs.map((staff) => ({ value: staff.maNhanSu, label: `${staff.maNhanSu} - ${staff.hoTen}` }))} value={selectedStaff ? { value: selectedStaff.maNhanSu, label: `${selectedStaff.maNhanSu} - ${selectedStaff.hoTen}` } : null} onChange={(option) => setField("employeeCode", option?.value || "")} placeholder="Chọn nhân sự" isClearable />
-          {selectedStaff && <div className="text-sm text-gray-500 mt-1"><p>Họ tên: {selectedStaff.hoTen || "-"}</p><p>Phòng ban: {selectedStaff.phongBan || "-"}</p><p>Đơn giá hiện tại: {Number(selectedStaff.hourlyRate || 0).toLocaleString("vi-VN")}/giờ</p></div>}
+        <Field label="Nhân sự" required error={errors.employeeCode}>
+          <Select className="text-left w-full" options={employeeOptions.map((staff) => ({ value: staff.maNhanSu, label: `${staff.maNhanSu} - ${staff.hoTen}` }))} value={selectedStaff ? { value: selectedStaff.maNhanSu, label: `${selectedStaff.maNhanSu} - ${selectedStaff.hoTen}` } : null} onChange={(option) => setField("employeeCode", option?.value || "")} placeholder="Nhân sự của tôi" isDisabled={mode === "add"} />
+          {selectedStaff && <div className="text-sm text-gray-500 mt-1"><p>Họ tên: {selectedStaff.hoTen || "-"}</p><p>Đơn giá hiện tại: {Number(selectedStaff.hourlyRate || 0).toLocaleString("vi-VN")}/giờ</p></div>}
         </Field>
-        <Field label="Mã hồ sơ" error={errors.caseCode}><CaseCodeSelect value={values.caseCode} onChange={(value) => setField("caseCode", value)} isDisabled={lockedCaseCode} className="text-left mt-1" /></Field>
-        <Field label="Ngày làm việc" error={errors.workDate}><DatePicker value={values.workDate ? dayjs(values.workDate) : null} onChange={(date) => setField("workDate", date?.format("YYYY-MM-DD") || "")} format="DD/MM/YYYY" className="w-full mt-1" /></Field>
-        <Field label="Số giờ" error={errors.hours}><input type="number" min="0.01" max="24" step="0.01" value={values.hours} onChange={(event) => setField("hours", event.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input" /></Field>
-        <Field label="Hoạt động" error={errors.activity}><Select className="text-left mt-1" options={activities.map((activity) => ({ value: activity, label: activity }))} value={values.activity ? { value: values.activity, label: values.activity } : null} onChange={(option) => setField("activity", option?.value || "")} placeholder="Chọn hoạt động" isClearable /></Field>
+        <Field label="Mã hồ sơ" error={errors.caseCode}><CaseCodeSelect value={values.caseCode} onChange={(value) => setField("caseCode", value)} isDisabled={lockedCaseCode} className="text-left" /></Field>
+        <Field label="Ngày làm việc" required error={errors.workDate}><DatePicker value={values.workDate ? dayjs(values.workDate) : null} onChange={(date) => setField("workDate", date?.format("YYYY-MM-DD") || "")} format="DD/MM/YYYY" className="w-full mt-1" /></Field>
+        <Field label="Số giờ" required error={errors.hours}><input type="number" min="0.01" max="24" step="0.01" value={values.hours} onChange={(event) => setField("hours", event.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input" /></Field>
+        <Field label="Hoạt động" required error={errors.activity}><Select className="text-left mt-1" options={activities.map((activity) => ({ value: activity, label: activity }))} value={values.activity ? { value: values.activity, label: values.activity } : null} onChange={(option) => setField("activity", option?.value || "")} placeholder="Chọn hoạt động" isClearable /></Field>
         <Field label="Nội dung công việc"><textarea value={values.description} onChange={(event) => setField("description", event.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input" rows={3} /></Field>
         <Field label="Ghi chú"><textarea value={values.notes} onChange={(event) => setField("notes", event.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input md:col-span-2" rows={3} /></Field>
       </div>
@@ -77,5 +82,5 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
     </form>
   </Spin>;
 }
-function Field({ label, error, children }) { return <div><label className="block text-gray-700 text-left">{label}</label>{children}{error && <p className="text-red-500 text-xs mt-1 text-left">{error}</p>}</div>; }
+function Field({ label, required = false, error, children }) { return <div><label className="block text-gray-700 text-left">{label}{required && <span className="text-red-500"> *</span>}</label>{children}{error && <p className="text-red-500 text-xs mt-1 text-left">{error}</p>}</div>; }
 export { emptyValues };

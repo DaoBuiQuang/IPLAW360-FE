@@ -19,7 +19,7 @@ export default function TimesheetDetail() {
   }, [id]);
 
   return <Spin spinning={loading}><div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
-    <h2 className="text-2xl font-semibold text-gray-700 mb-6">Chi tiết Timesheet</h2>
+    <h2 className="text-2xl font-semibold text-gray-700 mb-6">Chi tiết Time record</h2>
     {item && <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
       <Info label="Ngày làm việc" value={item.workDate} />
       <Info label="Mã hồ sơ" value={item.caseCode} />

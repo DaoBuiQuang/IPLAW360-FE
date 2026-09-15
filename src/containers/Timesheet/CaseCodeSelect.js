@@ -57,7 +57,7 @@ function CaseCodeSelect({ value, onChange, isDisabled = false, placeholder = "Ch
   const selectedOption = value ? { value, label: value } : null;
   return (
     <Select
-      className={className}
+      className={`${className} w-full`}
       options={options}
       value={selectedOption}
       onChange={(option) => onChange(option?.value || "")}
