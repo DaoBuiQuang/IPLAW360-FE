@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Modal, Pagination, Spin } from "antd";
+import { toast } from "react-toastify";
 import callAPI from "../../utils/api";
 
 function DsCongViecList() {
@@ -58,6 +59,10 @@ function DsCongViecList() {
         endpoint: "/ds-cong-viec/delete",
         data: { id: deleting.id },
       });
+      toast.success("Xóa công việc thành công!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       setDeleting(null);
       fetchList(pagination.pageIndex, pagination.pageSize, keyword);
     } catch {
@@ -70,7 +75,7 @@ function DsCongViecList() {
     <div className="p-1 bg-gray-100 min-h-screen">
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-          Danh Sach Cong Viec Thuong Nhat
+          Danh sách công việc thường nhật
         </h2>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
           <input
@@ -80,7 +85,7 @@ function DsCongViecList() {
             onKeyDown={(e) => {
               if (e.key === "Enter") fetchList(1, pagination.pageSize, keyword);
             }}
-            placeholder="Tim theo ma viet tat hoac mo ta..."
+            placeholder="Tìm theo mã viết tắt hoặc mô tả..."
             className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
           />
           <div className="flex gap-3">
@@ -88,14 +93,14 @@ function DsCongViecList() {
               onClick={() => fetchList(1, pagination.pageSize, keyword)}
               className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
             >
-              Tim kiem
+              Tìm kiếm
             </button>
             {staffRoles.includes(role) && (
               <button
                 onClick={() => navigate("/dscongviec_add")}
                 className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
               >
-                + Them moi
+                + Thêm mới
               </button>
             )}
           </div>
@@ -108,9 +113,9 @@ function DsCongViecList() {
             <thead>
               <tr className="text-[#667085] text-center font-normal bg-gray-50">
                 <th className="p-3 text-table">STT</th>
-                <th className="p-3 text-table text-left">Ma viet tat</th>
-                <th className="p-3 text-table text-left">Mo ta cong viec</th>
-                <th className="p-3 text-table">Nhan su</th>
+                <th className="p-3 text-table text-left">Mã viết tắt</th>
+                <th className="p-3 text-table text-left">Mô tả công việc</th>
+                <th className="p-3 text-table">Người tạo</th>
                 <th className="p-3 text-table"></th>
               </tr>
             </thead>
@@ -147,7 +152,7 @@ function DsCongViecList() {
                               navigate(`/dscongviec_edit/${item.id}`)
                             }
                           >
-                            Sua
+                            Sửa
                           </button>
                           <button
                             className="px-3 py-1 bg-red-200 text-red-600 rounded-md hover:bg-red-300 text-sm"
@@ -158,7 +163,7 @@ function DsCongViecList() {
                               })
                             }
                           >
-                            Xoa
+                            Xóa
                           </button>
                         </div>
                       )}
@@ -171,7 +176,7 @@ function DsCongViecList() {
                     colSpan="5"
                     className="p-8 text-center text-gray-400"
                   >
-                    {loading ? "Dang tai..." : "Khong co du lieu"}
+                    {loading ? "Đang tải..." : "Không có dữ liệu"}
                   </td>
                 </tr>
               )}
@@ -187,7 +192,7 @@ function DsCongViecList() {
           pageSize={pagination.pageSize}
           showSizeChanger
           pageSizeOptions={["20", "50", "100"]}
-          showTotal={(total) => `Tong ${total} ban ghi`}
+          showTotal={(total) => `Tổng ${total} bản ghi`}
           onChange={(page, size) =>
             fetchList(page, Math.min(size, 200), keyword)
           }
@@ -195,22 +200,22 @@ function DsCongViecList() {
       </div>
 
       <Modal
-        title="Xac nhan xoa"
+        title="Xác nhận xóa"
         open={Boolean(deleting)}
         onOk={handleDelete}
         onCancel={() => setDeleting(null)}
-        okText="Xoa"
-        cancelText="Huy"
+        okText="Xóa"
+        cancelText="Hủy"
         okButtonProps={{
           className: "bg-red-500 hover:bg-red-600 text-white",
         }}
       >
         <p>
-          Ban co chac muon xoa cong viec{" "}
-          <strong>"{deleting?.maVietTat}"</strong> khong?
+          Bạn có chắc muốn xóa công việc{" "}
+          <strong>"{deleting?.maVietTat}"</strong> không?
         </p>
         <p className="text-gray-500 text-sm mt-1">
-          Ban ghi se bi xoa mem va co the khoi phuc sau.
+          Bản ghi sẽ bị xóa và có thể khôi phục sau.
         </p>
       </Modal>
     </div>

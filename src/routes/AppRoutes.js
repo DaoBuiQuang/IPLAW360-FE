@@ -139,6 +139,10 @@ import TimesheetList from "../containers/Timesheet/TimesheetList";
 import TimesheetAdd from "../containers/Timesheet/TimesheetAdd";
 import TimesheetEdit from "../containers/Timesheet/TimesheetEdit";
 import TimesheetDetail from "../containers/Timesheet/TimesheetDetail";
+import DsCongViecList from "../containers/DsCongViec/DsCongViecList";
+import DsCongViecAdd from "../containers/DsCongViec/DsCongViecAdd";
+import DsCongViecEdit from "../containers/DsCongViec/DsCongViecEdit";
+import DsCongViecDetail from "../containers/DsCongViec/DsCongViecDetail";
 const MainLayout = ({ notification, setNotification }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   useEffect(() => {
@@ -377,6 +381,18 @@ const AppRoutes = ({ notification, setNotification }) => {
           <Route path="/vuviec_bill_da_duyet_all" element={<VuViec_BillDaDuyetList_ALL></VuViec_BillDaDuyetList_ALL>} />
           <Route path="/vuviec_bill_chua_duyet_all" element={<VuViec_BillChuaDuyetList_ALL></VuViec_BillChuaDuyetList_ALL>} />
           <Route path="/debitnote_list_all" element={<DebitNoteList_ALL></DebitNoteList_ALL>} />
+
+          {/* TIME RECORD */}
+          <Route path="/timesheetlist" element={<TimesheetList />} />
+          <Route path="/timesheetadd" element={<TimesheetAdd />} />
+          <Route path="/timesheetedit/:id" element={<TimesheetEdit />} />
+          <Route path="/timesheetdetail/:id" element={<TimesheetDetail />} />
+
+          {/* DANH SÁCH CÔNG VIỆC THƯỜNG NHẬT */}
+          <Route path="/dscongviec_list" element={<DsCongViecList />} />
+          <Route path="/dscongviec_add" element={<DsCongViecAdd />} />
+          <Route path="/dscongviec_edit/:id" element={<DsCongViecEdit />} />
+          <Route path="/dscongviec_detail/:id" element={<DsCongViecDetail />} />
         </Route>
         <Route path="/login" element={<Login />} />
 

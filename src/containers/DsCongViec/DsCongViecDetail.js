@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Spin } from "antd";
@@ -59,7 +59,7 @@ function DsCongViecDetail() {
     <div className="p-1 bg-gray-100 flex items-center justify-center min-h-screen">
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
         <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-          Chi Tiet Cong Viec
+          Chi tiết công việc
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
@@ -72,7 +72,7 @@ function DsCongViecDetail() {
           {/* Ma viet tat */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">
-              Ma viet tat
+              Mã Viết Tắt
             </label>
             <p className="p-2 bg-gray-50 border rounded-lg text-gray-700 font-mono font-semibold text-blue-600">
               {item.maVietTat}
@@ -82,7 +82,7 @@ function DsCongViecDetail() {
           {/* Mo ta - full width */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-500 mb-1">
-              Mo ta cong viec
+              Mô tả công việc
             </label>
             <p className="p-2 bg-gray-50 border rounded-lg text-gray-700 min-h-[60px]">
               {item.moTa}
@@ -92,19 +92,19 @@ function DsCongViecDetail() {
           {/* Nhan su */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">
-              Nhan su
+              Nhân sự
             </label>
             <p className="p-2 bg-gray-50 border rounded-lg text-gray-700">
               {item.nhanSu?.hoTen
                 ? `${item.nhanSu.hoTen} (${item.maNhanSu})`
-                : item.maNhanSu || "Chung (toan bo)"}
+                : item.maNhanSu || "Chung (toàn bộ)"}
             </p>
           </div>
 
           {/* Ngay tao */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">
-              Ngay tao
+              Ngày tạo
             </label>
             <p className="p-2 bg-gray-50 border rounded-lg text-gray-700">
               {formatDate(item.createdAt)}
@@ -114,7 +114,7 @@ function DsCongViecDetail() {
           {/* Cap nhat */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">
-              Cap nhat lan cuoi
+              Cập nhật lần cuối
             </label>
             <p className="p-2 bg-gray-50 border rounded-lg text-gray-700">
               {formatDate(item.updatedAt)}
@@ -128,14 +128,14 @@ function DsCongViecDetail() {
             className="bg-gray-300 hover:bg-gray-400 px-6 py-2 rounded-lg"
             onClick={() => navigate("/dscongviec_list")}
           >
-            Quay lai
+            Quay lại
           </button>
           {staffRoles.includes(role) && (
             <button
               onClick={() => navigate(`/dscongviec_edit/${item.id}`)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
             >
-              Chinh sua
+              Chỉnh sửa
             </button>
           )}
         </div>

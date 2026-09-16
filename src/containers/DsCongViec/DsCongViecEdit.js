@@ -1,8 +1,13 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Spin } from "antd";
 import { toast } from "react-toastify";
 import callAPI from "../../utils/api";
+
+const capitalizeFirstLetter = (str) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 function DsCongViecEdit() {
   const navigate = useNavigate();
@@ -42,8 +47,8 @@ function DsCongViecEdit() {
   const validateField = (name, value) => {
     let msg = "";
     if (!value || !value.trim()) {
-      if (name === "maVietTat") msg = "Ma viet tat la bat buoc";
-      if (name === "moTa") msg = "Mo ta la bat buoc";
+      if (name === "maVietTat") msg = "Mã viết tắt là bắt buộc";
+      if (name === "moTa") msg = "Mô tả là bắt buộc";
     }
     setErrors((prev) => ({ ...prev, [name]: msg }));
     return !msg;
@@ -66,10 +71,10 @@ function DsCongViecEdit() {
         data: {
           id: Number(id),
           maVietTat: maVietTat.trim().toUpperCase(),
-          moTa: moTa.trim(),
+          moTa: moTa.trim() ? moTa.trim().charAt(0).toUpperCase() + moTa.trim().slice(1) : "",
         },
       });
-      toast.success("Cap nhat cong viec thanh cong!", {
+      toast.success("Cập nhật công việc thành công!", {
         position: "top-right",
         autoClose: 3000,
       });
@@ -92,16 +97,22 @@ function DsCongViecEdit() {
 
   return (
     <div className="p-1 bg-gray-100 flex items-center justify-center min-h-screen">
-      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+        className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl"
+      >
         <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-          Sua Cong Viec Thuong Nhat
+          Sửa công việc
         </h2>
 
         <div className="grid grid-cols-1 gap-5 mb-6">
           {/* Ma viet tat */}
           <div>
             <label className="block text-gray-700 text-left mb-1">
-              Ma viet tat <span className="text-red-500">*</span>
+              Mã viết tắt <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -109,6 +120,12 @@ function DsCongViecEdit() {
               onChange={(e) => {
                 setMaVietTat(e.target.value.toUpperCase());
                 validateField("maVietTat", e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSubmit();
+                }
               }}
               placeholder="Vi du: ND, GQ, TV..."
               maxLength={20}
@@ -120,22 +137,30 @@ function DsCongViecEdit() {
               </p>
             )}
             <p className="text-gray-400 text-xs mt-1 text-left">
-              Tu dong chuyen chu HOA. Toi da 20 ky tu.
+              Tự động viết hoa. Tối đa 20 ký tự.
             </p>
           </div>
 
           {/* Mo ta */}
           <div>
             <label className="block text-gray-700 text-left mb-1">
-              Mo ta cong viec <span className="text-red-500">*</span>
+              Mô tả công việc <span className="text-red-500">*</span>
             </label>
             <textarea
               value={moTa}
               onChange={(e) => {
-                setMoTa(e.target.value);
-                validateField("moTa", e.target.value);
+                const val = e.target.value;
+                const formatted = val ? val.charAt(0).toUpperCase() + val.slice(1) : "";
+                setMoTa(formatted);
+                validateField("moTa", formatted);
               }}
-              placeholder="Noi dung mo ta cong viec..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
+              placeholder="Nội dung mô tả công việc..."
               maxLength={500}
               rows={3}
               className="w-full p-2 mt-1 border rounded-lg text-input resize-none"
@@ -145,34 +170,41 @@ function DsCongViecEdit() {
                 {errors.moTa}
               </p>
             )}
-            <p className="text-gray-400 text-xs mt-1 text-right">
-              {moTa.length}/500
-            </p>
+            <div className="flex justify-between items-center mt-1">
+              <p className="text-gray-400 text-xs text-left">
+                Tự động viết hoa chữ cái đầu. Nhấn Enter để lưu, Shift + Enter để xuống dòng.
+              </p>
+              <p className="text-gray-400 text-xs text-right">
+                {moTa.length}/500
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Buttons */}
         <div className="flex justify-center gap-4 mt-2">
           <button
+            type="button"
             className="bg-gray-300 hover:bg-gray-400 px-6 py-2 rounded-lg"
             onClick={() => navigate(-1)}
             disabled={loading}
           >
-            Quay lai
+            Quay lại
           </button>
           <button
+            type="submit"
             onClick={handleSubmit}
             disabled={!isFormValid || loading}
             className={`px-6 py-2 rounded-lg text-white ${
               isFormValid && !loading
-                ? "bg-blue-600 hover:bg-blue-700"
+                ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
                 : "bg-blue-300 cursor-not-allowed"
             }`}
           >
-            {loading ? "Dang luu..." : "Cap nhat"}
+            {loading ? "Đang lưu..." : "Cập nhật"}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
