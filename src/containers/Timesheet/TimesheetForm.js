@@ -47,17 +47,19 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
       const payload = {
         ...(mode === "edit" ? { id: initialValues.id } : {}),
         employeeCode: values.employeeCode,
-        caseCode: values.caseCode.trim(),
+        caseCode: values.caseCode ? values.caseCode.trim() : null,
         workDate: values.workDate,
         hours: Number(values.hours),
         activity: values.activity.trim(),
-        description: values.description.trim() || undefined,
-        notes: values.notes.trim() || undefined,
+        description: values.description ? values.description.trim() : undefined,
+        notes: values.notes ? values.notes.trim() : undefined,
       };
       await callAPI({ method: mode === "edit" ? "put" : "post", endpoint: mode === "edit" ? "/timesheet/edit" : "/timesheet/add", data: payload });
       await showSuccess("Thành công", mode === "edit" ? "Cập nhật timesheet thành công" : "Thêm timesheet thành công");
       if (onSaved) onSaved();
       else navigate(-1);
+    } catch (error) {
+      console.error("Lỗi khi lưu time record:", error);
     } finally {
       setLoading(false);
     }

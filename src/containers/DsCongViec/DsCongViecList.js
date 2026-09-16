@@ -111,7 +111,7 @@ function DsCongViecList() {
         <Spin spinning={loading}>
           <table className="w-full border-collapse bg-white text-sm">
             <thead>
-              <tr className="text-[#667085] text-center font-normal bg-gray-50">
+              <tr className="text-center font-normal bg-[#009999] text-white">
                 <th className="p-3 text-table">STT</th>
                 <th className="p-3 text-table text-left">Mã viết tắt</th>
                 <th className="p-3 text-table text-left">Mô tả công việc</th>

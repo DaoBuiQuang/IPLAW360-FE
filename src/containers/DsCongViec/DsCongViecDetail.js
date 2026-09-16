@@ -63,12 +63,6 @@ function DsCongViecDetail() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-          {/* ID */}
-          <div>
-            <label className="block text-sm font-medium text-gray-500 mb-1">ID</label>
-            <p className="p-2 bg-gray-50 border rounded-lg text-gray-700">{item.id}</p>
-          </div>
-
           {/* Ma viet tat */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">
@@ -76,16 +70,6 @@ function DsCongViecDetail() {
             </label>
             <p className="p-2 bg-gray-50 border rounded-lg text-gray-700 font-mono font-semibold text-blue-600">
               {item.maVietTat}
-            </p>
-          </div>
-
-          {/* Mo ta - full width */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-500 mb-1">
-              Mô tả công việc
-            </label>
-            <p className="p-2 bg-gray-50 border rounded-lg text-gray-700 min-h-[60px]">
-              {item.moTa}
             </p>
           </div>
 
@@ -98,6 +82,16 @@ function DsCongViecDetail() {
               {item.nhanSu?.hoTen
                 ? `${item.nhanSu.hoTen} (${item.maNhanSu})`
                 : item.maNhanSu || "Chung (toàn bộ)"}
+            </p>
+          </div>
+
+          {/* Mo ta - full width */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-500 mb-1">
+              Mô tả công việc
+            </label>
+            <p className="p-2 bg-gray-50 border rounded-lg text-gray-700 min-h-[60px]">
+              {item.moTa}
             </p>
           </div>
 
