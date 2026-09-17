@@ -145,10 +145,52 @@ export default function TimesheetList() {
               }
             />
           </div>
+          <div className="w-full md:w-1/6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              Nhân sự
+            </label>
+            <Select
+              className="text-left"
+              options={staffs.map((s) => ({
+                value: s.maNhanSu,
+                label: `${s.maNhanSu} - ${s.hoTen}`,
+              }))}
+              value={
+                filters.employeeCode
+                  ? { value: filters.employeeCode, label: filters.employeeCode }
+                  : null
+              }
+              onChange={(o) => setFilter("employeeCode", o?.value || "")}
+              placeholder="Chọn nhân sự"
+              isClearable
+            />
+          </div>
+          <div className="w-full md:w-1/6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              Mã hồ sơ
+            </label>
+            <CaseCodeSelect
+              value={filters.caseCode}
+              onChange={(value) => setFilter("caseCode", value)}
+              placeholder="Chọn mã hồ sơ"
+            />
+          </div>
+          <div className="w-full md:w-1/6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              Hoạt động
+            </label>
+            <input
+              className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm h-[32px] mt-auto"
+              style={{ height: '32px' }}
+              placeholder="Nhập hoạt động"
+              value={filters.activity}
+              onChange={(e) => setFilter("activity", e.target.value)}
+            />
+          </div>
           <div>
             <button
               onClick={() => fetchRows(1, pagination.pageSize)}
-              className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-2 rounded-lg shadow-md transition font-medium"
+              className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-2 rounded-lg shadow-md transition font-medium h-[32px] flex items-center justify-center"
             >
               Tìm kiếm
             </button>
@@ -156,21 +198,21 @@ export default function TimesheetList() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-          <div className="bg-gray-50 p-3 rounded-lg border">
+          <div className="bg-white p-3 rounded-lg shadow border-l-4 border-[#009999]">
             <p className="text-sm text-gray-500">Tổng số logtime</p>
-            <strong className="text-lg text-gray-800">
+            <strong className="text-xl text-[#009999]">
               {summary.totalItems || 0}
             </strong>
           </div>
-          <div className="bg-gray-50 p-3 rounded-lg border">
+          <div className="bg-white p-3 rounded-lg shadow border-l-4 border-orange-400">
             <p className="text-sm text-gray-500">Tổng số giờ</p>
-            <strong className="text-lg text-gray-800">
+            <strong className="text-xl text-orange-600">
               {Number(summary.totalHours || 0)}
             </strong>
           </div>
-          <div className="bg-gray-50 p-3 rounded-lg border">
+          <div className="bg-white p-3 rounded-lg shadow border-l-4 border-indigo-400">
             <p className="text-sm text-gray-500">Tổng chi phí</p>
-            <strong className="text-lg text-[#009999]">
+            <strong className="text-xl text-indigo-600">
               {money(summary.totalAmount)} đ
             </strong>
           </div>
@@ -181,7 +223,7 @@ export default function TimesheetList() {
         <Spin spinning={loading}>
           <table className="w-full border-collapse bg-white text-sm">
             <thead>
-              <tr className="text-center font-normal bg-[#009999] text-white">
+              <tr className="text-[#667085] text-center">
                 <th className="p-3 text-table">Ngày</th>
                 <th className="p-3 text-table">Mã hồ sơ</th>
                 <th className="p-3 text-table">Nhân sự</th>
@@ -199,22 +241,22 @@ export default function TimesheetList() {
                 rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="text-center border-b hover:bg-gray-50"
+                    className="text-center border-b hover:bg-[#f0fdfa]"
                   >
-                    <td className="p-3 text-table">{row.workDate}</td>
-                    <td className="p-3 text-table font-semibold text-blue-600">
+                    <td className="p-3 text-table text-gray-600">{formatDate(row.workDate)}</td>
+                    <td className="p-3 text-table font-medium text-[#009999]">
                       {row.caseCode || "-"}
                     </td>
-                    <td className="p-3 text-table">
+                    <td className="p-3 text-table text-gray-700">
                       {row.employee?.hoTen || row.employeeCode}
                     </td>
-                    <td className="p-3 text-table text-left font-medium">
+                    <td className="p-3 text-table text-left font-medium text-indigo-600">
                       {row.activity}
                     </td>
-                    <td className="p-3 text-table text-left">
+                    <td className="p-3 text-table text-left text-gray-600">
                       {row.description || "-"}
                     </td>
-                    <td className="p-3 text-table font-semibold">
+                    <td className="p-3 text-table font-semibold text-orange-600">
                       {Number(row.hours || 0)}
                     </td>
                     <td className="p-3 text-table">{money(row.hourlyRate)}</td>
