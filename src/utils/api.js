@@ -57,8 +57,15 @@ const callAPI = async ({ method = "post", endpoint, data = null, params = null }
         }
         return response.data;
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Lỗi kết nối đến server!";
-        toast.error(`🚨 ${errorMessage}`, { position: "top-right", autoClose: 3000 });
+        let errorMessage = error.response?.data?.message || "Lỗi kết nối đến server!";
+        if (
+            typeof errorMessage === "string" &&
+            (errorMessage.toLowerCase() === "validation error" ||
+             errorMessage.toLowerCase().includes("validation error"))
+        ) {
+            errorMessage = "Dữ liệu không hợp lệ hoặc mã công việc đã tồn tại trong hệ thống. Vui lòng kiểm tra lại!";
+        }
+        toast.error(`🚨 ${errorMessage}`, { position: "top-right", autoClose: 3500 });
         console.error("Lỗi API:", errorMessage);
         throw errorMessage;
     }
