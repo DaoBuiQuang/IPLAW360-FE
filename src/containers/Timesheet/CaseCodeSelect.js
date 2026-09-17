@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 import callAPI from "../../utils/api";
 
-function CaseCodeSelect({ value, onChange, isDisabled = false, placeholder = "Chọn mã hồ sơ", className = "text-left" }) {
+function CaseCodeSelect({ value, onChange, isDisabled = false, allowCustom = false, placeholder = "Chọn mã hồ sơ", className = "text-left" }) {
   const [options, setOptions] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [pageIndex, setPageIndex] = useState(1);
@@ -55,12 +56,16 @@ function CaseCodeSelect({ value, onChange, isDisabled = false, placeholder = "Ch
   };
 
   const selectedOption = value ? { value, label: value } : null;
+  const SelectComponent = allowCustom ? CreatableSelect : Select;
   return (
-    <Select
+    <SelectComponent
       className={`${className} w-full`}
       options={options}
       value={selectedOption}
       onChange={(option) => onChange(option?.value || "")}
+      onCreateOption={allowCustom ? (inputValue) => onChange(inputValue.trim()) : undefined}
+      formatCreateLabel={allowCustom ? (inputValue) => `Sử dụng mã "${inputValue.trim()}"` : undefined}
+      isValidNewOption={allowCustom ? (inputValue) => Boolean(inputValue.trim()) : undefined}
       onInputChange={handleInputChange}
       onMenuOpen={() => loadOptions(searchText, 1, false)}
       onMenuScrollToBottom={handleMenuScrollToBottom}
