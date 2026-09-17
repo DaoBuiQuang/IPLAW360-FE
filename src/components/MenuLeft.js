@@ -59,14 +59,27 @@ function MenuLeft() {
 
       <nav className="flex-1 px-4 py-4">
         <ul className="space-y-2 text-[#009999] text-sm font-bold">
-           {(role === "admin" || role === "staff") && (
-            <li>
-              <NavLink to="/timesheetlist" className={navLinkClass}>
-                <Timer size={14} />
-                <span className="text-left w-full">TIME RECORD</span>
-              </NavLink>
-            </li>
-          )}
+          {(role === "admin" || role === "staff") &&
+            renderMenuGroup(
+              "root",
+              "timerecord",
+              "TIME RECORD",
+              (open) => <Timer size={16} color={open ? "#009999" : undefined} />,
+              <>
+                <li>
+                  <NavLink to="/timesheetlist" className={navLinkClass}>
+                    <Timer size={14} />
+                    <span className="text-left w-full">Báo cáo công việc</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dscongviec_list" className={navLinkClass}>
+                    <Briefcase size={14} />
+                    <span className="text-left w-full">Công việc thường nhật</span>
+                  </NavLink>
+                </li>
+              </>
+            )}
 
           {/* VIỆT NAM */}
           {renderMenuGroup(
