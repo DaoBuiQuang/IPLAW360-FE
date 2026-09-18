@@ -75,7 +75,7 @@ function MenuLeft() {
                 <li>
                   <NavLink to="/timesheetlist" className={navLinkClass}>
                     <Timer size={14} />
-                    <span className="text-left w-full">Báo cáo công việc</span>
+                    <span className="text-left w-full">TIMESHEET</span>
                   </NavLink>
                 </li>
                 <li>
