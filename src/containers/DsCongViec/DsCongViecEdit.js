@@ -48,20 +48,18 @@ function DsCongViecEdit() {
     let msg = "";
     if (!value || !value.trim()) {
       if (name === "maVietTat") msg = "Mã viết tắt là bắt buộc";
-      if (name === "moTa") msg = "Mô tả là bắt buộc";
     }
     setErrors((prev) => ({ ...prev, [name]: msg }));
     return !msg;
   };
 
-  const isFormValid =
-    maVietTat.trim().length > 0 && moTa.trim().length > 0;
+  const isFormValid = maVietTat.trim().length > 0;
 
   // -----------------------------------------------------------------------
   const handleSubmit = async () => {
     const v1 = validateField("maVietTat", maVietTat);
-    const v2 = validateField("moTa", moTa);
-    if (!v1 || !v2) return;
+    validateField("moTa", moTa); // trigger clear error if any
+    if (!v1) return;
 
     setLoading(true);
     try {
@@ -144,7 +142,7 @@ function DsCongViecEdit() {
           {/* Mo ta */}
           <div>
             <label className="block text-gray-700 text-left mb-1">
-              Mô tả công việc <span className="text-red-500">*</span>
+              Mô tả công việc
             </label>
             <textarea
               value={moTa}

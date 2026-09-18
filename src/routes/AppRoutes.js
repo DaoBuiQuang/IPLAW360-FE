@@ -136,6 +136,7 @@ import VuViec_BillChuaDuyetList_ALL from "../containers/BillFull/VuViec_BillChua
 import DebitNoteList_ALL from "../containers/DebitNote/debitNoteList_ALL.js";
 import HomeReport from "../containers/Home/HomeReport.js";
 import TimesheetList from "../containers/Timesheet/TimesheetList";
+import TimesheetCalendarPage from "../containers/Timesheet/TimesheetCalendarPage";
 import TimesheetAdd from "../containers/Timesheet/TimesheetAdd";
 import TimesheetEdit from "../containers/Timesheet/TimesheetEdit";
 import TimesheetDetail from "../containers/Timesheet/TimesheetDetail";
@@ -213,6 +214,7 @@ const AppRoutes = ({ notification, setNotification }) => {
           <Route path="/staffedit/:maNhanSu" element={<StaffEdit></StaffEdit>} />
           <Route path="/staffdetail/:maNhanSu" element={<StaffDetail></StaffDetail>} />
           <Route path="/timesheetlist" element={<TimesheetList />} />
+          <Route path="/timesheetcalendar" element={<TimesheetCalendarPage />} />
           <Route path="/timesheetadd" element={<TimesheetAdd />} />
           <Route path="/timesheetedit/:id" element={<TimesheetEdit />} />
           <Route path="/timesheetdetail/:id" element={<TimesheetDetail />} />
@@ -384,6 +386,7 @@ const AppRoutes = ({ notification, setNotification }) => {
 
           {/* TIME RECORD */}
           <Route path="/timesheetlist" element={<TimesheetList />} />
+          <Route path="/timesheetcalendar" element={<TimesheetCalendarPage />} />
           <Route path="/timesheetadd" element={<TimesheetAdd />} />
           <Route path="/timesheetedit/:id" element={<TimesheetEdit />} />
           <Route path="/timesheetdetail/:id" element={<TimesheetDetail />} />

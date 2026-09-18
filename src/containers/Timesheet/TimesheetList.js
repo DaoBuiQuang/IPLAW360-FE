@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Select from "react-select";
 import { DatePicker, Modal, Pagination, Spin } from "antd";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 import CaseCodeSelect from "./CaseCodeSelect";
 import callAPI from "../../utils/api";
 
@@ -16,6 +18,15 @@ const formatDate = (value) => {
 
 export default function TimesheetList() {
   const navigate = useNavigate();
+
+  // ── Phân quyền ──
+  const role = useSelector((state) => state.auth.role);
+  const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
+  // Admin có thể sửa/xóa mọi record; nhân viên chỉ được sửa/xóa của chính mình
+  const canEditDelete = (record) =>
+    role === "admin" || record.employeeCode === currentMaNhanSu;
+
+  // ── Bảng dữ liệu (có phân trang) ──
   const [rows, setRows] = useState([]);
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -38,8 +49,12 @@ export default function TimesheetList() {
     totalHours: 0,
     totalAmount: 0,
   });
+
+
+  // ── Helpers ──
   const setFilter = (key, value) =>
     setFilters((old) => ({ ...old, [key]: value }));
+
   const getFilterPayload = () => ({
     employeeCode: filters.employeeCode || undefined,
     caseCode: filters.caseCode || undefined,
@@ -48,6 +63,8 @@ export default function TimesheetList() {
     fromDate: filters.fromDate || undefined,
     toDate: filters.toDate || undefined,
   });
+
+  // ── Fetch bảng thống kê (phân trang) ──
   const fetchRows = async (
     pageIndex = pagination.pageIndex,
     pageSize = pagination.pageSize,
@@ -83,7 +100,9 @@ export default function TimesheetList() {
       setLoading(false);
     }
   };
-  useEffect(() => { Promise.all([callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }), fetchRows(1, 20)]).then(([staff]) => setStaffs(staff || [])).catch(() => setStaffs([])); }, []);
+
+
+  // ── Xóa (từ bảng) ──
   const deleteRow = async () => {
     if (!deleting) return;
     try {
@@ -103,8 +122,22 @@ export default function TimesheetList() {
     }
   };
 
+  // ── Init ──
+  useEffect(() => {
+    Promise.all([
+      callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }),
+      fetchRows(1, 20),
+    ])
+      .then(([staff]) => setStaffs(staff || []))
+      .catch(() => setStaffs([]));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="p-1 bg-gray-100 min-h-screen">
+
+      {/* ══════════════════════════════════
+           HEADER + BỘ LỌC + SUMMARY CARDS
+          ══════════════════════════════════ */}
       <div className="bg-white p-4 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-semibold text-gray-700">
@@ -118,6 +151,7 @@ export default function TimesheetList() {
           </button>
         </div>
 
+        {/* Bộ lọc */}
         <div className="flex flex-wrap items-end gap-3 mb-4">
           <div className="w-full md:w-1/6">
             <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
@@ -181,7 +215,7 @@ export default function TimesheetList() {
             </label>
             <input
               className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm h-[32px] mt-auto"
-              style={{ height: '32px' }}
+              style={{ height: "32px" }}
               placeholder="Nhập hoạt động"
               value={filters.activity}
               onChange={(e) => setFilter("activity", e.target.value)}
@@ -197,6 +231,7 @@ export default function TimesheetList() {
           </div>
         </div>
 
+        {/* Summary cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
           <div className="bg-white p-3 rounded-lg shadow border-l-4 border-[#009999]">
             <p className="text-sm text-gray-500">Tổng số logtime</p>
@@ -219,6 +254,10 @@ export default function TimesheetList() {
         </div>
       </div>
 
+
+      {/* ══════════════════════════════
+           TABLE VIEW
+          ══════════════════════════════ */}
       <div className="overflow-x-auto mt-4 rounded-lg border shadow bg-white">
         <Spin spinning={loading}>
           <table className="w-full border-collapse bg-white text-sm">
@@ -276,20 +315,24 @@ export default function TimesheetList() {
                       >
                         Xem
                       </button>
-                      <button
-                        onClick={() => navigate(`/timesheetedit/${row.id}`)}
-                        className="px-2.5 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded mr-1.5 transition text-xs font-medium"
-                        title="Chỉnh sửa"
-                      >
-                        Sửa 📝
-                      </button>
-                      <button
-                        onClick={() => setDeleting(row)}
-                        className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded transition text-xs font-medium"
-                        title="Xóa"
-                      >
-                        Xóa 🗑️
-                      </button>
+                      {canEditDelete(row) && (
+                        <>
+                          <button
+                            onClick={() => navigate(`/timesheetedit/${row.id}`)}
+                            className="px-2.5 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded mr-1.5 transition text-xs font-medium"
+                            title="Chỉnh sửa"
+                          >
+                            Sửa 📝
+                          </button>
+                          <button
+                            onClick={() => setDeleting(row)}
+                            className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded transition text-xs font-medium"
+                            title="Xóa"
+                          >
+                            Xóa 🗑️
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -305,6 +348,7 @@ export default function TimesheetList() {
         </Spin>
       </div>
 
+      {/* Pagination */}
       <div className="mt-4 flex justify-center">
         <Pagination
           current={pagination.pageIndex}
@@ -317,6 +361,7 @@ export default function TimesheetList() {
         />
       </div>
 
+      {/* ══ Modal xóa (từ bảng) ══ */}
       <Modal
         title="Xác nhận xóa Time Report"
         open={Boolean(deleting)}

@@ -10,7 +10,7 @@ import { showSuccess } from "../../components/commom/Notification";
 
 const emptyValues = { employeeCode: "", caseCode: "", workDate: dayjs().format("YYYY-MM-DD"), hours: "", activity: "", description: "", notes: "" };
 
-export default function TimesheetForm({ mode = "add", initialValues = emptyValues, lockedCaseCode = false, onSaved }) {
+export default function TimesheetForm({ mode = "add", initialValues = emptyValues, lockedCaseCode = false, onSaved, embedded = false }) {
   const navigate = useNavigate();
   const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
   const [values, setValues] = useState({ ...emptyValues, ...initialValues, employeeCode: mode === "add" ? currentEmployeeCode : initialValues.employeeCode });
@@ -66,8 +66,8 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
   };
 
   return <Spin spinning={loading}>
-    <form onSubmit={submit} className="bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-4">{mode === "edit" ? "Chỉnh sửa time record" : "Thêm time record"}</h2>
+    <form onSubmit={submit} className={embedded ? "" : "bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto"}>
+      {!embedded && <h2 className="text-2xl font-semibold text-gray-700 mb-4">{mode === "edit" ? "Chỉnh sửa time record" : "Thêm time record"}</h2>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Nhân sự" required error={errors.employeeCode}>
           <Select className="text-left w-full" options={employeeOptions.map((staff) => ({ value: staff.maNhanSu, label: `${staff.maNhanSu} - ${staff.hoTen}` }))} value={selectedStaff ? { value: selectedStaff.maNhanSu, label: `${selectedStaff.maNhanSu} - ${selectedStaff.hoTen}` } : null} onChange={(option) => setField("employeeCode", option?.value || "")} placeholder="Nhân sự của tôi" isDisabled={mode === "add"} />
@@ -97,7 +97,10 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
         <Field label="Nội dung công việc"><textarea value={values.description} onChange={(event) => setField("description", event.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input" rows={3} /></Field>
         <Field label="Ghi chú"><textarea value={values.notes} onChange={(event) => setField("notes", event.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input md:col-span-2" rows={3} /></Field>
       </div>
-      <div className="flex justify-center gap-4 mt-4"><button type="button" onClick={() => navigate(-1)} className="bg-gray-300 px-4 py-2 rounded-lg">Quay lại</button><button type="submit" className="bg-[#009999] text-white px-4 py-2 rounded-lg">{mode === "edit" ? "Cập nhật" : "Thêm mới"}</button></div>
+      <div className="flex justify-center gap-4 mt-4">
+        {!embedded && <button type="button" onClick={() => navigate(-1)} className="bg-gray-300 px-4 py-2 rounded-lg">Quay lại</button>}
+        <button type="submit" className="bg-[#009999] text-white px-4 py-2 rounded-lg">{mode === "edit" ? "Cập nhật" : "Thêm mới"}</button>
+      </div>
     </form>
   </Spin>;
 }

@@ -166,7 +166,7 @@ function Application_GH_NH_KHList() {
                     </thead>
                     <tbody>
                         {donGiaHans.map((donGiaHan, index) => (
-                            <tr className="group hover:bg-gray-100 text-center border-b relative">
+                            <tr key={donGiaHan.id || index} className="group hover:bg-gray-100 text-center border-b relative">
                                 <td className="p-2 text-table">{index + 1}</td>
                                 <td
                                     className="p-2 text-table text-blue-500 cursor-pointer hover:underline"
@@ -181,17 +181,17 @@ function Application_GH_NH_KHList() {
                                 <td className="p-2 text-table">{donGiaHan.ngayQuyetDinhGiaHan ? new Date(donGiaHan.ngayQuyetDinhGiaHan).toLocaleDateString("vi-VN") : ""}</td>
                                 <td className="p-2 text-table">{donGiaHan.ngayDangBa ? new Date(donGiaHan.ngayDangBa).toLocaleDateString("vi-VN") : ""}</td>
                                 <td className="p-2 text-table">{donGiaHan.ghiChu}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.soBang}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.soDon}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.maHoSo}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.KhachHangCuoi?.tenKhachHang}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.DoiTac?.tenDoiTac}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.NhanHieu?.tenNhanHieu}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.soBang}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.soDon}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.maHoSo}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.KhachHangCuoi?.tenKhachHang}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.DoiTac?.tenDoiTac}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.NhanHieu?.tenNhanHieu}</td>
                                 {/* <td className="p-2 text-table">Màu</td> */}
-                                <td className="p-2 text-table">{donGiaHan.gcn.dsNhomSPDV}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.ngayNopDon ? new Date(donGiaHan.gcn.ngayNopDon).toLocaleDateString("vi-VN") : ""}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.ngayCapBang ? new Date(donGiaHan.gcn.ngayCapBang).toLocaleDateString("vi-VN") : ""}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn.hanGiaHan ? new Date(donGiaHan.gcn.hanGiaHan).toLocaleDateString("vi-VN") : ""}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.dsNhomSPDV}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.ngayNopDon ? new Date(donGiaHan.gcn.ngayNopDon).toLocaleDateString("vi-VN") : ""}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.ngayCapBang ? new Date(donGiaHan.gcn.ngayCapBang).toLocaleDateString("vi-VN") : ""}</td>
+                                <td className="p-2 text-table">{donGiaHan.gcn?.hanGiaHan ? new Date(donGiaHan.gcn.hanGiaHan).toLocaleDateString("vi-VN") : ""}</td>
                                 <td className="p-2 relative">
                                     {(role === "admin" || role === "staff") && (
                                         <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
