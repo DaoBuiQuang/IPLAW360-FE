@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   PieChart, Users, Briefcase, Handshake, Globe, UserCheck,
   FileText, Settings, Tag, ShoppingCart, LayoutDashboard,
-  Key, User, ChevronDown, ChevronUp, DollarSign, Search, FileSignature, BarChart3, Stamp, Timer
+  Key, User, ChevronDown, ChevronUp, DollarSign, Search, FileSignature, BarChart3, Stamp, Timer, Calendar
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -66,6 +66,12 @@ function MenuLeft() {
               "TIME RECORD",
               (open) => <Timer size={16} color={open ? "#009999" : undefined} />,
               <>
+                <li>
+                  <NavLink to="/timesheetcalendar" className={navLinkClass}>
+                    <Calendar size={14} />
+                    <span className="text-left w-full">Lịch công việc</span>
+                  </NavLink>
+                </li>
                 <li>
                   <NavLink to="/timesheetlist" className={navLinkClass}>
                     <Timer size={14} />

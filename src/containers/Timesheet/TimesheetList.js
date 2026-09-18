@@ -7,8 +7,6 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import CaseCodeSelect from "./CaseCodeSelect";
 import callAPI from "../../utils/api";
-import TimesheetCalendar from "./TimesheetCalendar";
-import TimesheetDayDrawer from "./TimesheetDayDrawer";
 
 const statusMap = { APPROVED: "Đã duyệt" };
 const money = (value) => Number(value || 0).toLocaleString("vi-VN");
@@ -52,11 +50,6 @@ export default function TimesheetList() {
     totalAmount: 0,
   });
 
-  // ── Calendar state ──
-  const [calendarMonth, setCalendarMonth] = useState(dayjs());
-  const [groupedData, setGroupedData] = useState({});
-  const [calendarLoading, setCalendarLoading] = useState(false);
-  const [selectedDay, setSelectedDay] = useState(null);
 
   // ── Helpers ──
   const setFilter = (key, value) =>
@@ -108,58 +101,6 @@ export default function TimesheetList() {
     }
   };
 
-  // ── Fetch dữ liệu calendar (toàn bộ tháng, không phân trang) ──
-  const fetchCalendarData = async (month = calendarMonth) => {
-    setCalendarLoading(true);
-    try {
-      const startDate = month.startOf("month").format("YYYY-MM-DD");
-      const endDate = month.endOf("month").format("YYYY-MM-DD");
-      const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
-
-      const response = await callAPI({
-        method: "post",
-        endpoint: "/timesheet/list",
-        data: {
-          employeeCode: filters.employeeCode || currentEmployeeCode || undefined,
-          status: "APPROVED",
-          fromDate: startDate,
-          toDate: endDate,
-          pageIndex: 1,
-          pageSize: 500,
-        },
-      });
-
-      const rawRecords = response?.data || [];
-
-      // Reduce → groupedData: { "YYYY-MM-DD": { totalHours, records[] } }
-      const grouped = rawRecords.reduce((acc, curr) => {
-        const dateKey = String(curr.workDate || "").slice(0, 10);
-        if (!dateKey) return acc;
-        if (!acc[dateKey]) acc[dateKey] = { totalHours: 0, records: [] };
-        acc[dateKey].totalHours += Number(curr.hours || 0);
-        acc[dateKey].records.push(curr);
-        return acc;
-      }, {});
-
-      setGroupedData(grouped);
-    } catch (err) {
-      console.error("Lỗi tải dữ liệu calendar:", err);
-    } finally {
-      setCalendarLoading(false);
-    }
-  };
-
-  // ── Chuyển tháng ──
-  const handleMonthChange = (newMonth) => {
-    setCalendarMonth(newMonth);
-    fetchCalendarData(newMonth);
-  };
-
-  // ── Refresh sau CRUD trong Drawer ──
-  const handleDrawerRefresh = () => {
-    fetchCalendarData();
-    fetchRows();
-  };
 
   // ── Xóa (từ bảng) ──
   const deleteRow = async () => {
@@ -176,7 +117,6 @@ export default function TimesheetList() {
       });
       setDeleting(null);
       fetchRows();
-      fetchCalendarData();
     } catch {
       setDeleting(null);
     }
@@ -187,7 +127,6 @@ export default function TimesheetList() {
     Promise.all([
       callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }),
       fetchRows(1, 20),
-      fetchCalendarData(),
     ])
       .then(([staff]) => setStaffs(staff || []))
       .catch(() => setStaffs([]));
@@ -315,18 +254,6 @@ export default function TimesheetList() {
         </div>
       </div>
 
-      {/* ══════════════════════════════
-           CALENDAR VIEW
-          ══════════════════════════════ */}
-      <div className="mt-4">
-        <TimesheetCalendar
-          groupedData={groupedData}
-          currentMonth={calendarMonth}
-          onMonthChange={handleMonthChange}
-          onDayClick={(dateStr) => setSelectedDay(dateStr)}
-          loading={calendarLoading}
-        />
-      </div>
 
       {/* ══════════════════════════════
            TABLE VIEW
@@ -450,15 +377,6 @@ export default function TimesheetList() {
           <em>{deleting?.activity}</em>) không?
         </p>
       </Modal>
-
-      {/* ══ Drawer ngày (từ Calendar) ══ */}
-      <TimesheetDayDrawer
-        open={Boolean(selectedDay)}
-        date={selectedDay}
-        records={selectedDay ? (groupedData[selectedDay]?.records || []) : []}
-        onClose={() => setSelectedDay(null)}
-        onRefresh={handleDrawerRefresh}
-      />
     </div>
   );
 }
