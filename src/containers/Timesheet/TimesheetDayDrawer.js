@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Drawer, Modal } from "antd";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import TimesheetForm from "./TimesheetForm";
 import callAPI from "../../utils/api";
@@ -43,7 +44,7 @@ function InfoField({ label, value, accent = false }) {
 /**
  * Mode "detail": hiển thị đầy đủ thông tin một time record
  */
-function RecordDetail({ record, onEdit, onDelete }) {
+function RecordDetail({ record, onEdit, onDelete, canEditDelete }) {
   return (
     <div className="flex flex-col h-full">
       {/* Banner tổng giờ */}
@@ -149,20 +150,22 @@ function RecordDetail({ record, onEdit, onDelete }) {
       </div>
 
       {/* Nút hành động */}
-      <div className="p-4 border-t border-gray-100 bg-white flex gap-3">
-        <button
-          onClick={() => onEdit(record)}
-          className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-blue-100 hover:text-blue-700 text-gray-700 font-semibold text-sm transition"
-        >
-          ✏️ Chỉnh sửa
-        </button>
-        <button
-          onClick={() => onDelete(record)}
-          className="flex-1 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-sm transition"
-        >
-          🗑️ Xóa
-        </button>
-      </div>
+      {canEditDelete && (
+        <div className="p-4 border-t border-gray-100 bg-white flex gap-3">
+          <button
+            onClick={() => onEdit(record)}
+            className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-blue-100 hover:text-blue-700 text-gray-700 font-semibold text-sm transition"
+          >
+            ✏️ Chỉnh sửa
+          </button>
+          <button
+            onClick={() => onDelete(record)}
+            className="flex-1 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-sm transition"
+          >
+            🗑️ Xóa
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -170,7 +173,7 @@ function RecordDetail({ record, onEdit, onDelete }) {
 /**
  * Một dòng record trong danh sách ngày — click vào card body để xem chi tiết
  */
-function RecordRow({ record, onView, onEdit, onDelete }) {
+function RecordRow({ record, onView, onEdit, onDelete, canEditDelete }) {
   return (
     <div
       className="flex items-start justify-between gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50 hover:bg-[#f0fdfa] hover:border-[#009999]/30 transition group cursor-pointer"
@@ -203,20 +206,22 @@ function RecordRow({ record, onView, onEdit, onDelete }) {
         </div>
       </div>
       {/* Buttons — stopPropagation để không trigger onView khi click Sửa/Xóa */}
-      <div className="flex flex-col gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-        <button
-          onClick={() => onEdit(record)}
-          className="px-2.5 py-1 bg-gray-200 hover:bg-blue-100 hover:text-blue-700 text-gray-600 rounded-lg text-xs font-medium transition"
-        >
-          Sửa ✏️
-        </button>
-        <button
-          onClick={() => onDelete(record)}
-          className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-xs font-medium transition"
-        >
-          Xóa 🗑️
-        </button>
-      </div>
+      {canEditDelete && (
+        <div className="flex flex-col gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => onEdit(record)}
+            className="px-2.5 py-1 bg-gray-200 hover:bg-blue-100 hover:text-blue-700 text-gray-600 rounded-lg text-xs font-medium transition"
+          >
+            Sửa ✏️
+          </button>
+          <button
+            onClick={() => onDelete(record)}
+            className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-xs font-medium transition"
+          >
+            Xóa 🗑️
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -227,6 +232,12 @@ function RecordRow({ record, onView, onEdit, onDelete }) {
  */
 export default function TimesheetDayDrawer({ open, date, records = [], onClose, onRefresh }) {
   const [mode, setMode] = useState("list");
+  
+  const role = useSelector((state) => state.auth.role);
+  const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
+  const canEditDelete = (record) =>
+    role === "admin" || record.employeeCode === currentMaNhanSu;
+    
   const [editingRecord, setEditingRecord] = useState(null);
   const [viewingRecord, setViewingRecord] = useState(null);
   const [deletingRecord, setDeletingRecord] = useState(null);
@@ -396,6 +407,7 @@ export default function TimesheetDayDrawer({ open, date, records = [], onClose, 
                     onView={handleView}
                     onEdit={handleEdit}
                     onDelete={setDeletingRecord}
+                    canEditDelete={canEditDelete(rec)}
                   />
                 ))
               )}
@@ -418,6 +430,7 @@ export default function TimesheetDayDrawer({ open, date, records = [], onClose, 
             record={viewingRecord}
             onEdit={handleEdit}
             onDelete={handleDeleteFromDetail}
+            canEditDelete={canEditDelete(viewingRecord)}
           />
         )}
 

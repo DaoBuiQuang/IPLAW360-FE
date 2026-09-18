@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Select from "react-select";
 import { DatePicker, Modal, Pagination, Spin } from "antd";
 import { toast } from "react-toastify";
@@ -19,6 +20,13 @@ const formatDate = (value) => {
 
 export default function TimesheetList() {
   const navigate = useNavigate();
+
+  // ── Phân quyền ──
+  const role = useSelector((state) => state.auth.role);
+  const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
+  // Admin có thể sửa/xóa mọi record; nhân viên chỉ được sửa/xóa của chính mình
+  const canEditDelete = (record) =>
+    role === "admin" || record.employeeCode === currentMaNhanSu;
 
   // ── Bảng dữ liệu (có phân trang) ──
   const [rows, setRows] = useState([]);
@@ -380,20 +388,24 @@ export default function TimesheetList() {
                       >
                         Xem
                       </button>
-                      <button
-                        onClick={() => navigate(`/timesheetedit/${row.id}`)}
-                        className="px-2.5 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded mr-1.5 transition text-xs font-medium"
-                        title="Chỉnh sửa"
-                      >
-                        Sửa 📝
-                      </button>
-                      <button
-                        onClick={() => setDeleting(row)}
-                        className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded transition text-xs font-medium"
-                        title="Xóa"
-                      >
-                        Xóa 🗑️
-                      </button>
+                      {canEditDelete(row) && (
+                        <>
+                          <button
+                            onClick={() => navigate(`/timesheetedit/${row.id}`)}
+                            className="px-2.5 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded mr-1.5 transition text-xs font-medium"
+                            title="Chỉnh sửa"
+                          >
+                            Sửa 📝
+                          </button>
+                          <button
+                            onClick={() => setDeleting(row)}
+                            className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded transition text-xs font-medium"
+                            title="Xóa"
+                          >
+                            Xóa 🗑️
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
