@@ -23,6 +23,9 @@ export default function TimesheetDetail() {
     {item && <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
       <Info label="Ngày làm việc" value={item.workDate} />
       <Info label="Mã hồ sơ" value={item.caseCode} />
+      <Info label="Quốc gia" value={item.countryCode ? `${item.countryCode}${item.countryName ? ` - ${item.countryName}` : ""}` : "-"} />
+      <Info label="Đối tác" value={item.partnerCode ? `${item.partnerCode}${item.partnerName ? ` - ${item.partnerName}` : ""}` : "-"} />
+      <Info label="Khách hàng" value={item.customerCode ? `${item.customerCode}${item.customerName ? ` - ${item.customerName}` : ""}` : "-"} />
       <Info label="Nhân sự" value={`${item.employee?.hoTen || "-"} (${item.employeeCode})`} />
       <Info label="Phòng ban" value={item.employee?.phongBan} />
       <Info label="Hoạt động" value={item.activity} />

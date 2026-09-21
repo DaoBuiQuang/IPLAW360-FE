@@ -38,7 +38,7 @@ function getDayStyle(totalHours) {
   return { bg: "#fef9c3", text: "#a16207", badge: "#ca8a04" };
 }
 
-export default function TimesheetCalendar({ groupedData = {}, currentMonth, onMonthChange, onDayClick, loading }) {
+export default function TimesheetCalendar({ groupedData = {}, totalHours = 0, currentMonth, onMonthChange, onDayClick, loading }) {
   const year = currentMonth.year();
   const month = currentMonth.month() + 1; // dayjs month() bắt đầu từ 0
   const days = buildCalendarDays(year, month);
@@ -61,7 +61,9 @@ export default function TimesheetCalendar({ groupedData = {}, currentMonth, onMo
             Tháng {month}/{year}
           </p>
           <p className="text-white/70 text-xs mt-0.5">
-            {loading ? "Đang tải..." : `${Object.keys(groupedData).length} ngày đã log`}
+            {loading
+              ? "Đang tải..."
+              : `${Object.keys(groupedData).length} ngày đã log · ${Number(totalHours).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} giờ`}
           </p>
         </div>
 

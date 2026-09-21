@@ -8,6 +8,7 @@ export default function TimesheetCalendarPage() {
   // ── Calendar state ──
   const [calendarMonth, setCalendarMonth] = useState(dayjs());
   const [groupedData, setGroupedData] = useState({});
+  const [monthlyTotalHours, setMonthlyTotalHours] = useState(0);
   const [calendarLoading, setCalendarLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
 
@@ -19,20 +20,27 @@ export default function TimesheetCalendarPage() {
       const endDate = month.endOf("month").format("YYYY-MM-DD");
       const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
 
-      const response = await callAPI({
-        method: "post",
-        endpoint: "/timesheet/list",
-        data: {
-          employeeCode: currentEmployeeCode || undefined,
-          status: "APPROVED",
-          fromDate: startDate,
-          toDate: endDate,
-          pageIndex: 1,
-          pageSize: 500,
-        },
-      });
+      const filterPayload = {
+        employeeCode: currentEmployeeCode || undefined,
+        status: "APPROVED",
+        fromDate: startDate,
+        toDate: endDate,
+      };
+      const [response, summaryResponse] = await Promise.all([
+        callAPI({
+          method: "post",
+          endpoint: "/timesheet/list",
+          data: {
+            ...filterPayload,
+            pageIndex: 1,
+            pageSize: 500,
+          },
+        }),
+        callAPI({ method: "post", endpoint: "/timesheet/summary", data: filterPayload }),
+      ]);
 
       const rawRecords = response?.data || [];
+      setMonthlyTotalHours(Number(summaryResponse?.summary?.totalHours || 0));
 
       // Reduce → groupedData: { "YYYY-MM-DD": { totalHours, records[] } }
       const grouped = rawRecords.reduce((acc, curr) => {
@@ -47,6 +55,7 @@ export default function TimesheetCalendarPage() {
       setGroupedData(grouped);
     } catch (err) {
       console.error("Lỗi tải dữ liệu calendar:", err);
+      setMonthlyTotalHours(0);
     } finally {
       setCalendarLoading(false);
     }
@@ -79,6 +88,7 @@ export default function TimesheetCalendarPage() {
       <div className="mt-4">
         <TimesheetCalendar
           groupedData={groupedData}
+          totalHours={monthlyTotalHours}
           currentMonth={calendarMonth}
           onMonthChange={handleMonthChange}
           onDayClick={(dateStr) => setSelectedDay(dateStr)}

@@ -8,25 +8,41 @@ import dayjs from "dayjs";
 import callAPI from "../../utils/api";
 import { showSuccess } from "../../components/commom/Notification";
 
-const emptyValues = { employeeCode: "", caseCode: "", workDate: dayjs().format("YYYY-MM-DD"), hours: "", activity: "", description: "", notes: "" };
+const emptyValues = { employeeCode: "", caseCode: "", countryCode: "", partnerCode: "", customerCode: "", workDate: dayjs().format("YYYY-MM-DD"), hours: "", activity: "", description: "", notes: "" };
 
 export default function TimesheetForm({ mode = "add", initialValues = emptyValues, lockedCaseCode = false, onSaved, embedded = false }) {
   const navigate = useNavigate();
   const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
   const [values, setValues] = useState({ ...emptyValues, ...initialValues, employeeCode: mode === "add" ? currentEmployeeCode : initialValues.employeeCode });
   const [staffs, setStaffs] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [partners, setPartners] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }).then((response) => {
-      const list = Array.isArray(response) ? response : response?.data || [];
-      setStaffs(list);
-    }).catch(() => setStaffs([]));
+    Promise.allSettled([
+      callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }),
+      callAPI({ method: "post", endpoint: "/country/list", data: {} }),
+      callAPI({ method: "post", endpoint: "/partner/all", data: {} }),
+      callAPI({ method: "post", endpoint: "/customers/by-name", data: {} }),
+    ]).then(([staffResult, countryResult, partnerResult, customerResult]) => {
+      setStaffs(staffResult.status === "fulfilled" ? (Array.isArray(staffResult.value) ? staffResult.value : staffResult.value?.data || []) : []);
+      setCountries(countryResult.status === "fulfilled" ? (Array.isArray(countryResult.value) ? countryResult.value : countryResult.value?.data || []) : []);
+      setPartners(partnerResult.status === "fulfilled" ? (Array.isArray(partnerResult.value) ? partnerResult.value : partnerResult.value?.data || []) : []);
+      setCustomers(customerResult.status === "fulfilled" ? (Array.isArray(customerResult.value) ? customerResult.value : customerResult.value?.data || []) : []);
+    });
   }, []);
 
   const selectedStaff = staffs.find((staff) => staff.maNhanSu === values.employeeCode);
   const employeeOptions = staffs.filter((staff) => mode === "edit" || staff.maNhanSu === currentEmployeeCode);
+  const countryOptions = countries.map((item) => ({ value: item.maQuocGia, label: `${item.maQuocGia} - ${item.tenQuocGia}` }));
+  const partnerOptions = partners.map((item) => ({ value: item.maDoiTac, label: `${item.maDoiTac} - ${item.tenDoiTac}` }));
+  const customerOptions = customers.map((item) => ({ value: item.maKhachHang, label: `${item.maKhachHang} - ${item.tenKhachHang}` }));
+  const selectedOption = (options, value, fallbackName) => value
+    ? options.find((option) => option.value === value) || { value, label: `${value}${fallbackName ? ` - ${fallbackName}` : ""}` }
+    : null;
   const setField = (field, value) => setValues((previous) => ({ ...previous, [field]: value }));
   const validate = () => {
     const nextErrors = {};
@@ -48,6 +64,9 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
         ...(mode === "edit" ? { id: initialValues.id } : {}),
         employeeCode: values.employeeCode,
         caseCode: values.caseCode ? values.caseCode.trim() : null,
+        countryCode: values.countryCode || null,
+        partnerCode: values.partnerCode || null,
+        customerCode: values.customerCode || null,
         workDate: values.workDate,
         hours: Number(values.hours),
         activity: values.activity.trim(),
@@ -74,6 +93,15 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
           {selectedStaff && <div className="text-sm text-gray-500 mt-1"><p>Họ tên: {selectedStaff.hoTen || "-"}</p><p>Đơn giá hiện tại: {Number(selectedStaff.hourlyRate || 0).toLocaleString("vi-VN")}/giờ</p></div>}
         </Field>
         <Field label="Mã hồ sơ" error={errors.caseCode}><CaseCodeSelect value={values.caseCode} onChange={(value) => setField("caseCode", value)} isDisabled={lockedCaseCode} allowCustom placeholder="Chọn hoặc nhập mã hồ sơ" className="text-left" /></Field>
+        <Field label="Quốc gia">
+          <Select className="text-left w-full" options={countryOptions} value={selectedOption(countryOptions, values.countryCode, initialValues.countryName)} onChange={(option) => setField("countryCode", option?.value || "")} placeholder="Chọn quốc gia" isClearable />
+        </Field>
+        <Field label="Đối tác">
+          <Select className="text-left w-full" options={partnerOptions} value={selectedOption(partnerOptions, values.partnerCode, initialValues.partnerName)} onChange={(option) => setField("partnerCode", option?.value || "")} placeholder="Chọn đối tác" isClearable />
+        </Field>
+        <Field label="Khách hàng">
+          <Select className="text-left w-full" options={customerOptions} value={selectedOption(customerOptions, values.customerCode, initialValues.customerName)} onChange={(option) => setField("customerCode", option?.value || "")} placeholder="Chọn khách hàng" isClearable />
+        </Field>
         <Field label="Ngày làm việc" required error={errors.workDate}><DatePicker value={values.workDate ? dayjs(values.workDate) : null} onChange={(date) => setField("workDate", date?.format("YYYY-MM-DD") || "")} format="DD/MM/YYYY" className="w-full mt-1" /></Field>
         <Field label="Số giờ" required error={errors.hours}><input type="number" min="0.01" max="24" step="0.01" value={values.hours} onChange={(event) => setField("hours", event.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input" /></Field>
         <Field label="Hoạt động" required error={errors.activity}>

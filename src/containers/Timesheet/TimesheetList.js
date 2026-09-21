@@ -29,6 +29,7 @@ export default function TimesheetList() {
   // ── Bảng dữ liệu (có phân trang) ──
   const [rows, setRows] = useState([]);
   const [staffs, setStaffs] = useState([]);
+  const currentStaff = staffs.find((staff) => staff.maNhanSu === currentMaNhanSu);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     employeeCode: "",
@@ -56,7 +57,7 @@ export default function TimesheetList() {
     setFilters((old) => ({ ...old, [key]: value }));
 
   const getFilterPayload = () => ({
-    employeeCode: filters.employeeCode || undefined,
+    employeeCode: role === "staff" ? currentMaNhanSu : (filters.employeeCode || undefined),
     caseCode: filters.caseCode || undefined,
     status: "APPROVED",
     activity: filters.activity || undefined,
@@ -189,14 +190,13 @@ export default function TimesheetList() {
                 value: s.maNhanSu,
                 label: `${s.maNhanSu} - ${s.hoTen}`,
               }))}
-              value={
-                filters.employeeCode
-                  ? { value: filters.employeeCode, label: filters.employeeCode }
-                  : null
-              }
+              value={role === "staff"
+                ? { value: currentMaNhanSu, label: currentStaff?.hoTen ? `${currentMaNhanSu} - ${currentStaff.hoTen}` : currentMaNhanSu }
+                : (filters.employeeCode ? { value: filters.employeeCode, label: filters.employeeCode } : null)}
               onChange={(o) => setFilter("employeeCode", o?.value || "")}
-              placeholder="Chọn nhân sự"
-              isClearable
+              placeholder={role === "staff" ? "Nhân sự của tôi" : "Chọn nhân sự"}
+              isClearable={role !== "staff"}
+              isDisabled={role === "staff"}
             />
           </div>
           <div className="w-full md:w-1/6">
