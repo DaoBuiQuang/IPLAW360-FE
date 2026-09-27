@@ -8,6 +8,7 @@ const initialState = {
     timkiem: null,
     system: null,
     settings: null,
+    timesheet: null, // submenu của TIMESHEET (MYTIME có thể mở ROUTINES)
   },
 };
 

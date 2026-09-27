@@ -23,6 +23,10 @@ export default function TimesheetList() {
   // ── Phân quyền ──
   const role = useSelector((state) => state.auth.role);
   const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
+  const isStaff = role === "staff" || role === "trainee";
+  const isManager = role === "manager";
+  const isAdmin = role === "admin" || role === "ceo";
+
   // Chỉ cho phép xem, sửa, xóa với timerecord của bản thân; timerecord của nhân viên khác chỉ được xem
   const canEditDelete = (record) =>
     Boolean(record?.employeeCode && record.employeeCode === currentMaNhanSu);
@@ -35,6 +39,8 @@ export default function TimesheetList() {
   const [filters, setFilters] = useState({
     employeeCode: "",
     caseCode: "",
+    customerCode: "",
+    partnerCode: "",
     activity: "",
     status: "",
     fromDate: "",
@@ -52,14 +58,17 @@ export default function TimesheetList() {
     totalAmount: 0,
   });
 
-
   // ── Helpers ──
   const setFilter = (key, value) =>
     setFilters((old) => ({ ...old, [key]: value }));
 
   const getFilterPayload = () => ({
-    employeeCode: role === "staff" ? currentMaNhanSu : (filters.employeeCode || undefined),
+    employeeCode: isStaff
+      ? currentMaNhanSu
+      : (filters.employeeCode || undefined),
     caseCode: filters.caseCode || undefined,
+    customerCode: filters.customerCode || undefined,
+    partnerCode: filters.partnerCode || undefined,
     status: "APPROVED",
     activity: filters.activity || undefined,
     fromDate: filters.fromDate || undefined,
@@ -103,7 +112,6 @@ export default function TimesheetList() {
     }
   };
 
-
   // ── Xóa (từ bảng) ──
   const deleteRow = async () => {
     if (!deleting) return;
@@ -126,12 +134,26 @@ export default function TimesheetList() {
 
   // ── Init ──
   useEffect(() => {
-    Promise.all([
-      callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }),
-      fetchRows(1, 20),
-    ])
-      .then(([staff]) => setStaffs(staff || []))
-      .catch(() => setStaffs([]));
+    const loadStaffs = async () => {
+      try {
+        if (isManager) {
+          // Manager: lấy danh sách thành viên trong team của mình
+          const res = await callAPI({ method: "post", endpoint: "/staff/myteam", data: {} });
+          const members = res?.members || res?.data || (Array.isArray(res) ? res : []);
+          setStaffs(members);
+        } else {
+          // Admin hoặc Staff: lấy basiclist
+          const res = await callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} });
+          setStaffs(Array.isArray(res) ? res : res?.data || []);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải danh sách nhân sự:", err);
+        setStaffs([]);
+      }
+    };
+
+    loadStaffs();
+    fetchRows(1, 20);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Giám sát tỉ lệ đóng góp theo từng mã hồ sơ (nếu tổng đóng góp > 100%) ──
@@ -212,15 +234,15 @@ export default function TimesheetList() {
               className="text-left"
               options={staffs.map((s) => ({
                 value: s.maNhanSu,
-                label: `${s.maNhanSu} - ${s.hoTen}`,
+                label: `${s.maNhanSu} - ${s.hoTen || s.chucVu || ""}`,
               }))}
-              value={role === "staff"
+              value={isStaff
                 ? { value: currentMaNhanSu, label: currentStaff?.hoTen ? `${currentMaNhanSu} - ${currentStaff.hoTen}` : currentMaNhanSu }
                 : (filters.employeeCode ? { value: filters.employeeCode, label: filters.employeeCode } : null)}
               onChange={(o) => setFilter("employeeCode", o?.value || "")}
-              placeholder={role === "staff" ? "Nhân sự của tôi" : "Chọn nhân sự"}
-              isClearable={role !== "staff"}
-              isDisabled={role === "staff"}
+              placeholder={isStaff ? "Nhân sự của tôi" : isManager ? "Tất cả team" : "Chọn nhân sự"}
+              isClearable={!isStaff}
+              isDisabled={isStaff}
             />
           </div>
           <div className="w-full md:w-1/6">
@@ -241,24 +263,68 @@ export default function TimesheetList() {
             <ActivitySelect
               value={filters.activity}
               onChange={(actVal) => setFilter("activity", actVal || "")}
-              placeholder="Chọn hoặc nhập hoạt động"
+              placeholder="Chọn hoạt động"
               className="text-left"
             />
           </div>
-          <div>
+          <div className="w-full md:w-1/6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              Mã KH
+            </label>
+            <input
+              type="text"
+              placeholder="Mã khách hàng"
+              value={filters.customerCode}
+              onChange={(e) => setFilter("customerCode", e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:border-[#009999] focus:outline-none h-[38px]"
+            />
+          </div>
+          <div className="w-full md:w-1/6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              Mã đối tác
+            </label>
+            <input
+              type="text"
+              placeholder="Mã đối tác"
+              value={filters.partnerCode}
+              onChange={(e) => setFilter("partnerCode", e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:border-[#009999] focus:outline-none h-[38px]"
+            />
+          </div>
+          <div className="flex items-center gap-2">
             <button
               type="submit"
               className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-2 rounded-lg shadow-md transition font-medium h-[38px] flex items-center justify-center cursor-pointer"
             >
               Tìm kiếm
             </button>
+            {(filters.employeeCode || filters.caseCode || filters.customerCode || filters.partnerCode || filters.activity || filters.fromDate || filters.toDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilters({
+                    employeeCode: "",
+                    caseCode: "",
+                    customerCode: "",
+                    partnerCode: "",
+                    activity: "",
+                    status: "",
+                    fromDate: "",
+                    toDate: "",
+                  });
+                }}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium h-[38px] transition cursor-pointer"
+              >
+                Xóa lọc
+              </button>
+            )}
           </div>
         </form>
 
         {/* Summary cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
           <div className="bg-white p-3 rounded-lg shadow border-l-4 border-[#009999]">
-            <p className="text-sm text-gray-500">Tổng số logtime</p>
+            <p className="text-sm text-gray-500">Tổng số time record</p>
             <strong className="text-xl text-[#009999]">
               {summary.totalItems || 0}
             </strong>
@@ -270,7 +336,7 @@ export default function TimesheetList() {
             </strong>
           </div>
           <div className="bg-white p-3 rounded-lg shadow border-l-4 border-indigo-400">
-            <p className="text-sm text-gray-500">Tổng chi phí</p>
+            <p className="text-sm text-gray-500">Tổng doanh thu</p>
             <strong className="text-xl text-indigo-600">
               {money(summary.totalAmount)} đ
             </strong>
@@ -312,19 +378,19 @@ export default function TimesheetList() {
       <div className="overflow-x-auto mt-4 rounded-lg border shadow bg-white">
         <Spin spinning={loading}>
           <table className="w-full border-collapse bg-white text-sm">
-            <thead>
-              <tr className="text-[#667085] text-center">
-                <th className="p-3 text-table">Ngày</th>
-                <th className="p-3 text-table">Mã hồ sơ</th>
-                <th className="p-3 text-table">Nhân sự</th>
-                <th className="p-3 text-table text-left">Hoạt động</th>
-                <th className="p-3 text-table text-left">Nội dung</th>
-                <th className="p-3 text-table">Số giờ</th>
-                <th className="p-3 text-table">Đóng góp (%)</th>
-                <th className="p-3 text-table">Đơn giá/giờ</th>
-                <th className="p-3 text-table">Thành tiền</th>
-                <th className="p-3 text-table">Trạng thái</th>
-                <th className="p-3 text-table">Thao tác</th>
+            <thead className="bg-[#009999] text-white">
+              <tr className="text-white text-center">
+                <th className="p-3 text-xs font-semibold text-white">Ngày</th>
+                <th className="p-3 text-xs font-semibold text-white">Mã hồ sơ</th>
+                <th className="p-3 text-xs font-semibold text-white">Nhân sự</th>
+                <th className="p-3 text-xs font-semibold text-left text-white">Hoạt động</th>
+                <th className="p-3 text-xs font-semibold text-left text-white">Nội dung</th>
+                <th className="p-3 text-xs font-semibold text-white">Số giờ</th>
+                <th className="p-3 text-xs font-semibold text-white">Đóng góp (%)</th>
+                <th className="p-3 text-xs font-semibold text-white">Đơn giá/giờ</th>
+                <th className="p-3 text-xs font-semibold text-white">Thành tiền</th>
+                <th className="p-3 text-xs font-semibold text-white">Trạng thái</th>
+                <th className="p-3 text-xs font-semibold text-white">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -417,7 +483,7 @@ export default function TimesheetList() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="10" className="p-8 text-center text-gray-500">
+                  <td colSpan="11" className="p-8 text-center text-gray-500">
                     Không có bản ghi nào
                   </td>
                 </tr>

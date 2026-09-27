@@ -239,14 +239,15 @@ function RecordRow({ record, onView, onEdit, onDelete, canEditDelete }) {
  * Drawer hiển thị time records của một ngày cụ thể.
  * Modes: "list" | "detail" | "add" | "edit"
  */
-export default function TimesheetDayDrawer({ open, date, dateStr, records = [], onClose, onRefresh }) {
+export default function TimesheetDayDrawer({ open, date, dateStr, records = [], onClose, onRefresh, readOnly = false }) {
   const [mode, setMode] = useState("list");
   const activeDate = date || dateStr;
 
   const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
-  // Chỉ cho phép xem, sửa, xóa với time record của bản thân; time record của nhân viên khác chỉ được xem
+  // Khi readOnly=true (manager/CEO xem NV khác) → không cho phép sửa/xóa/thêm
   const canEditDelete = (record) =>
-    Boolean(record?.employeeCode && record.employeeCode === currentMaNhanSu);
+    !readOnly && Boolean(record?.employeeCode && record.employeeCode === currentMaNhanSu);
+
     
   const [editingRecord, setEditingRecord] = useState(null);
   const [viewingRecord, setViewingRecord] = useState(null);
@@ -400,15 +401,17 @@ export default function TimesheetDayDrawer({ open, date, dateStr, records = [], 
               </div>
             )}
 
-            {/* Nút thêm time record chuyển lên đầu */}
-            <div className="p-4 border-b border-gray-100 bg-white">
-              <button
-                onClick={handleAdd}
-                className="w-full py-2.5 rounded-xl bg-[#009999] hover:bg-[#007a7a] text-white font-semibold text-sm transition shadow-sm flex items-center justify-center gap-1.5"
-              >
-                <span className="text-base font-bold">+</span> Thêm time record
-              </button>
-            </div>
+            {/* Nút thêm time record — ẩn khi readOnly */}
+            {!readOnly && (
+              <div className="p-4 border-b border-gray-100 bg-white">
+                <button
+                  onClick={handleAdd}
+                  className="w-full py-2.5 rounded-xl bg-[#009999] hover:bg-[#007a7a] text-white font-semibold text-sm transition shadow-sm flex items-center justify-center gap-1.5"
+                >
+                  <span className="text-base font-bold">+</span> Thêm time record
+                </button>
+              </div>
+            )}
 
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
               {records.length === 0 ? (

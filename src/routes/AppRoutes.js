@@ -140,10 +140,16 @@ import TimesheetCalendarPage from "../containers/Timesheet/TimesheetCalendarPage
 import TimesheetAdd from "../containers/Timesheet/TimesheetAdd";
 import TimesheetEdit from "../containers/Timesheet/TimesheetEdit";
 import TimesheetDetail from "../containers/Timesheet/TimesheetDetail";
+import TimesheetMyTime from "../containers/Timesheet/TimesheetMyTime";
+import TimesheetMyTeam from "../containers/Timesheet/TimesheetMyTeam";
+import TimesheetMyOffice from "../containers/Timesheet/TimesheetMyOffice";
+import TimesheetTeamwork from "../containers/Timesheet/TimesheetTeamwork";
+import TimesheetOfficework from "../containers/Timesheet/TimesheetOfficework";
 import DsCongViecList from "../containers/DsCongViec/DsCongViecList";
 import DsCongViecAdd from "../containers/DsCongViec/DsCongViecAdd";
 import DsCongViecEdit from "../containers/DsCongViec/DsCongViecEdit";
 import DsCongViecDetail from "../containers/DsCongViec/DsCongViecDetail";
+import TeamManagement from "../containers/Team/TeamManagement";
 const MainLayout = ({ notification, setNotification }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   useEffect(() => {
@@ -213,12 +219,8 @@ const AppRoutes = ({ notification, setNotification }) => {
           <Route path="/staffadd" element={<StaffAdd></StaffAdd>} />
           <Route path="/staffedit/:maNhanSu" element={<StaffEdit></StaffEdit>} />
           <Route path="/staffdetail/:maNhanSu" element={<StaffDetail></StaffDetail>} />
-          <Route path="/timesheetlist" element={<TimesheetList />} />
-          <Route path="/timesheetcalendar" element={<TimesheetCalendarPage />} />
-          <Route path="/timesheetadd" element={<TimesheetAdd />} />
-          <Route path="/timesheetedit/:id" element={<TimesheetEdit />} />
-          <Route path="/timesheetdetail/:id" element={<TimesheetDetail />} />
           <Route path="/registerstaff/:maNhanSu" element={<RegisterStaff></RegisterStaff>} />
+
 
           <Route path="/countrylist" element={<CountryList></CountryList>} />
           <Route path="/countryadd" element={<CountryAdd></CountryAdd>} />
@@ -384,12 +386,21 @@ const AppRoutes = ({ notification, setNotification }) => {
           <Route path="/vuviec_bill_chua_duyet_all" element={<VuViec_BillChuaDuyetList_ALL></VuViec_BillChuaDuyetList_ALL>} />
           <Route path="/debitnote_list_all" element={<DebitNoteList_ALL></DebitNoteList_ALL>} />
 
-          {/* TIME RECORD */}
+          {/* TIME RECORD (legacy routes - giữ lại để backward compatible) */}
           <Route path="/timesheetlist" element={<TimesheetList />} />
           <Route path="/timesheetcalendar" element={<TimesheetCalendarPage />} />
           <Route path="/timesheetadd" element={<TimesheetAdd />} />
           <Route path="/timesheetedit/:id" element={<TimesheetEdit />} />
           <Route path="/timesheetdetail/:id" element={<TimesheetDetail />} />
+
+          {/* TIMESHEET — Cấu trúc menu mới */}
+          <Route path="/timesheet/mytime" element={<TimesheetMyTime />} />
+          <Route path="/timesheet/myteam" element={<TimesheetMyTeam />} />
+          <Route path="/timesheet/teamwork" element={<TimesheetTeamwork />} />
+          <Route path="/timesheet/myoffice" element={<TimesheetMyOffice />} />
+          <Route path="/timesheet/officework" element={<TimesheetOfficework />} />
+          <Route path="/teamlist" element={<TeamManagement />} />
+          <Route path="/team/list" element={<TeamManagement />} />
 
           {/* DANH SÁCH CÔNG VIỆC THƯỜNG NHẬT */}
           <Route path="/dscongviec_list" element={<DsCongViecList />} />

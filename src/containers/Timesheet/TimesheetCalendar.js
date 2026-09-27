@@ -97,12 +97,12 @@ export default function TimesheetCalendar({ groupedData = {}, totalHours = 0, cu
       </div>
 
       {/* ===== Grid Header (T2 → CN) ===== */}
-      <div className="grid grid-cols-7 border-b border-gray-100">
+      <div className="grid grid-cols-7 bg-teal-50/80 border-b border-teal-100">
         {WEEKDAYS.map((d) => (
           <div
             key={d}
-            className={`py-2 text-center text-xs font-semibold ${
-              d === "T7" || d === "CN" ? "text-red-400" : "text-gray-500"
+            className={`py-2 text-center text-xs font-bold ${
+              d === "T7" || d === "CN" ? "text-red-500" : "text-[#007a7a]"
             }`}
           >
             {d}
