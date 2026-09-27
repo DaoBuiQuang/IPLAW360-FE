@@ -148,12 +148,12 @@ function MenuLeft() {
                       <span className="text-left w-full">Đơn sửa đổi GCN</span>
                     </NavLink>
                   </li>
-                  <li>
+                  {/* <li>
                     <NavLink to="/application_cn_gcn_nh_vn_list" className={navLinkClass}>
                       <FileText size={14} />
                       <span className="text-left w-full">Đơn chuyển nhượng GCN</span>
                     </NavLink>
-                  </li>
+                  </li> */}
                 </>
               )}
 
@@ -316,12 +316,12 @@ function MenuLeft() {
                       <span className="text-left w-full">Đơn sửa đổi GCN</span>
                     </NavLink>
                   </li>
-                  <li>
+                  {/* <li>
                     <NavLink to="/application_cn_nh_khlist" className={navLinkClass}>
                       <FileText size={14} />
                       <span className="text-left w-full">Đơn chuyển nhượng GCN</span>
                     </NavLink>
-                  </li>
+                  </li> */}
                 </>
               )}
 

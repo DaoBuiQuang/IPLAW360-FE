@@ -74,6 +74,12 @@ function RecordDetail({ record, onEdit, onDelete, canEditDelete }) {
           <InfoField label="Mã hồ sơ" value={record.caseCode} accent />
         </div>
 
+        <InfoField
+          label="Tỉ lệ đóng góp"
+          value={`${Number(record.contributionPercentage ?? record.contributionRate ?? 100)}%`}
+          accent
+        />
+
         {/* Nhân sự */}
         <InfoField
           label="Nhân sự"
@@ -190,6 +196,9 @@ function RecordRow({ record, onView, onEdit, onDelete, canEditDelete }) {
               {record.caseCode}
             </span>
           )}
+          <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
+            Đóng góp: {Number(record.contributionPercentage ?? record.contributionRate ?? 100)}%
+          </span>
         </div>
         {record.description && (
           <p className="text-xs text-gray-500 mt-1.5 truncate">{record.description}</p>
@@ -230,13 +239,14 @@ function RecordRow({ record, onView, onEdit, onDelete, canEditDelete }) {
  * Drawer hiển thị time records của một ngày cụ thể.
  * Modes: "list" | "detail" | "add" | "edit"
  */
-export default function TimesheetDayDrawer({ open, date, records = [], onClose, onRefresh }) {
+export default function TimesheetDayDrawer({ open, date, dateStr, records = [], onClose, onRefresh }) {
   const [mode, setMode] = useState("list");
-  
-  const role = useSelector((state) => state.auth.role);
+  const activeDate = date || dateStr;
+
   const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
+  // Chỉ cho phép xem, sửa, xóa với time record của bản thân; time record của nhân viên khác chỉ được xem
   const canEditDelete = (record) =>
-    role === "admin" || record.employeeCode === currentMaNhanSu;
+    Boolean(record?.employeeCode && record.employeeCode === currentMaNhanSu);
     
   const [editingRecord, setEditingRecord] = useState(null);
   const [viewingRecord, setViewingRecord] = useState(null);
@@ -324,11 +334,11 @@ export default function TimesheetDayDrawer({ open, date, records = [], onClose, 
   };
 
   const drawerTitle = {
-    list: `📅 ${formatDisplay(date)}`,
+    list: `📅 ${formatDisplay(activeDate)}`,
     detail: "🔍 Chi tiết time record",
     add: "➕ Thêm time record",
     edit: "✏️ Chỉnh sửa time record",
-  }[mode] || `📅 ${formatDisplay(date)}`;
+  }[mode] || `📅 ${formatDisplay(activeDate)}`;
 
   const drawerSubtitle =
     mode === "list"
@@ -390,13 +400,23 @@ export default function TimesheetDayDrawer({ open, date, records = [], onClose, 
               </div>
             )}
 
+            {/* Nút thêm time record chuyển lên đầu */}
+            <div className="p-4 border-b border-gray-100 bg-white">
+              <button
+                onClick={handleAdd}
+                className="w-full py-2.5 rounded-xl bg-[#009999] hover:bg-[#007a7a] text-white font-semibold text-sm transition shadow-sm flex items-center justify-center gap-1.5"
+              >
+                <span className="text-base font-bold">+</span> Thêm time record
+              </button>
+            </div>
+
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
               {records.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <div className="text-5xl mb-3">📭</div>
                   <p className="text-gray-500 font-medium">Chưa có time record nào</p>
                   <p className="text-gray-400 text-sm mt-1">
-                    Nhấn nút bên dưới để thêm công việc
+                    Nhấn nút bên trên để thêm công việc
                   </p>
                 </div>
               ) : (
@@ -411,15 +431,6 @@ export default function TimesheetDayDrawer({ open, date, records = [], onClose, 
                   />
                 ))
               )}
-            </div>
-
-            <div className="p-4 border-t border-gray-100 bg-white">
-              <button
-                onClick={handleAdd}
-                className="w-full py-2.5 rounded-xl bg-[#009999] hover:bg-[#007a7a] text-white font-semibold text-sm transition shadow-sm"
-              >
-                + Thêm time record
-              </button>
             </div>
           </div>
         )}
@@ -439,7 +450,7 @@ export default function TimesheetDayDrawer({ open, date, records = [], onClose, 
           <div className="p-4">
             <TimesheetForm
               mode={mode}
-              initialValues={mode === "edit" ? editingRecord : { workDate: date }}
+              initialValues={mode === "edit" ? editingRecord : { workDate: activeDate }}
               onSaved={handleFormSaved}
               embedded
             />

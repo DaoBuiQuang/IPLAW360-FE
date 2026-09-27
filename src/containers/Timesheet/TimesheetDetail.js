@@ -30,6 +30,7 @@ export default function TimesheetDetail() {
       <Info label="Phòng ban" value={item.employee?.phongBan} />
       <Info label="Hoạt động" value={item.activity} />
       <Info label="Số giờ" value={Number(item.hours || 0)} />
+      <Info label="Tỉ lệ đóng góp" value={`${Number(item.contributionPercentage ?? item.contributionRate ?? 100)}%`} />
       <Info label="Đơn giá/giờ" value={money(item.hourlyRate)} />
       <Info label="Thành tiền" value={money(item.totalAmount)} />
       <Info label="Trạng thái" value={statusMap[item.status] || item.status} />

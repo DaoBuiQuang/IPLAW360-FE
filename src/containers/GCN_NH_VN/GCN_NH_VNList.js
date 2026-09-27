@@ -264,6 +264,11 @@ function GCN_NH_VNList() {
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  fetchGCNs(searchTerm, selectedCountry, 1, pageSize);
+                }
+              }}
               placeholder="Nhập tên khách hàng"
               className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
             />
@@ -277,6 +282,11 @@ function GCN_NH_VNList() {
               type="text"
               value={partnerName}
               onChange={(e) => setPartnerName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  fetchGCNs(searchTerm, selectedCountry, 1, pageSize);
+                }
+              }}
               placeholder="Nhập tên đối tác"
               className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
             />
@@ -290,6 +300,11 @@ function GCN_NH_VNList() {
               type="text"
               value={brandName}
               onChange={(e) => setBrandName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  fetchGCNs(searchTerm, selectedCountry, 1, pageSize);
+                }
+              }}
               placeholder="Nhập tên nhãn hiệu"
               className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
             />
@@ -339,6 +354,7 @@ function GCN_NH_VNList() {
               <th className="p-2 text-table">Đại diện SHCN</th>
               <th className="p-2 text-table">Tên nhãn hiệu</th>
               <th className="p-2 text-table">Ảnh nhãn hiệu</th>
+              <th className="p-2 text-table">Ảnh scan GCN</th>
               <th className="p-2 text-table">Nhóm SPDV</th>
               <th className="p-2 text-table">Ngày nộp đơn</th>
               <th className="p-2 text-table">Ngày cấp bằng</th>
@@ -380,6 +396,21 @@ function GCN_NH_VNList() {
                     />
                   ) : (
                     <span className="text-gray-500 italic">Không có ảnh</span>
+                  )}
+                </td>
+                <td className="p-2 text-table">
+                  {gcn_nh.anhBang || gcn_nh.linkScan ? (
+                    <a
+                      href={gcn_nh.anhBang || gcn_nh.linkScan}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#009999] hover:underline font-medium inline-flex items-center gap-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      📄 Xem scan
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 italic">Chưa có</span>
                   )}
                 </td>
                 <td className="p-2 text-table">{gcn_nh.dsNhomSPDV}</td>

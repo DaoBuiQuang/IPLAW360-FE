@@ -25,14 +25,25 @@ function GCN_NH_Info({ data }) {
           </div>
         )}
 
-        {data.anhBang && (
-          <div className="text-center">
-            <p className="font-semibold text-gray-700 mb-2">Ảnh bằng</p>
-            <img
-              src={data.anhBang}
-              alt="Ảnh bằng GCN"
-              className="max-h-64 rounded-lg border shadow-md"
-            />
+        {(data.anhBang || data.linkScan) && (
+          <div className="text-center flex flex-col items-center">
+            <p className="font-semibold text-gray-700 mb-2">Ảnh bằng (Scan)</p>
+            <a
+              href={data.anhBang || data.linkScan}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block group"
+              title="Click để mở xem ảnh scan gốc trong tab mới"
+            >
+              <img
+                src={data.anhBang || data.linkScan}
+                alt="Ảnh bằng GCN"
+                className="max-h-64 rounded-lg border shadow-md group-hover:opacity-90 transition cursor-pointer"
+              />
+              <span className="mt-2 inline-flex items-center gap-1 text-sm text-[#009999] hover:underline font-medium">
+                🔗 Xem ảnh scan đầy đủ (tab mới)
+              </span>
+            </a>
           </div>
         )}
       </div>
