@@ -53,6 +53,11 @@ export default function TeamManagement() {
   const [memberToDelete, setMemberToDelete] = useState(null); // { nhomId, maNhanSu, hoTen, managerCode }
   const [deleting, setDeleting] = useState(false);
 
+  // ── State cho modal Xóa toàn bộ Team ──
+  const [deleteTeamModalOpen, setDeleteTeamModalOpen] = useState(false);
+  const [teamToDelete, setTeamToDelete] = useState(null); // { managerCode, managerName, members }
+  const [deletingTeam, setDeletingTeam] = useState(false);
+
   // ── State cho modal Tạo Team mới & Chỉ định Trưởng nhóm ──
   const [createTeamModalOpen, setCreateTeamModalOpen] = useState(false);
   const [newManagerCode, setNewManagerCode] = useState("");
@@ -246,6 +251,36 @@ export default function TeamManagement() {
       toast.error(err?.response?.data?.message || "Không thể xóa thành viên khỏi team.");
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // ── Xóa toàn bộ Team & tự hạ Manager về Staff nếu hết nhóm (chỉ Admin) ──
+  const handleOpenDeleteTeamModal = (team) => {
+    setTeamToDelete(team);
+    setDeleteTeamModalOpen(true);
+  };
+
+  const handleExecuteDeleteTeam = async () => {
+    if (!teamToDelete) return;
+    setDeletingTeam(true);
+    try {
+      const res = await callAPI({
+        method: "post",
+        endpoint: "/team/delete",
+        data: {
+          managerCode: teamToDelete.managerCode,
+        },
+      });
+      toast.success(res?.message || `Đã xóa toàn bộ team của ${teamToDelete.managerName} thành công!`);
+      setDeleteTeamModalOpen(false);
+      setTeamToDelete(null);
+      fetchTeams(searchText, pageIndex, pageSize);
+      fetchAllStaff();
+    } catch (err) {
+      console.error("Lỗi xóa team:", err);
+      toast.error(err?.response?.data?.message || "Không thể xóa team. Vui lòng kiểm tra quyền.");
+    } finally {
+      setDeletingTeam(false);
     }
   };
 
@@ -446,6 +481,14 @@ export default function TeamManagement() {
                       >
                         <Edit3 size={13} />
                         <span>Chỉnh sửa team</span>
+                      </button>
+                      <button
+                        onClick={() => handleOpenDeleteTeamModal(team)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg font-medium transition cursor-pointer"
+                        title="Xóa cả team này & tự động chuyển Trưởng nhóm về lại Nhân viên (nếu không phải Admin)"
+                      >
+                        <Trash2 size={13} />
+                        <span>Xóa cả team</span>
                       </button>
                     </div>
 
@@ -818,6 +861,63 @@ export default function TeamManagement() {
             <p className="text-[11px] text-gray-400 mt-1">
               Đã chọn: <strong>{newTeamMembers.length}</strong> thành viên trực thuộc.
             </p>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── Modal: Xóa toàn bộ Team ── */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2 text-base font-bold text-red-600">
+            <Trash2 size={20} className="text-red-500" />
+            <span>Xác nhận xóa toàn bộ Team</span>
+          </div>
+        }
+        open={deleteTeamModalOpen}
+        onCancel={() => {
+          setDeleteTeamModalOpen(false);
+          setTeamToDelete(null);
+        }}
+        onOk={handleExecuteDeleteTeam}
+        confirmLoading={deletingTeam}
+        okText="Xác nhận xóa team"
+        cancelText="Hủy bỏ"
+        okButtonProps={{ danger: true, className: "cursor-pointer font-semibold" }}
+        width={500}
+      >
+        <div className="py-3 space-y-3">
+          <p className="text-sm text-gray-700">
+            Bạn có chắc chắn muốn giải tán và xóa toàn bộ team của Trưởng nhóm:
+          </p>
+
+          <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-2">
+              <span className="text-base">👔</span>
+              <div>
+                <p className="font-bold text-gray-800 text-sm">{teamToDelete?.managerName}</p>
+                <p className="text-xs text-gray-400 font-mono">Mã: {teamToDelete?.managerCode}</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Số thành viên trong nhóm: <strong className="text-red-600 font-bold">{(teamToDelete?.members || []).length}</strong> nhân sự
+            </p>
+          </div>
+
+          <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 space-y-1.5">
+            <p className="font-bold flex items-center gap-1.5 text-amber-900">
+              <span>⚠️</span> Quy tắc phân quyền & tài khoản:
+            </p>
+            <ul className="list-disc pl-4 space-y-1 text-amber-800/90">
+              <li>
+                Tài khoản của Trưởng nhóm sẽ được <strong>tự động chuyển về vai trò Nhân viên (Staff)</strong> nếu họ không còn quản lý nhóm nào khác.
+              </li>
+              <li>
+                Nếu Trưởng nhóm đang giữ vai trò <strong>Admin / Ban Giám đốc</strong>, quyền Admin <strong>sẽ được giữ nguyên 100%</strong>, tuyệt đối không bị thay đổi.
+              </li>
+              <li>
+                Toàn bộ dữ liệu Timesheet đã log của các thành viên trước đây vẫn được lưu trữ nguyên vẹn trong hệ thống.
+              </li>
+            </ul>
           </div>
         </div>
       </Modal>
