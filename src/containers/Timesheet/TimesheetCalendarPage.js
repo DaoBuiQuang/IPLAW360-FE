@@ -98,6 +98,7 @@ export default function TimesheetCalendarPage() {
 
       <TimesheetDayDrawer
         open={!!selectedDay}
+        date={selectedDay}
         dateStr={selectedDay}
         onClose={() => setSelectedDay(null)}
         records={selectedDay ? groupedData[selectedDay]?.records || [] : []}

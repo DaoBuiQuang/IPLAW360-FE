@@ -8,12 +8,29 @@ import dayjs from "dayjs";
 import callAPI from "../../utils/api";
 import { showSuccess } from "../../components/commom/Notification";
 
-const emptyValues = { employeeCode: "", caseCode: "", countryCode: "", partnerCode: "", customerCode: "", workDate: dayjs().format("YYYY-MM-DD"), hours: "", activity: "", description: "", notes: "" };
+const emptyValues = { employeeCode: "", caseCode: "", countryCode: "", partnerCode: "", customerCode: "", workDate: dayjs().format("YYYY-MM-DD"), hours: "", contributionPercentage: 100, activity: "", description: "", notes: "" };
 
 export default function TimesheetForm({ mode = "add", initialValues = emptyValues, lockedCaseCode = false, onSaved, embedded = false }) {
   const navigate = useNavigate();
   const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
-  const [values, setValues] = useState({ ...emptyValues, ...initialValues, employeeCode: mode === "add" ? currentEmployeeCode : initialValues.employeeCode });
+  const isEditingOtherStaff = mode === "edit" && Boolean(initialValues.employeeCode && initialValues.employeeCode !== currentEmployeeCode);
+  const [values, setValues] = useState({
+    ...emptyValues,
+    ...initialValues,
+    workDate: initialValues.workDate || emptyValues.workDate,
+    contributionPercentage: initialValues.contributionPercentage ?? initialValues.contributionRate ?? 100,
+    employeeCode: mode === "add" ? currentEmployeeCode : initialValues.employeeCode,
+  });
+
+  useEffect(() => {
+    setValues({
+      ...emptyValues,
+      ...initialValues,
+      workDate: initialValues.workDate || emptyValues.workDate,
+      contributionPercentage: initialValues.contributionPercentage ?? initialValues.contributionRate ?? 100,
+      employeeCode: mode === "add" ? currentEmployeeCode : (initialValues.employeeCode || currentEmployeeCode),
+    });
+  }, [initialValues.workDate, initialValues.id, mode]); // eslint-disable-line react-hooks/exhaustive-deps
   const [staffs, setStaffs] = useState([]);
   const [countries, setCountries] = useState([]);
   const [partners, setPartners] = useState([]);
@@ -51,6 +68,12 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
     if (!values.workDate) nextErrors.workDate = "Vui lòng chọn ngày làm việc";
     const hours = Number(values.hours);
     if (!Number.isFinite(hours) || hours <= 0 || hours > 24) nextErrors.hours = "Số giờ phải lớn hơn 0 và không quá 24";
+    if (values.contributionPercentage !== "" && values.contributionPercentage !== null && values.contributionPercentage !== undefined) {
+      const rate = Number(values.contributionPercentage);
+      if (!Number.isFinite(rate) || rate < 0 || rate > 100) {
+        nextErrors.contributionPercentage = "Tỉ lệ đóng góp phải từ 0% đến 100%";
+      }
+    }
     if (!String(values.activity).trim()) nextErrors.activity = "Hoạt động không được để trống";
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -69,6 +92,10 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
         customerCode: values.customerCode || null,
         workDate: values.workDate,
         hours: Number(values.hours),
+        contributionPercentage:
+          values.contributionPercentage !== "" && values.contributionPercentage !== null && values.contributionPercentage !== undefined
+            ? Number(values.contributionPercentage)
+            : 100,
         activity: values.activity.trim(),
         description: values.description ? values.description.trim() : undefined,
         notes: values.notes ? values.notes.trim() : undefined,
@@ -83,6 +110,25 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
       setLoading(false);
     }
   };
+
+  if (isEditingOtherStaff) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto text-center mt-4">
+        <div className="text-4xl mb-3">⛔</div>
+        <h3 className="text-lg font-bold text-red-600 mb-2">Không có quyền chỉnh sửa</h3>
+        <p className="text-gray-600 mb-4 text-sm">
+          Bạn chỉ có thể xem time record của nhân viên khác và không thể chỉnh sửa hay xóa.
+        </p>
+        <button
+          type="button"
+          onClick={() => (onSaved ? onSaved() : navigate(-1))}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+        >
+          Quay lại
+        </button>
+      </div>
+    );
+  }
 
   return <Spin spinning={loading}>
     <form onSubmit={submit} className={embedded ? "" : "bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto"}>
@@ -104,6 +150,18 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
         </Field>
         <Field label="Ngày làm việc" required error={errors.workDate}><DatePicker value={values.workDate ? dayjs(values.workDate) : null} onChange={(date) => setField("workDate", date?.format("YYYY-MM-DD") || "")} format="DD/MM/YYYY" className="w-full mt-1" /></Field>
         <Field label="Số giờ" required error={errors.hours}><input type="number" min="0.01" max="24" step="0.01" value={values.hours} onChange={(event) => setField("hours", event.target.value)} className="w-full p-2 mt-1 border rounded-lg text-input" /></Field>
+        <Field label="Tỉ lệ đóng góp (%)" error={errors.contributionPercentage}>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            value={values.contributionPercentage ?? ""}
+            onChange={(event) => setField("contributionPercentage", event.target.value)}
+            placeholder="Nhập % đóng góp vào hồ sơ (0 - 100%)"
+            className="w-full p-2 mt-1 border rounded-lg text-input"
+          />
+        </Field>
         <Field label="Hoạt động" required error={errors.activity}>
           <ActivitySelect
             value={values.activity}

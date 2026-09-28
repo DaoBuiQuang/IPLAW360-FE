@@ -195,12 +195,12 @@ function GCN_NH_VNDetail() {
           >
             Thêm mới Đơn Sửa Đổi
           </button>
-          <button
+          {/* <button
             onClick={() => setShowFormSuaDoi(true)}
             className="bg-[#009999] hover:bg-[#007a7a] text-white font-medium px-6 py-3 rounded-lg shadow transition"
           >
             Thêm mới Đơn chuyển nhượng
-          </button>
+          </button> */}
         </div>
         {showFormSuaDoi && (
           <div className="mt-10 border-t pt-6">

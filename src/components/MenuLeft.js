@@ -59,33 +59,89 @@ function MenuLeft() {
 
       <nav className="flex-1 px-4 py-4">
         <ul className="space-y-2 text-[#009999] text-sm font-bold">
-          {(role === "admin" || role === "staff") &&
-            renderMenuGroup(
-              "root",
-              "timerecord",
-              "TIME RECORD",
-              (open) => <Timer size={16} color={open ? "#009999" : undefined} />,
-              <>
+          {/* ════════════════════════════════════
+               TIMESHEET — menu tổng (mọi role đều thấy)
+              ════════════════════════════════════ */}
+          {renderMenuGroup(
+            "root",
+            "timesheet",
+            "TIMESHEET",
+            (open) => <Timer size={16} color={open ? "#009999" : undefined} />,
+            <>
+              {/* ── MYTIME — NavLink trực tiếp vào trang + ROUTINES sub ── */}
+              <li>
+                <NavLink to="/timesheet/mytime" className={navLinkClass}>
+                  <User size={14} />
+                  <span className="text-left w-full">MYTIME</span>
+                </NavLink>
+                {/* ROUTINES: hiện ra khi đang ở trang MYTIME */}
+                {location.pathname.startsWith("/timesheet/mytime") || location.pathname === "/dscongviec_list" ? (
+                  <ul className="ml-5 mt-1 space-y-1 text-sm">
+                    <li>
+                      <NavLink to="/dscongviec_list" className={navLinkClass}>
+                        <Briefcase size={13} />
+                        <span className="text-left w-full">ROUTINES</span>
+                      </NavLink>
+                    </li>
+                  </ul>
+                ) : null}
+              </li>
+
+              {/* ── MYTEAM — Manager hoặc Admin xem ── */}
+              {(role === "manager" || role === "admin" || role === "ceo") && (
                 <li>
-                  <NavLink to="/timesheetcalendar" className={navLinkClass}>
-                    <Calendar size={14} />
-                    <span className="text-left w-full">Lịch công việc</span>
+                  <NavLink to="/timesheet/myteam" className={navLinkClass}>
+                    <Users size={14} />
+                    <span className="text-left w-full">MYTEAM</span>
+                  </NavLink>
+                  {/* TEAMWORK: hiện khi đang ở MYTEAM hoặc TEAMWORK */}
+                  {(location.pathname.startsWith("/timesheet/myteam") || location.pathname.startsWith("/timesheet/teamwork")) ? (
+                    <ul className="ml-5 mt-1 space-y-1 text-sm">
+                      <li>
+                        <NavLink to="/timesheet/teamwork" className={navLinkClass}>
+                          <FileText size={13} />
+                          <span className="text-left w-full">TEAMWORK</span>
+                        </NavLink>
+                      </li>
+                    </ul>
+                  ) : null}
+                </li>
+              )}
+
+              {/* ── QUẢN LÝ TEAM — Chỉ Admin/CEO ── */}
+              {(role === "admin" || role === "ceo") && (
+                <li>
+                  <NavLink to="/teamlist" className={navLinkClass}>
+                    <UserCheck size={14} />
+                    <span className="text-left w-full">QUẢN LÝ TEAM</span>
                   </NavLink>
                 </li>
+              )}
+
+              {/* ── MYOFFICE — chỉ CEO/Admin ── */}
+              {(role === "admin" || role === "ceo") && (
                 <li>
-                  <NavLink to="/timesheetlist" className={navLinkClass}>
-                    <Timer size={14} />
-                    <span className="text-left w-full">TIMESHEET</span>
+                  <NavLink to="/timesheet/myoffice" className={navLinkClass}>
+                    <BarChart3 size={14} />
+                    <span className="text-left w-full">MYOFFICE</span>
                   </NavLink>
+                  {/* OFFICEWORK: hiện khi đang ở MYOFFICE hoặc OFFICEWORK */}
+                  {(location.pathname.startsWith("/timesheet/myoffice") || location.pathname.startsWith("/timesheet/officework")) ? (
+                    <ul className="ml-5 mt-1 space-y-1 text-sm">
+                      <li>
+                        <NavLink to="/timesheet/officework" className={navLinkClass}>
+                          <FileText size={13} />
+                          <span className="text-left w-full">OFFICEWORK</span>
+                        </NavLink>
+                      </li>
+                    </ul>
+                  ) : null}
                 </li>
-                <li>
-                  <NavLink to="/dscongviec_list" className={navLinkClass}>
-                    <Briefcase size={14} />
-                    <span className="text-left w-full">Công việc thường nhật</span>
-                  </NavLink>
-                </li>
-              </>
-            )}
+              )}
+            </>
+          )}
+
+
 
           {/* VIỆT NAM */}
           {renderMenuGroup(
@@ -148,12 +204,12 @@ function MenuLeft() {
                       <span className="text-left w-full">Đơn sửa đổi GCN</span>
                     </NavLink>
                   </li>
-                  <li>
+                  {/* <li>
                     <NavLink to="/application_cn_gcn_nh_vn_list" className={navLinkClass}>
                       <FileText size={14} />
                       <span className="text-left w-full">Đơn chuyển nhượng GCN</span>
                     </NavLink>
-                  </li>
+                  </li> */}
                 </>
               )}
 
@@ -316,12 +372,12 @@ function MenuLeft() {
                       <span className="text-left w-full">Đơn sửa đổi GCN</span>
                     </NavLink>
                   </li>
-                  <li>
+                  {/* <li>
                     <NavLink to="/application_cn_nh_khlist" className={navLinkClass}>
                       <FileText size={14} />
                       <span className="text-left w-full">Đơn chuyển nhượng GCN</span>
                     </NavLink>
-                  </li>
+                  </li> */}
                 </>
               )}
 
@@ -452,7 +508,7 @@ function MenuLeft() {
             </>
           )}
 
-          {/* HỆ THỐNG */}
+          {/* HỆ THỐNG — Quản lý nhân sự & Quản lý team bên trong chỉ dành cho Admin/CEO */}
           {renderMenuGroup(
             "root",
             "system",
@@ -513,12 +569,18 @@ function MenuLeft() {
                   <span className="text-left w-full">{t("sanPhamDichVu")}</span>
                 </NavLink>
               </li>
-              {(role === "admin" || role === "staff") && (
+              {(role === "admin" || role === "ceo") && (
                 <>
                   <li>
                     <NavLink to="/stafflist" className={navLinkClass}>
                       <UserCheck size={14} />
                       <span className="text-left w-full">{t("nhanSu")}</span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/teamlist" className={navLinkClass}>
+                      <Users size={14} />
+                      <span className="text-left w-full">Quản lý Team</span>
                     </NavLink>
                   </li>
                 </>
@@ -547,30 +609,33 @@ function MenuLeft() {
               </li>
             </>
           )}
-          {renderMenuGroup(
-            "root",
-            "reports",
-            "Báo cáo thống kê",
-            (open) => <BarChart3 size={16} color={open ? "#009999" : undefined} />, // icon cho group
-            <>
-              <li>
-                <NavLink to="/applicationlist_vn_report" className={navLinkClass}>
-                  <Stamp size={14} />
-                  <span className="text-left w-full">
-                    {t("Báo cáo về đơn đăng ký nhãn hiệu Việt Nam")}
-                  </span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/applicationlist_kh_report" className={navLinkClass}>
-                  <Stamp size={14} />
-                  <span className="text-left w-full">
-                    {t("Báo cáo về đơn đăng ký nhãn hiệu Campuchia")}
-                  </span>
-                </NavLink>
-              </li>
-            </>
-          )}
+
+          {/* BÁO CÁO THỐNG KÊ — Chỉ Admin/CEO */}
+          {(role === "admin" || role === "ceo") &&
+            renderMenuGroup(
+              "root",
+              "reports",
+              "Báo cáo thống kê",
+              (open) => <BarChart3 size={16} color={open ? "#009999" : undefined} />,
+              <>
+                <li>
+                  <NavLink to="/applicationlist_vn_report" className={navLinkClass}>
+                    <Stamp size={14} />
+                    <span className="text-left w-full">
+                      {t("Báo cáo về đơn đăng ký nhãn hiệu Việt Nam")}
+                    </span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/applicationlist_kh_report" className={navLinkClass}>
+                    <Stamp size={14} />
+                    <span className="text-left w-full">
+                      {t("Báo cáo về đơn đăng ký nhãn hiệu Campuchia")}
+                    </span>
+                  </NavLink>
+                </li>
+              </>
+            )}
 
         </ul>
       </nav>

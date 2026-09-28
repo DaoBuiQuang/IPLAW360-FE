@@ -70,6 +70,7 @@ function RegisterStaff() {
             className="w-full p-2 mt-1 border rounded-lg text-input"
           >
             <option value="staff">Nhân viên</option>
+            <option value="manager">Trưởng nhóm (Manager)</option>
             <option value="admin">Quản trị viên</option>
             <option value="trainee">Thực tập sinh - học việc</option>
           </select>

@@ -202,7 +202,7 @@ function CaseDetail() {
             const response = await callAPI({ method: "post", endpoint: "/timesheet/by-case", data: { caseCode: maHoSoVuViec } });
             setTimesheets(response?.data || []);
             setTimesheetSummary(response?.summary || { totalHours: 0, totalAmount: 0 });
-        } catch (error) { console.error("Lỗi khi lấy log time:", error); }
+        } catch (error) { console.error("Lỗi khi lấy time record:", error); }
     };
     const fetchApplicationTypes = async () => {
         try {

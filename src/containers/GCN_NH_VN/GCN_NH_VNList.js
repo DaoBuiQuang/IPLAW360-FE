@@ -5,6 +5,7 @@ import Select from "react-select";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { Modal, Pagination } from "antd";
+import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
 
 const FILTER_STORAGE_KEY_GCN_VN = "gcnNhVnListFilters";
 const STATE_STORAGE_KEY_GCN_VN = "gcnNhVnListState";
@@ -25,6 +26,24 @@ function GCN_NH_VNList() {
   const [customerName, setCustomerName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [brandName, setBrandName] = useState("");
+  const [customerOptions, setCustomerOptions] = useState([]);
+  const [partnerOptions, setPartnerOptions] = useState([]);
+  const [brandOptions, setBrandOptions] = useState([]);
+
+  const soBangSearchOptions = React.useMemo(() => {
+    const list = [];
+    const seen = new Set();
+    (gcn_nhs || []).forEach((item) => {
+      if (item.soBang && !seen.has(item.soBang)) {
+        seen.add(item.soBang);
+        list.push({
+          value: item.soBang,
+          label: `Số bằng: ${item.soBang}${item.tenNhanHieu ? ` - ${item.tenNhanHieu}` : ""}`,
+        });
+      }
+    });
+    return list;
+  }, [gcn_nhs]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [partnerToDelete, setPartnerToDelete] = useState(null);
@@ -92,6 +111,45 @@ function GCN_NH_VNList() {
     }
   };
 
+  const fetchFilterOptions = async () => {
+    try {
+      const [custRes, partnerRes, brandRes] = await Promise.allSettled([
+        callAPI({ method: "post", endpoint: "/customers/by-name", data: {} }),
+        callAPI({ method: "post", endpoint: "/partner/all", data: {} }),
+        callAPI({ method: "post", endpoint: "/brand/shortlist", data: {} }),
+      ]);
+      if (custRes.status === "fulfilled") {
+        const raw = Array.isArray(custRes.value) ? custRes.value : custRes.value?.data || [];
+        setCustomerOptions(
+          raw.map((c) => ({
+            value: c.tenKhachHang,
+            label: `${c.tenKhachHang}${c.maKhachHang ? ` (${c.maKhachHang})` : ""}`,
+          }))
+        );
+      }
+      if (partnerRes.status === "fulfilled") {
+        const raw = Array.isArray(partnerRes.value) ? partnerRes.value : partnerRes.value?.data || [];
+        setPartnerOptions(
+          raw.map((p) => ({
+            value: p.tenDoiTac,
+            label: `${p.tenDoiTac}${p.maDoiTac ? ` (${p.maDoiTac})` : ""}`,
+          }))
+        );
+      }
+      if (brandRes.status === "fulfilled") {
+        const raw = Array.isArray(brandRes.value) ? brandRes.value : brandRes.value?.data || [];
+        setBrandOptions(
+          raw.map((b) => ({
+            value: b.tenNhanHieu,
+            label: `${b.tenNhanHieu}${b.maNhanHieu ? ` (${b.maNhanHieu})` : ""}`,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải filter options:", error);
+    }
+  };
+
   // Khởi tạo: phân biệt vào mới / back
   useEffect(() => {
     const savedPage = parseInt(
@@ -102,6 +160,7 @@ function GCN_NH_VNList() {
     const savedStateString = localStorage.getItem(STATE_STORAGE_KEY_GCN_VN);
 
     fetchCountries();
+    fetchFilterOptions();
 
     if (navigationType === "POP" && savedStateString) {
       // 👉 Trường hợp Back: load từ cache, KHÔNG gọi API
@@ -225,18 +284,15 @@ function GCN_NH_VNList() {
 
         {/* Hàng search chính */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                fetchGCNs(searchTerm, selectedCountry, 1, pageSize);
-              }
-            }}
-            placeholder="🔍 Nhập số bằng"
-            className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
-          />
+          <div className="w-full md:w-1/3">
+            <SearchCreatableSelect
+              value={searchTerm}
+              onChange={(val) => setSearchTerm(val)}
+              onSearch={(keyword) => fetchGCNs(keyword !== undefined ? keyword : searchTerm, selectedCountry, 1, pageSize)}
+              options={soBangSearchOptions}
+              placeholder="🔍 Nhập số bằng"
+            />
+          </div>
 
           <div className="flex gap-3 flex-wrap">
             <button
@@ -260,12 +316,12 @@ function GCN_NH_VNList() {
             <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
               Khách hàng
             </label>
-            <input
-              type="text"
+            <SearchCreatableSelect
               value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+              onChange={(val) => setCustomerName(val)}
+              onSearch={() => fetchGCNs(searchTerm, selectedCountry, 1, pageSize)}
+              options={customerOptions}
               placeholder="Nhập tên khách hàng"
-              className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
             />
           </div>
 
@@ -273,12 +329,12 @@ function GCN_NH_VNList() {
             <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
               Đối tác
             </label>
-            <input
-              type="text"
+            <SearchCreatableSelect
               value={partnerName}
-              onChange={(e) => setPartnerName(e.target.value)}
+              onChange={(val) => setPartnerName(val)}
+              onSearch={() => fetchGCNs(searchTerm, selectedCountry, 1, pageSize)}
+              options={partnerOptions}
               placeholder="Nhập tên đối tác"
-              className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
             />
           </div>
 
@@ -286,12 +342,12 @@ function GCN_NH_VNList() {
             <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
               Nhãn hiệu
             </label>
-            <input
-              type="text"
+            <SearchCreatableSelect
               value={brandName}
-              onChange={(e) => setBrandName(e.target.value)}
+              onChange={(val) => setBrandName(val)}
+              onSearch={() => fetchGCNs(searchTerm, selectedCountry, 1, pageSize)}
+              options={brandOptions}
               placeholder="Nhập tên nhãn hiệu"
-              className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
             />
           </div>
 
@@ -339,6 +395,7 @@ function GCN_NH_VNList() {
               <th className="p-2 text-table">Đại diện SHCN</th>
               <th className="p-2 text-table">Tên nhãn hiệu</th>
               <th className="p-2 text-table">Ảnh nhãn hiệu</th>
+              <th className="p-2 text-table">Ảnh scan GCN</th>
               <th className="p-2 text-table">Nhóm SPDV</th>
               <th className="p-2 text-table">Ngày nộp đơn</th>
               <th className="p-2 text-table">Ngày cấp bằng</th>
@@ -380,6 +437,21 @@ function GCN_NH_VNList() {
                     />
                   ) : (
                     <span className="text-gray-500 italic">Không có ảnh</span>
+                  )}
+                </td>
+                <td className="p-2 text-table">
+                  {gcn_nh.anhBang || gcn_nh.linkScan ? (
+                    <a
+                      href={gcn_nh.anhBang || gcn_nh.linkScan}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#009999] hover:underline font-medium inline-flex items-center gap-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      📄 Xem scan
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 italic">Chưa có</span>
                   )}
                 </td>
                 <td className="p-2 text-table">{gcn_nh.dsNhomSPDV}</td>

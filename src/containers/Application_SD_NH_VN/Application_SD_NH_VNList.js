@@ -271,6 +271,11 @@ function Application_SD_NH_VNList() {
                 type="text"
                 value={customerName || ""}
                 onChange={e => setCustomerName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    fetchApplications(searchTerm, 1, pageSize);
+                  }
+                }}
                 placeholder="Nhập tên khách hàng"
                 className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
@@ -283,6 +288,11 @@ function Application_SD_NH_VNList() {
                 type="text"
                 value={partnerName || ""}
                 onChange={e => setPartnerName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    fetchApplications(searchTerm, 1, pageSize);
+                  }
+                }}
                 placeholder="Nhập tên đối tác"
                 className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
@@ -295,6 +305,11 @@ function Application_SD_NH_VNList() {
                 type="text"
                 value={brandName || ""}
                 onChange={e => setBrandName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    fetchApplications(searchTerm, 1, pageSize);
+                  }
+                }}
                 placeholder="Nhập tên nhãn hiệu"
                 className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
