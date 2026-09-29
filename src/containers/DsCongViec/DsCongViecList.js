@@ -8,7 +8,18 @@ import callAPI from "../../utils/api";
 function DsCongViecList() {
   const navigate = useNavigate();
   const role = useSelector((state) => state.auth.role);
-  const staffRoles = ["admin", "staff"];
+  const staffRoles = ["admin", "staff", "manager", "ceo"];
+  const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
+
+  const canModifyItem = (item) => {
+    if (role === "admin" || role === "ceo") return true;
+    const isSys =
+      item.isSystem === true ||
+      item.loaiCongViec === "HE_THONG" ||
+      (!item.maNhanSu && item.isSystem !== false);
+    if (isSys) return false;
+    return item.maNhanSu === currentEmployeeCode;
+  };
 
   const [rows, setRows] = useState([]);
   const [keyword, setKeyword] = useState("");
@@ -115,6 +126,7 @@ function DsCongViecList() {
                 <th className="p-3 text-table">STT</th>
                 <th className="p-3 text-table text-left">Mã viết tắt</th>
                 <th className="p-3 text-table text-left">Mô tả công việc</th>
+                <th className="p-3 text-table">Phân loại</th>
                 <th className="p-3 text-table">Người tạo</th>
                 <th className="p-3 text-table"></th>
               </tr>
@@ -141,10 +153,21 @@ function DsCongViecList() {
                     </td>
                     <td className="p-2 text-table text-left">{item.moTa}</td>
                     <td className="p-2 text-table">
-                      {item.nhanSu?.hoTen || item.maNhanSu || "-"}
+                      {item.isSystem || !item.maNhanSu ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                          Hệ thống
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                          Cá nhân
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-2 text-table">
+                      {item.nhanSu?.hoTen || item.maNhanSu || "Hệ thống"}
                     </td>
                     <td className="p-2 relative">
-                      {staffRoles.includes(role) && (
+                      {canModifyItem(item) && (
                         <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
                           <button
                             className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 text-sm"
@@ -173,7 +196,7 @@ function DsCongViecList() {
               ) : (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="p-8 text-center text-gray-400"
                   >
                     {loading ? "Đang tải..." : "Không có dữ liệu"}
