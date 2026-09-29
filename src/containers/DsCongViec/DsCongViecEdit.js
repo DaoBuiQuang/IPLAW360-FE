@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Spin } from "antd";
 import { toast } from "react-toastify";
 import callAPI from "../../utils/api";
@@ -12,6 +13,8 @@ const capitalizeFirstLetter = (str) => {
 function DsCongViecEdit() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const role = useSelector((state) => state.auth.role);
+  const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
 
   const [maVietTat, setMaVietTat] = useState("");
   const [moTa, setMoTa] = useState("");
@@ -32,6 +35,20 @@ function DsCongViecEdit() {
           data: { id: Number(id) },
         });
         const item = res.data;
+        // Kiểm tra quyền:
+        const isAdmin = role === "admin" || role === "ceo";
+        const isSys = item.isSystem === true || item.loaiCongViec === "HE_THONG" || (!item.maNhanSu && item.isSystem !== false);
+        const isOwner = item.maNhanSu === currentMaNhanSu;
+
+        if (!isAdmin && (isSys || !isOwner)) {
+          toast.error("Bạn không có quyền chỉnh sửa công việc này!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+          navigate("/dscongviec_list");
+          return;
+        }
+
         setMaVietTat(item.maVietTat || "");
         setMoTa(item.moTa || "");
       } catch {
@@ -41,7 +58,7 @@ function DsCongViecEdit() {
       }
     };
     if (id) fetchDetail();
-  }, [id, navigate]);
+  }, [id, navigate, role, currentMaNhanSu]);
 
   // -----------------------------------------------------------------------
   const validateField = (name, value) => {
