@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import callAPI from "../../utils/api";
 import Select from "react-select";
@@ -31,6 +31,11 @@ function FormHoSo({
     const [partners, setPartners] = useState([]);
     const [staffs, setStaffs] = useState([]);
     const [errors, setErrors] = useState({});
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
+    const maHoSoRef = useRef(null);
+    const listRef = useRef(null);
     useEffect(() => {
         console.log("id khách hàng", idKhachHang)
     }, [idKhachHang]);
@@ -94,12 +99,44 @@ function FormHoSo({
         console.log("trangThaiVuViec ", trangThaiVuViec)
     }, []);
 
+    // Đóng dropdown khi click ra ngoài
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (maHoSoRef.current && !maHoSoRef.current.contains(e.target)) {
+                setShowSuggestions(false);
+                setHighlightedIndex(-1);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    // Tự động cuộn phần tử đang highlight vào view khi bấm phím mũi tên
+    useEffect(() => {
+        if (highlightedIndex >= 0 && listRef.current) {
+            const activeItem = listRef.current.children[highlightedIndex];
+            if (activeItem) {
+                activeItem.scrollIntoView({ block: "nearest" });
+            }
+        }
+    }, [highlightedIndex]);
+
     // Select handlers
     const handleMaKhachHangChange = async (selectedOption) => {
         if (selectedOption) {
             setMaKhachHang({ id: selectedOption.id, ma: selectedOption.value });
             setIdKhachHang(selectedOption.id);
             validateField("maKhachHang", selectedOption.value);
+
+            // Tự động điền Đối tác nếu KH có liên kết đối tác
+            const rawCustomer = customers.find(c => c.id === selectedOption.id);
+            if (rawCustomer?.idDoiTac) {
+                setIdDoiTac(rawCustomer.idDoiTac);
+                setMaDoiTac({ id: rawCustomer.idDoiTac, ma: rawCustomer.maDoiTac });
+            } else {
+                setIdDoiTac(null);
+                setMaDoiTac(null);
+            }
 
             try {
                 const response = await callAPI({
@@ -113,6 +150,8 @@ function FormHoSo({
             setMaKhachHang(null);
             setIdKhachHang(null);
             setMaHoSoVuViec("");
+            setIdDoiTac(null);
+            setMaDoiTac(null);
             validateField("maKhachHang", "");
         }
     };
@@ -124,6 +163,84 @@ function FormHoSo({
         } else {
             setMaDoiTac(null);
             setIdDoiTac(null);
+        }
+    };
+
+    // Lọc danh sách KH theo prefix người dùng gõ (local filter, không cần API mới)
+    const filterCustomers = (prefix) => {
+        if (!prefix || prefix.length < 1) return [];
+        const lower = prefix.toLowerCase();
+        return formatOptions(customers, "id", "maKhachHang", "tenKhachHang")
+            .filter(opt => opt.value.toLowerCase().startsWith(lower))
+            .slice(0, 10);
+    };
+
+    // Handler khi user gõ vào ô Mã hồ sơ
+    const handleMaHoSoInputChange = (e) => {
+        const val = e.target.value;
+        setMaHoSoVuViec(val);
+        validateField("maHoSoVuViec", val);
+        setHighlightedIndex(-1);
+        if (val.length >= 1) {
+            const filtered = filterCustomers(val);
+            setSuggestions(filtered);
+            setShowSuggestions(filtered.length > 0);
+        } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+        }
+    };
+
+    // Điều hướng bằng bàn phím (mũi tên lên / xuống, Enter, Escape)
+    const handleMaHoSoKeyDown = (e) => {
+        if (!showSuggestions || suggestions.length === 0) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setHighlightedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : 0));
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setHighlightedIndex(prev => (prev > 0 ? prev - 1 : suggestions.length - 1));
+        } else if (e.key === "Enter") {
+            if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
+                e.preventDefault();
+                handleSuggestionSelect(suggestions[highlightedIndex]);
+            }
+        } else if (e.key === "Escape") {
+            setShowSuggestions(false);
+            setHighlightedIndex(-1);
+        }
+    };
+
+    // Handler khi user chọn 1 KH từ dropdown gợi ý
+    const handleSuggestionSelect = async (selectedOption) => {
+        setShowSuggestions(false);
+        setSuggestions([]);
+        setHighlightedIndex(-1);
+        // Điền thông tin KH
+        setIdKhachHang(selectedOption.id);
+        setMaKhachHang({ id: selectedOption.id, ma: selectedOption.value });
+        // Tự động điền Đối tác nếu KH có liên kết
+        const rawCustomer = customers.find(c => c.id === selectedOption.id);
+        if (rawCustomer?.idDoiTac) {
+            setIdDoiTac(rawCustomer.idDoiTac);
+            setMaDoiTac({ id: rawCustomer.idDoiTac, ma: rawCustomer.maDoiTac });
+        } else {
+            setIdDoiTac(null);
+            setMaDoiTac(null);
+        }
+        // Tự động hoàn thiện mã hồ sơ (thêm -0000x)
+        try {
+            const response = await callAPI({
+                method: "post",
+                endpoint: "/case/generate-code-case",
+                data: { maKhachHang: selectedOption.value }
+            });
+            setMaHoSoVuViec(response.maHoSoVuViec);
+            validateField("maHoSoVuViec", response.maHoSoVuViec);
+        } catch (error) {
+            console.error("Lỗi khi tạo mã hồ sơ:", error);
+            setMaHoSoVuViec(selectedOption.value + "-");
         }
     };
     const loaiDonOptions = [
@@ -159,32 +276,37 @@ function FormHoSo({
         <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
 
-                <div className="flex-1">
+                <div className="flex-1 relative" ref={maHoSoRef}>
                     <label className="block text-gray-700 text-left">Mã hồ sơ <span className="text-red-500">*</span></label>
                     <input
                         type="text"
                         value={maHoSoVuViec}
-                        onChange={(e) => {
-                            if (!idKhachHang) {
-                                showError(
-                                    "Thất bại!",
-                                    "Vui lòng chọn khách hàng trước.",
-                                    new Error("Mã hồ sơ yêu cầu chọn khách hàng.")
-                                );
-                                setErrors(prev => ({ ...prev, idKhachHang: "Vui lòng chọn khách hàng trước" }));
-                                return; // không cập nhật giá trị
-                            }
-
-                            const val = e.target.value;
-                            setErrors(prev => ({ ...prev, idKhachHang: undefined }));
-                            setMaHoSoVuViec(val);
-                            validateField("maHoSoVuViec", val);
-                        }}
-
-                        placeholder="Chọn khách hàng để ra mã hồ sơ"
+                        onChange={handleMaHoSoInputChange}
+                        onKeyDown={handleMaHoSoKeyDown}
+                        placeholder="Nhập mã KH để tìm, hoặc chọn KH bên dưới"
                         className="w-full p-2 mt-1 border rounded-lg text-input h-10"
+                        autoComplete="off"
                     />
-
+                    {showSuggestions && suggestions.length > 0 && (
+                        <ul
+                            ref={listRef}
+                            className="absolute z-50 w-full bg-white border border-gray-300 rounded-lg shadow-xl mt-1 max-h-48 overflow-y-auto"
+                        >
+                            {suggestions.map((s, index) => (
+                                <li
+                                    key={s.id}
+                                    onMouseDown={(e) => { e.preventDefault(); handleSuggestionSelect(s); }}
+                                    onMouseEnter={() => setHighlightedIndex(index)}
+                                    className={`px-3 py-2 cursor-pointer text-sm text-left border-b last:border-b-0 flex items-center gap-2 transition-colors ${
+                                        highlightedIndex === index ? "bg-blue-100 text-blue-900 font-medium" : "hover:bg-blue-50 text-gray-700"
+                                    }`}
+                                >
+                                    <span className="font-mono font-semibold text-blue-700 shrink-0">{s.value}</span>
+                                    <span className="text-gray-500 truncate">– {s.label}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                     {errors.maHoSoVuViec && <p className="text-red-500 text-xs mt-1 text-left">{errors.maHoSoVuViec}</p>}
                 </div>
                 <div>
@@ -275,7 +397,7 @@ function FormHoSo({
                     <label className="block text-gray-700 text-left">Đối tác</label>
                     <Select
                         options={formatOptions(partners, "id", "maDoiTac", "tenDoiTac")}
-                        value={idDoiTac ? formatOptions(partners, "id", "maDoiTac", "tenDoiTac").find(opt => opt.id === idDoiTac) : null}
+                        value={idDoiTac ? formatOptions(partners, "id", "maDoiTac", "tenDoiTac").find(opt => opt.id == idDoiTac) : null}
                         onChange={handleMaDoiTacChange}
                         placeholder="Chọn đối tác"
                         className="w-full mt-1 rounded-lg text-left"
