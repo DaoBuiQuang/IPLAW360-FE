@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import EmailTest from "../containers/Mail/EmailTest";
 import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import Header from "../components/Header";
 import MenuLeft from "../components/MenuLeft";
@@ -208,6 +209,7 @@ const AppRoutes = ({ notification, setNotification }) => {
     <Router>
       <Routes>
         <Route element={<MainLayout notification={notification} setNotification={setNotification} />}>
+          <Route path="/email-test" element={<EmailTest />} />
            {/* <Route path="/" element={<HomePage></HomePage>} /> */}
           <Route path="/" element={<HomeReport></HomeReport>} />
           <Route path="/customerlist" element={<CustomerList />} />
