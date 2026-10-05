@@ -1,0 +1,1157 @@
+
+> qlcv-web@0.1.0 build
+> react-scripts build
+
+Creating an optimized production build...
+Browserslist: browsers data (caniuse-lite) is 19 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 19 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Compiled with warnings.
+
+[eslint] 
+src\App.js
+  Line 2:10:  'toast' is defined but never used                                                                            no-unused-vars
+  Line 10:8:  'axios' is defined but never used                                                                            no-unused-vars
+  Line 85:6:  React Hook useEffect has a missing dependency: 'dispatch'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\BrandBasicForm.js
+  Line 19:10:  'isReuseExisting' is assigned a value but never used  no-unused-vars
+  Line 22:10:  'tenNhanHieuOld' is assigned a value but never used   no-unused-vars
+
+src\components\Header.js
+  Line 7:16:   'Bell' is defined but never used                                                                                       no-unused-vars
+  Line 13:8:   'logoweb' is defined but never used                                                                                    no-unused-vars
+  Line 17:10:  'showLangModal' is assigned a value but never used                                                                     no-unused-vars
+  Line 17:25:  'setShowLangModal' is assigned a value but never used                                                                  no-unused-vars
+  Line 18:10:  'currentLang' is assigned a value but never used                                                                       no-unused-vars
+  Line 49:6:   React Hook useEffect has missing dependencies: 'navigate' and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\MenuLeft.js
+  Line 11:8:  'logoweb' is defined but never used            no-unused-vars
+  Line 14:9:  'location' is assigned a value but never used  no-unused-vars
+
+src\components\MultiLang\i18n.js
+  Line 112:21:  Duplicate key 'suaKhachHang'  no-dupe-keys
+
+src\components\NotificationDropdown.js
+  Line 10:9:  'refreshTrigger' is assigned a value but never used  no-unused-vars
+
+src\components\TrademarkRegistrationProcess\CompleteDocumentation.js
+  Line 3:8:    'Select' is defined but never used                  no-unused-vars
+  Line 15:11:  'processStatus' is assigned a value but never used  no-unused-vars
+
+src\components\TrademarkRegistrationProcess\ContentReview.js
+  Line 1:38:  'useRef' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 46:8:  React Hook useEffect has missing dependencies: 'setBuocXuLy' and 'updateRefusal'. Either include them or remove the dependency array. If 'setBuocXuLy' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+src\components\TrademarkRegistrationProcess\DegreeInformation.js
+  Line 44:11:  'handleToggleMode' is assigned a value but never used  no-unused-vars
+
+src\components\TrademarkRegistrationProcess\DiphimaProcess.js
+  Line 1:28:  'useState' is defined but never used         no-unused-vars
+  Line 6:9:   'Option' is assigned a value but never used  no-unused-vars
+
+src\components\TrademarkRegistrationProcess\FormalDetermination.js
+  Line 48:8:  React Hook useEffect has missing dependencies: 'setBuocXuLy' and 'updateRefusal'. Either include them or remove the dependency array. If 'setBuocXuLy' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+src\components\TrademarkRegistrationProcess\KH\ContentReview_KH.js
+  Line 1:38:    'useRef' is defined but never used                                                                                                                                                                                                                           no-unused-vars
+  Line 46:8:    React Hook useEffect has missing dependencies: 'setBuocXuLy' and 'updateRefusal'. Either include them or remove the dependency array. If 'setBuocXuLy' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  Line 73:11:   'handleKNThatBai' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 257:31:  'hanTraLoiGiaHan' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+
+src\components\TrademarkRegistrationProcess\KH\DocumentSection_KH.js
+  Line 1:38:  'use' is defined but never used  no-unused-vars
+
+src\components\VuViecForm\AddVuViecModal.js
+  Line 34:9:  'navigate' is assigned a value but never used  no-unused-vars
+
+src\components\VuViecForm\EditVuViecModal.js
+  Line 18:34:   'showWarning' is defined but never used        no-unused-vars
+  Line 31:11:   'navigate' is assigned a value but never used  no-unused-vars
+  Line 151:19:  'resp' is assigned a value but never used      no-unused-vars
+
+src\components\commom\FormAffidavit.js
+  Line 3:29:  'InputNumber' is defined but never used  no-unused-vars
+  Line 3:42:  'Radio' is defined but never used        no-unused-vars
+
+src\components\commom\FormGiaHan.js
+  Line 3:8:  'Select' is defined but never used  no-unused-vars
+
+src\components\commom\FormHoSo.js
+  Line 6:10:   'showSuccess' is defined but never used                                                                             no-unused-vars
+  Line 29:11:  'navigate' is assigned a value but never used                                                                       no-unused-vars
+  Line 49:11:  'isFormValid' is assigned a value but never used                                                                    no-unused-vars
+  Line 95:8:   React Hook useEffect has a missing dependency: 'trangThaiVuViec'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\ApplicationKD_VN\ApplicationKD_VNAdd.js
+  Line 114:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                                  no-unused-vars
+  Line 267:8:   React Hook useEffect has missing dependencies: 'ketQuaYKien', 'ngayHetHanBang', and 'soBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\ApplicationKD_VN\ApplicationKD_VNDetail.js
+  Line 3:8:     'dayjs' is defined but never used                                                                                     no-unused-vars
+  Line 8:10:    'showSuccess' is defined but never used                                                                               no-unused-vars
+  Line 8:23:    'showError' is defined but never used                                                                                 no-unused-vars
+  Line 23:11:   'isViewOnly' is assigned a value but never used                                                                       no-unused-vars
+  Line 50:12:   'trangThaiTraLoiKQThamDinhND' is assigned a value but never used                                                      no-unused-vars
+  Line 61:12:   'ngayPhanHoiKQYKien' is assigned a value but never used                                                               no-unused-vars
+  Line 72:12:   'buocXuLy' is assigned a value but never used                                                                         no-unused-vars
+  Line 76:12:   'brands' is assigned a value but never used                                                                           no-unused-vars
+  Line 77:12:   'productAndService' is assigned a value but never used                                                                no-unused-vars
+  Line 116:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 118:11:  'formatOptions' is assigned a value but never used                                                                    no-unused-vars
+
+src\containers\ApplicationKD_VN\ApplicationKD_VNEdit.js
+  Line 25:11:   'isEditOnly' is assigned a value but never used                                                                                                   no-unused-vars
+  Line 84:12:   'brands' is assigned a value but never used                                                                                                       no-unused-vars
+  Line 88:11:   'isFormValid' is assigned a value but never used                                                                                                  no-unused-vars
+  Line 118:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                                  no-unused-vars
+  Line 148:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array                              react-hooks/exhaustive-deps
+  Line 269:8:   React Hook useEffect has missing dependencies: 'ketQuaYKien', 'ngayHetHanBang', and 'soBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\ApplicationKD_VN\ApplicationKD_VNList.js
+  Line 171:6:   React Hook useEffect has missing dependencies: 'fetchApplications' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 195:10:  'showFilters' is assigned a value but never used                                                                                       no-unused-vars
+  Line 195:23:  'setShowFilters' is assigned a value but never used                                                                                    no-unused-vars
+  Line 212:9:   'handleClearFilters' is assigned a value but never used                                                                                no-unused-vars
+
+src\containers\ApplicationType\ApplicationTypeAdd.js
+  Line 26:19:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\ApplicationType\ApplicationTypeEdit.js
+  Line 47:19:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\ApplicationType\ApplicationTypeList.js
+  Line 6:10:  'showSuccess' is defined but never used  no-unused-vars
+
+src\containers\Application\ApplicationAdd.js
+  Line 2:10:    'Form' is defined but never used                                                                                                       no-unused-vars
+  Line 15:10:   'DatePicker' is defined but never used                                                                                                 no-unused-vars
+  Line 24:13:   'id' is assigned a value but never used                                                                                                no-unused-vars
+  Line 137:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                       no-unused-vars
+  Line 290:8:   React Hook useEffect has missing dependencies: 'ketQuaYKien' and 'ngayHetHanBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Application\ApplicationDetail.js
+  Line 3:8:     'dayjs' is defined but never used                                                                                     no-unused-vars
+  Line 8:10:    'showSuccess' is defined but never used                                                                               no-unused-vars
+  Line 8:23:    'showError' is defined but never used                                                                                 no-unused-vars
+  Line 15:11:   'isViewOnly' is assigned a value but never used                                                                       no-unused-vars
+  Line 30:12:   'lichSuThamDinhHT' is assigned a value but never used                                                                 no-unused-vars
+  Line 38:12:   'lichSuThamDinhND' is assigned a value but never used                                                                 no-unused-vars
+  Line 40:12:   'trangThaiTraLoiKQThamDinhND' is assigned a value but never used                                                      no-unused-vars
+  Line 51:12:   'ngayPhanHoiKQYKien' is assigned a value but never used                                                               no-unused-vars
+  Line 63:12:   'brands' is assigned a value but never used                                                                           no-unused-vars
+  Line 64:12:   'productAndService' is assigned a value but never used                                                                no-unused-vars
+  Line 94:8:    React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 96:11:   'formatOptions' is assigned a value but never used                                                                    no-unused-vars
+  Line 166:11:  'handleTaiLieuChange' is assigned a value but never used                                                              no-unused-vars
+
+src\containers\Application\ApplicationDetailTest.js
+  Line 3:8:     'dayjs' is defined but never used                                                                                     no-unused-vars
+  Line 8:10:    'showSuccess' is defined but never used                                                                               no-unused-vars
+  Line 8:23:    'showError' is defined but never used                                                                                 no-unused-vars
+  Line 33:12:   'hanTraLoi' is assigned a value but never used                                                                        no-unused-vars
+  Line 34:12:   'hanXuLy' is assigned a value but never used                                                                          no-unused-vars
+  Line 37:12:   'trangThaiHoanThanhHSTL' is assigned a value but never used                                                           no-unused-vars
+  Line 51:12:   'trangThaiTraLoiKQThamDinhND' is assigned a value but never used                                                      no-unused-vars
+  Line 58:12:   'trangThaiCapBang' is assigned a value but never used                                                                 no-unused-vars
+  Line 61:12:   'ketQuaYKien' is assigned a value but never used                                                                      no-unused-vars
+  Line 73:12:   'buocXuLy' is assigned a value but never used                                                                         no-unused-vars
+  Line 78:12:   'brands' is assigned a value but never used                                                                           no-unused-vars
+  Line 79:12:   'productAndService' is assigned a value but never used                                                                no-unused-vars
+  Line 83:12:   'donSuaDoi' is assigned a value but never used                                                                        no-unused-vars
+  Line 124:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 126:11:  'formatOptions' is assigned a value but never used                                                                    no-unused-vars
+  Line 218:11:  'daysLeft' is assigned a value but never used                                                                         no-unused-vars
+
+src\containers\Application\ApplicationEdit.js
+  Line 16:10:   'DatePicker' is defined but never used                                                                                                 no-unused-vars
+  Line 104:12:  'brands' is assigned a value but never used                                                                                            no-unused-vars
+  Line 142:11:  'isFormValid' is assigned a value but never used                                                                                       no-unused-vars
+  Line 172:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                       no-unused-vars
+  Line 210:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array                   react-hooks/exhaustive-deps
+  Line 332:8:   React Hook useEffect has missing dependencies: 'ketQuaYKien' and 'ngayHetHanBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Application\ApplicationList.js
+  Line 242:6:   React Hook useEffect has missing dependencies: 'applyMonthFilterAndSearch', 'applyMonthTotalFilterAndSearch', 'applyYearTotalFilterAndSearch', 'fetchApplications', 'filterCondition', 'hanOptions', 'location.state', and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 375:10:  'showFilters' is assigned a value but never used                                                                                                                                                                                                                                           no-unused-vars
+  Line 375:23:  'setShowFilters' is assigned a value but never used                                                                                                                                                                                                                                        no-unused-vars
+  Line 629:6:   React Hook useEffect has missing dependencies: 'selectedLoaiDon', 'selectedNhanSu', and 'selectedTrangThaiVV'. Either include them or remove the dependency array                                                                                                                          react-hooks/exhaustive-deps
+
+src\containers\Application_GH_NH_KH\Application_GH_NH_KHAdd.js
+  Line 2:23:    'useParams' is defined but never used                                                                                             no-unused-vars
+  Line 8:22:    'Radio' is defined but never used                                                                                                 no-unused-vars
+  Line 32:11:   'isAddOnly' is assigned a value but never used                                                                                    no-unused-vars
+  Line 47:31:   'setNgayHoanThanhHSTL' is assigned a value but never used                                                                         no-unused-vars
+  Line 48:12:   'trangThaiHoanThanhHSTL' is assigned a value but never used                                                                       no-unused-vars
+  Line 48:36:   'setTrangThaiHoanThanhHSTL' is assigned a value but never used                                                                    no-unused-vars
+  Line 63:12:   'ngayNopPhiCapBang' is assigned a value but never used                                                                            no-unused-vars
+  Line 63:31:   'setNgayNopPhiCapBang' is assigned a value but never used                                                                         no-unused-vars
+  Line 64:26:   'setNgayNhanBang' is assigned a value but never used                                                                              no-unused-vars
+  Line 73:12:   'trangThaiCapBang' is assigned a value but never used                                                                             no-unused-vars
+  Line 73:30:   'setTrangThaiCapBang' is assigned a value but never used                                                                          no-unused-vars
+  Line 74:12:   'ngayNopYKien' is assigned a value but never used                                                                                 no-unused-vars
+  Line 74:26:   'setNgayNopYKien' is assigned a value but never used                                                                              no-unused-vars
+  Line 75:12:   'ketQuaYKien' is assigned a value but never used                                                                                  no-unused-vars
+  Line 75:25:   'setKetQuaYKien' is assigned a value but never used                                                                               no-unused-vars
+  Line 109:12:  'daChonNgayNopDon' is assigned a value but never used                                                                             no-unused-vars
+  Line 110:12:  'daChonNgayHoanThanhHSTL' is assigned a value but never used                                                                      no-unused-vars
+  Line 112:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                  no-unused-vars
+  Line 175:19:  'duKien' is assigned a value but never used                                                                                       no-unused-vars
+  Line 181:8:   React Hook useEffect has missing dependencies: 'ngayHetHanBang' and 'soBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 416:25:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                                           react/jsx-pascal-case
+
+src\containers\Application_GH_NH_KH\Application_GH_NH_KHDetail.js
+  Line 3:8:     'dayjs' is defined but never used                                                                                     no-unused-vars
+  Line 5:8:     'DonProgress' is defined but never used                                                                               no-unused-vars
+  Line 8:10:    'showSuccess' is defined but never used                                                                               no-unused-vars
+  Line 8:23:    'showError' is defined but never used                                                                                 no-unused-vars
+  Line 9:10:    'Table' is defined but never used                                                                                     no-unused-vars
+  Line 9:17:    'Modal' is defined but never used                                                                                     no-unused-vars
+  Line 9:24:    'Button' is defined but never used                                                                                    no-unused-vars
+  Line 23:11:   'isViewOnly' is assigned a value but never used                                                                       no-unused-vars
+  Line 57:12:   'buocXuLy' is assigned a value but never used                                                                         no-unused-vars
+  Line 61:12:   'brands' is assigned a value but never used                                                                           no-unused-vars
+  Line 62:12:   'productAndService' is assigned a value but never used                                                                no-unused-vars
+  Line 64:12:   'isModalTDOpen' is assigned a value but never used                                                                    no-unused-vars
+  Line 64:27:   'setIsModalTDOpen' is assigned a value but never used                                                                 no-unused-vars
+  Line 100:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 102:11:  'formatOptions' is assigned a value but never used                                                                    no-unused-vars
+  Line 183:11:  'getLatestThongBao' is assigned a value but never used                                                                no-unused-vars
+
+src\containers\Application_GH_NH_KH\Application_GH_NH_KHEdit.js
+  Line 76:8:    React Hook useEffect has a missing dependency: 'fetchAffidavitDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 130:25:  Imported JSX component GCN_NH_Info must be in PascalCase or SCREAMING_SNAKE_CASE                                         react/jsx-pascal-case
+  Line 139:21:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                                  react/jsx-pascal-case
+
+src\containers\Application_GH_NH_KH\Application_GH_NH_KHList.js
+  Line 4:8:    'Select' is defined but never used                                                                           no-unused-vars
+  Line 13:12:  'countries' is assigned a value but never used                                                               no-unused-vars
+  Line 15:29:  'setSelectedCountry' is assigned a value but never used                                                      no-unused-vars
+  Line 63:8:   React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 80:11:  'formatOptions' is assigned a value but never used                                                           no-unused-vars
+
+src\containers\Application_GH_NH_VN\Application_GH_NH_VNAdd.js
+  Line 2:23:    'useParams' is defined but never used                                                                                             no-unused-vars
+  Line 8:22:    'Radio' is defined but never used                                                                                                 no-unused-vars
+  Line 32:11:   'isAddOnly' is assigned a value but never used                                                                                    no-unused-vars
+  Line 47:31:   'setNgayHoanThanhHSTL' is assigned a value but never used                                                                         no-unused-vars
+  Line 48:12:   'trangThaiHoanThanhHSTL' is assigned a value but never used                                                                       no-unused-vars
+  Line 48:36:   'setTrangThaiHoanThanhHSTL' is assigned a value but never used                                                                    no-unused-vars
+  Line 63:12:   'ngayNopPhiCapBang' is assigned a value but never used                                                                            no-unused-vars
+  Line 63:31:   'setNgayNopPhiCapBang' is assigned a value but never used                                                                         no-unused-vars
+  Line 64:26:   'setNgayNhanBang' is assigned a value but never used                                                                              no-unused-vars
+  Line 73:12:   'trangThaiCapBang' is assigned a value but never used                                                                             no-unused-vars
+  Line 73:30:   'setTrangThaiCapBang' is assigned a value but never used                                                                          no-unused-vars
+  Line 74:12:   'ngayNopYKien' is assigned a value but never used                                                                                 no-unused-vars
+  Line 74:26:   'setNgayNopYKien' is assigned a value but never used                                                                              no-unused-vars
+  Line 75:12:   'ketQuaYKien' is assigned a value but never used                                                                                  no-unused-vars
+  Line 75:25:   'setKetQuaYKien' is assigned a value but never used                                                                               no-unused-vars
+  Line 109:12:  'daChonNgayNopDon' is assigned a value but never used                                                                             no-unused-vars
+  Line 110:12:  'daChonNgayHoanThanhHSTL' is assigned a value but never used                                                                      no-unused-vars
+  Line 112:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                  no-unused-vars
+  Line 175:19:  'duKien' is assigned a value but never used                                                                                       no-unused-vars
+  Line 181:8:   React Hook useEffect has missing dependencies: 'ngayHetHanBang' and 'soBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 416:25:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                                           react/jsx-pascal-case
+
+src\containers\Application_GH_NH_VN\Application_GH_NH_VNDetail.js
+  Line 3:8:     'dayjs' is defined but never used                                                                                     no-unused-vars
+  Line 5:8:     'DonProgress' is defined but never used                                                                               no-unused-vars
+  Line 8:10:    'showSuccess' is defined but never used                                                                               no-unused-vars
+  Line 8:23:    'showError' is defined but never used                                                                                 no-unused-vars
+  Line 9:10:    'Table' is defined but never used                                                                                     no-unused-vars
+  Line 9:17:    'Modal' is defined but never used                                                                                     no-unused-vars
+  Line 9:24:    'Button' is defined but never used                                                                                    no-unused-vars
+  Line 23:11:   'isViewOnly' is assigned a value but never used                                                                       no-unused-vars
+  Line 57:12:   'buocXuLy' is assigned a value but never used                                                                         no-unused-vars
+  Line 61:12:   'brands' is assigned a value but never used                                                                           no-unused-vars
+  Line 62:12:   'productAndService' is assigned a value but never used                                                                no-unused-vars
+  Line 64:12:   'isModalTDOpen' is assigned a value but never used                                                                    no-unused-vars
+  Line 64:27:   'setIsModalTDOpen' is assigned a value but never used                                                                 no-unused-vars
+  Line 100:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 102:11:  'formatOptions' is assigned a value but never used                                                                    no-unused-vars
+  Line 183:11:  'getLatestThongBao' is assigned a value but never used                                                                no-unused-vars
+
+src\containers\Application_GH_NH_VN\Application_GH_NH_VNEdit.js
+  Line 76:8:    React Hook useEffect has a missing dependency: 'fetchAffidavitDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 130:25:  Imported JSX component GCN_NH_Info must be in PascalCase or SCREAMING_SNAKE_CASE                                         react/jsx-pascal-case
+  Line 139:21:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                                  react/jsx-pascal-case
+
+src\containers\Application_GH_NH_VN\Application_GH_NH_VNList.js
+  Line 4:8:    'Select' is defined but never used                                                                           no-unused-vars
+  Line 13:12:  'countries' is assigned a value but never used                                                               no-unused-vars
+  Line 15:29:  'setSelectedCountry' is assigned a value but never used                                                      no-unused-vars
+  Line 63:8:   React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 80:11:  'formatOptions' is assigned a value but never used                                                           no-unused-vars
+
+src\containers\Application_KH\ApplicationAdd_KH.js
+  Line 2:23:    'useParams' is defined but never used                                                                                             no-unused-vars
+  Line 10:22:   'Radio' is defined but never used                                                                                                 no-unused-vars
+  Line 56:41:   'setTrangThaiTraLoiKQThamDinhND' is assigned a value but never used                                                               no-unused-vars
+  Line 58:12:   'ngayNopPhiCapBang' is assigned a value but never used                                                                            no-unused-vars
+  Line 58:31:   'setNgayNopPhiCapBang' is assigned a value but never used                                                                         no-unused-vars
+  Line 59:26:   'setNgayNhanBang' is assigned a value but never used                                                                              no-unused-vars
+  Line 102:12:  'daChonNgayNopDon' is assigned a value but never used                                                                             no-unused-vars
+  Line 103:12:  'daChonNgayHoanThanhHSTL' is assigned a value but never used                                                                      no-unused-vars
+  Line 105:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                  no-unused-vars
+  Line 168:19:  'duKien1' is assigned a value but never used                                                                                      no-unused-vars
+  Line 182:8:   React Hook useEffect has missing dependencies: 'ngayHetHanBang' and 'soBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 469:25:  Imported JSX component ContentReview_KH must be in PascalCase or SCREAMING_SNAKE_CASE                                             react/jsx-pascal-case
+
+src\containers\Application_KH\ApplicationDetail_KH.js
+  Line 18:10:  'noiDungVuViec' is assigned a value but never used                                                                    no-unused-vars
+  Line 33:10:  'hanTraLoi' is assigned a value but never used                                                                        no-unused-vars
+  Line 34:10:  'hanXuLy' is assigned a value but never used                                                                          no-unused-vars
+  Line 39:10:  'trangThaiHoanThanhHSTL' is assigned a value but never used                                                           no-unused-vars
+  Line 55:10:  'trangThaiTraLoiKQThamDinhND' is assigned a value but never used                                                      no-unused-vars
+  Line 63:10:  'trangThaiCapBang' is assigned a value but never used                                                                 no-unused-vars
+  Line 66:10:  'ketQuaYKien' is assigned a value but never used                                                                      no-unused-vars
+  Line 79:10:  'buocXuLy' is assigned a value but never used                                                                         no-unused-vars
+  Line 95:10:  'donGoc' is assigned a value but never used                                                                           no-unused-vars
+  Line 96:10:  'donSuaDoi' is assigned a value but never used                                                                        no-unused-vars
+  Line 101:6:  React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 117:9:  'daysLeft' is assigned a value but never used                                                                         no-unused-vars
+  Line 239:9:  'handleVuViecChange' is assigned a value but never used                                                               no-unused-vars
+
+src\containers\Application_KH\ApplicationEdit_KH.js
+  Line 10:8:    'DonProgress' is defined but never used                                                                                           no-unused-vars
+  Line 12:22:   'Radio' is defined but never used                                                                                                 no-unused-vars
+  Line 82:12:   'brands' is assigned a value but never used                                                                                       no-unused-vars
+  Line 117:11:  'isFormValid' is assigned a value but never used                                                                                  no-unused-vars
+  Line 141:12:  'daChonNgayNopDon' is assigned a value but never used                                                                             no-unused-vars
+  Line 142:12:  'daChonNgayHoanThanhHSTL' is assigned a value but never used                                                                      no-unused-vars
+  Line 144:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                  no-unused-vars
+  Line 174:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array              react-hooks/exhaustive-deps
+  Line 209:19:  'duKien1' is assigned a value but never used                                                                                      no-unused-vars
+  Line 223:8:   React Hook useEffect has missing dependencies: 'ngayHetHanBang' and 'soBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 620:29:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                                           react/jsx-pascal-case
+  Line 643:29:  Imported JSX component ContentReview_KH must be in PascalCase or SCREAMING_SNAKE_CASE                                             react/jsx-pascal-case
+
+src\containers\Application_KH\ApplicationList_KH.js
+  Line 243:6:   React Hook useEffect has missing dependencies: 'applyMonthFilterAndSearch', 'applyMonthTotalFilterAndSearch', 'applyYearTotalFilterAndSearch', 'fetchApplications', 'filterCondition', 'hanOptions', 'location.state', and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 251:10:  'brands' is assigned a value but never used                                                                                                                                                                                                                                                no-unused-vars
+  Line 251:18:  'setBrands' is assigned a value but never used                                                                                                                                                                                                                                             no-unused-vars
+  Line 292:9:   'trangThaiDonOptions' is assigned a value but never used                                                                                                                                                                                                                                   no-unused-vars
+  Line 384:10:  'showFilters' is assigned a value but never used                                                                                                                                                                                                                                           no-unused-vars
+  Line 384:23:  'setShowFilters' is assigned a value but never used                                                                                                                                                                                                                                        no-unused-vars
+  Line 641:6:   React Hook useEffect has missing dependencies: 'selectedLoaiDon', 'selectedNhanSu', and 'selectedTrangThaiVV'. Either include them or remove the dependency array                                                                                                                          react-hooks/exhaustive-deps
+
+src\containers\Application_SD_NH_KH\Application_SD_NH_KHAdd.js
+  Line 5:8:     'Select' is defined but never used                                                                                                     no-unused-vars
+  Line 7:8:     'AnnouncementOfApplication' is defined but never used                                                                                  no-unused-vars
+  Line 8:8:     'FormalDetermination' is defined but never used                                                                                        no-unused-vars
+  Line 9:8:     'ReplyContentRating' is defined but never used                                                                                         no-unused-vars
+  Line 10:8:    'DiphimaProcess' is defined but never used                                                                                             no-unused-vars
+  Line 11:8:    'DegreeInformation' is defined but never used                                                                                          no-unused-vars
+  Line 12:8:    'ContentReview' is defined but never used                                                                                              no-unused-vars
+  Line 13:8:    'CompleteDocumentation' is defined but never used                                                                                      no-unused-vars
+  Line 14:8:    'DonProgress' is defined but never used                                                                                                no-unused-vars
+  Line 16:10:   'DatePicker' is defined but never used                                                                                                 no-unused-vars
+  Line 16:22:   'Radio' is defined but never used                                                                                                      no-unused-vars
+  Line 19:8:    'BrandBasicForm' is defined but never used                                                                                             no-unused-vars
+  Line 20:10:   'Spin' is defined but never used                                                                                                       no-unused-vars
+  Line 21:8:    'FormHoSo' is defined but never used                                                                                                   no-unused-vars
+  Line 23:8:    'DSVuViec' is defined but never used                                                                                                   no-unused-vars
+  Line 35:12:   'idKhachHang' is assigned a value but never used                                                                                       no-unused-vars
+  Line 35:25:   'setIdKhachHang' is assigned a value but never used                                                                                    no-unused-vars
+  Line 37:12:   'hanTraLoi' is assigned a value but never used                                                                                         no-unused-vars
+  Line 38:12:   'hanXuLy' is assigned a value but never used                                                                                           no-unused-vars
+  Line 39:12:   'idDoiTac' is assigned a value but never used                                                                                          no-unused-vars
+  Line 39:22:   'setIdDoiTac' is assigned a value but never used                                                                                       no-unused-vars
+  Line 40:12:   'maDoiTac' is assigned a value but never used                                                                                          no-unused-vars
+  Line 40:22:   'setMaDoiTac' is assigned a value but never used                                                                                       no-unused-vars
+  Line 41:12:   'clientsRef' is assigned a value but never used                                                                                        no-unused-vars
+  Line 41:24:   'setClientsRef' is assigned a value but never used                                                                                     no-unused-vars
+  Line 42:12:   'ngayTiepNhan' is assigned a value but never used                                                                                      no-unused-vars
+  Line 42:26:   'setNgayTiepNhan' is assigned a value but never used                                                                                   no-unused-vars
+  Line 43:12:   'ngayXuLy' is assigned a value but never used                                                                                          no-unused-vars
+  Line 43:22:   'setNgayXuLy' is assigned a value but never used                                                                                       no-unused-vars
+  Line 44:12:   'trangThaiVuViec' is assigned a value but never used                                                                                   no-unused-vars
+  Line 44:29:   'setTrangThaiVuViec' is assigned a value but never used                                                                                no-unused-vars
+  Line 45:12:   'nhanSuVuViec' is assigned a value but never used                                                                                      no-unused-vars
+  Line 45:26:   'setNhanSuVuViec' is assigned a value but never used                                                                                   no-unused-vars
+  Line 46:12:   'nguoiXuLyChinh' is assigned a value but never used                                                                                    no-unused-vars
+  Line 46:28:   'setNguoiXuLyChinh' is assigned a value but never used                                                                                 no-unused-vars
+  Line 47:12:   'nguoiXuLyPhu' is assigned a value but never used                                                                                      no-unused-vars
+  Line 47:26:   'setNguoiXuLyPhu' is assigned a value but never used                                                                                   no-unused-vars
+  Line 48:12:   'ngayDongHS' is assigned a value but never used                                                                                        no-unused-vars
+  Line 48:24:   'setNgayDongHS' is assigned a value but never used                                                                                     no-unused-vars
+  Line 49:12:   'ngayRutHS' is assigned a value but never used                                                                                         no-unused-vars
+  Line 49:23:   'setNgayRutHS' is assigned a value but never used                                                                                      no-unused-vars
+  Line 51:11:   'isEditOnly' is assigned a value but never used                                                                                        no-unused-vars
+  Line 58:11:   'nhanHieu' is assigned a value but never used                                                                                          no-unused-vars
+  Line 68:12:   'trangThaiHoanThanhHSTL' is assigned a value but never used                                                                            no-unused-vars
+  Line 72:12:   'lichSuThamDinhHT' is assigned a value but never used                                                                                  no-unused-vars
+  Line 80:12:   'lichSuThamDinhND' is assigned a value but never used                                                                                  no-unused-vars
+  Line 89:12:   'hanNopYKien' is assigned a value but never used                                                                                       no-unused-vars
+  Line 100:12:  'quyetDinhSo' is assigned a value but never used                                                                                       no-unused-vars
+  Line 104:12:  'trangThaiDon' is assigned a value but never used                                                                                      no-unused-vars
+  Line 105:12:  'buocXuLy' is assigned a value but never used                                                                                          no-unused-vars
+  Line 111:12:  'brands' is assigned a value but never used                                                                                            no-unused-vars
+  Line 112:12:  'productAndService' is assigned a value but never used                                                                                 no-unused-vars
+  Line 131:12:  'errors' is assigned a value but never used                                                                                            no-unused-vars
+  Line 132:11:  'isFormValid' is assigned a value but never used                                                                                       no-unused-vars
+  Line 137:11:  'validateField' is assigned a value but never used                                                                                     no-unused-vars
+  Line 156:12:  'daChonNgayNopDon' is assigned a value but never used                                                                                  no-unused-vars
+  Line 157:12:  'daChonNgayHoanThanhHSTL' is assigned a value but never used                                                                           no-unused-vars
+  Line 158:12:  'daChonNgayThamDinhHinhThuc' is assigned a value but never used                                                                        no-unused-vars
+  Line 159:12:  'daChonNgayCongBoDon' is assigned a value but never used                                                                               no-unused-vars
+  Line 161:12:  'daChonNgayTraLoiThamDinhNoiDung' is assigned a value but never used                                                                   no-unused-vars
+  Line 162:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                       no-unused-vars
+  Line 163:11:  'formatDateVN' is assigned a value but never used                                                                                      no-unused-vars
+  Line 195:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array                   react-hooks/exhaustive-deps
+  Line 316:8:   React Hook useEffect has missing dependencies: 'ketQuaYKien' and 'ngayHetHanBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 339:11:  'formatOptions' is assigned a value but never used                                                                                     no-unused-vars
+
+src\containers\Application_SD_NH_KH\Application_SD_NH_KHList.js
+  Line 22:10:   'brands' is assigned a value but never used                                                                           no-unused-vars
+  Line 22:18:   'setBrands' is assigned a value but never used                                                                        no-unused-vars
+  Line 23:10:   'selectedBrand' is assigned a value but never used                                                                    no-unused-vars
+  Line 50:9:    'trangThaiDonOptions' is assigned a value but never used                                                              no-unused-vars
+  Line 148:11:  'savedPage' is assigned a value but never used                                                                        no-unused-vars
+  Line 154:6:   React Hook useEffect has a missing dependency: 'fetchApplications'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 178:10:  'showFilters' is assigned a value but never used                                                                      no-unused-vars
+  Line 178:23:  'setShowFilters' is assigned a value but never used                                                                   no-unused-vars
+  Line 195:9:   'handleClearFilters' is assigned a value but never used                                                               no-unused-vars
+
+src\containers\Application_SD_NH_VN\Application_SD_NH_VNAdd.js
+  Line 5:8:     'Select' is defined but never used                                                                                                     no-unused-vars
+  Line 7:8:     'AnnouncementOfApplication' is defined but never used                                                                                  no-unused-vars
+  Line 8:8:     'FormalDetermination' is defined but never used                                                                                        no-unused-vars
+  Line 9:8:     'ReplyContentRating' is defined but never used                                                                                         no-unused-vars
+  Line 10:8:    'DiphimaProcess' is defined but never used                                                                                             no-unused-vars
+  Line 11:8:    'DegreeInformation' is defined but never used                                                                                          no-unused-vars
+  Line 12:8:    'ContentReview' is defined but never used                                                                                              no-unused-vars
+  Line 13:8:    'CompleteDocumentation' is defined but never used                                                                                      no-unused-vars
+  Line 14:8:    'DonProgress' is defined but never used                                                                                                no-unused-vars
+  Line 16:10:   'DatePicker' is defined but never used                                                                                                 no-unused-vars
+  Line 16:22:   'Radio' is defined but never used                                                                                                      no-unused-vars
+  Line 19:8:    'BrandBasicForm' is defined but never used                                                                                             no-unused-vars
+  Line 20:10:   'Spin' is defined but never used                                                                                                       no-unused-vars
+  Line 21:8:    'FormHoSo' is defined but never used                                                                                                   no-unused-vars
+  Line 23:8:    'DSVuViec' is defined but never used                                                                                                   no-unused-vars
+  Line 35:12:   'idKhachHang' is assigned a value but never used                                                                                       no-unused-vars
+  Line 35:25:   'setIdKhachHang' is assigned a value but never used                                                                                    no-unused-vars
+  Line 37:12:   'hanTraLoi' is assigned a value but never used                                                                                         no-unused-vars
+  Line 38:12:   'hanXuLy' is assigned a value but never used                                                                                           no-unused-vars
+  Line 39:12:   'idDoiTac' is assigned a value but never used                                                                                          no-unused-vars
+  Line 39:22:   'setIdDoiTac' is assigned a value but never used                                                                                       no-unused-vars
+  Line 40:12:   'maDoiTac' is assigned a value but never used                                                                                          no-unused-vars
+  Line 40:22:   'setMaDoiTac' is assigned a value but never used                                                                                       no-unused-vars
+  Line 41:12:   'clientsRef' is assigned a value but never used                                                                                        no-unused-vars
+  Line 41:24:   'setClientsRef' is assigned a value but never used                                                                                     no-unused-vars
+  Line 42:12:   'ngayTiepNhan' is assigned a value but never used                                                                                      no-unused-vars
+  Line 42:26:   'setNgayTiepNhan' is assigned a value but never used                                                                                   no-unused-vars
+  Line 43:12:   'ngayXuLy' is assigned a value but never used                                                                                          no-unused-vars
+  Line 43:22:   'setNgayXuLy' is assigned a value but never used                                                                                       no-unused-vars
+  Line 44:12:   'trangThaiVuViec' is assigned a value but never used                                                                                   no-unused-vars
+  Line 44:29:   'setTrangThaiVuViec' is assigned a value but never used                                                                                no-unused-vars
+  Line 45:12:   'nhanSuVuViec' is assigned a value but never used                                                                                      no-unused-vars
+  Line 45:26:   'setNhanSuVuViec' is assigned a value but never used                                                                                   no-unused-vars
+  Line 46:12:   'nguoiXuLyChinh' is assigned a value but never used                                                                                    no-unused-vars
+  Line 46:28:   'setNguoiXuLyChinh' is assigned a value but never used                                                                                 no-unused-vars
+  Line 47:12:   'nguoiXuLyPhu' is assigned a value but never used                                                                                      no-unused-vars
+  Line 47:26:   'setNguoiXuLyPhu' is assigned a value but never used                                                                                   no-unused-vars
+  Line 48:12:   'ngayDongHS' is assigned a value but never used                                                                                        no-unused-vars
+  Line 48:24:   'setNgayDongHS' is assigned a value but never used                                                                                     no-unused-vars
+  Line 49:12:   'ngayRutHS' is assigned a value but never used                                                                                         no-unused-vars
+  Line 49:23:   'setNgayRutHS' is assigned a value but never used                                                                                      no-unused-vars
+  Line 51:11:   'isEditOnly' is assigned a value but never used                                                                                        no-unused-vars
+  Line 58:11:   'nhanHieu' is assigned a value but never used                                                                                          no-unused-vars
+  Line 68:12:   'trangThaiHoanThanhHSTL' is assigned a value but never used                                                                            no-unused-vars
+  Line 72:12:   'lichSuThamDinhHT' is assigned a value but never used                                                                                  no-unused-vars
+  Line 80:12:   'lichSuThamDinhND' is assigned a value but never used                                                                                  no-unused-vars
+  Line 89:12:   'hanNopYKien' is assigned a value but never used                                                                                       no-unused-vars
+  Line 100:12:  'quyetDinhSo' is assigned a value but never used                                                                                       no-unused-vars
+  Line 104:12:  'trangThaiDon' is assigned a value but never used                                                                                      no-unused-vars
+  Line 105:12:  'buocXuLy' is assigned a value but never used                                                                                          no-unused-vars
+  Line 111:12:  'brands' is assigned a value but never used                                                                                            no-unused-vars
+  Line 112:12:  'productAndService' is assigned a value but never used                                                                                 no-unused-vars
+  Line 131:12:  'errors' is assigned a value but never used                                                                                            no-unused-vars
+  Line 132:11:  'isFormValid' is assigned a value but never used                                                                                       no-unused-vars
+  Line 137:11:  'validateField' is assigned a value but never used                                                                                     no-unused-vars
+  Line 156:12:  'daChonNgayNopDon' is assigned a value but never used                                                                                  no-unused-vars
+  Line 157:12:  'daChonNgayHoanThanhHSTL' is assigned a value but never used                                                                           no-unused-vars
+  Line 158:12:  'daChonNgayThamDinhHinhThuc' is assigned a value but never used                                                                        no-unused-vars
+  Line 159:12:  'daChonNgayCongBoDon' is assigned a value but never used                                                                               no-unused-vars
+  Line 161:12:  'daChonNgayTraLoiThamDinhNoiDung' is assigned a value but never used                                                                   no-unused-vars
+  Line 162:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                       no-unused-vars
+  Line 163:11:  'formatDateVN' is assigned a value but never used                                                                                      no-unused-vars
+  Line 195:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array                   react-hooks/exhaustive-deps
+  Line 316:8:   React Hook useEffect has missing dependencies: 'ketQuaYKien' and 'ngayHetHanBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 339:11:  'formatOptions' is assigned a value but never used                                                                                     no-unused-vars
+
+src\containers\Application_SD_NH_VN\Application_SD_NH_VNList.js
+  Line 169:6:   React Hook useEffect has missing dependencies: 'fetchApplications' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 193:10:  'showFilters' is assigned a value but never used                                                                                       no-unused-vars
+  Line 193:23:  'setShowFilters' is assigned a value but never used                                                                                    no-unused-vars
+  Line 210:9:   'handleClearFilters' is assigned a value but never used                                                                                no-unused-vars
+
+src\containers\Application_TD_NH\Application_TD_NH_KHList.js
+  Line 22:10:   'brands' is assigned a value but never used                                                                           no-unused-vars
+  Line 22:18:   'setBrands' is assigned a value but never used                                                                        no-unused-vars
+  Line 23:10:   'selectedBrand' is assigned a value but never used                                                                    no-unused-vars
+  Line 50:9:    'trangThaiDonOptions' is assigned a value but never used                                                              no-unused-vars
+  Line 148:11:  'savedPage' is assigned a value but never used                                                                        no-unused-vars
+  Line 154:6:   React Hook useEffect has a missing dependency: 'fetchApplications'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 178:10:  'showFilters' is assigned a value but never used                                                                      no-unused-vars
+  Line 178:23:  'setShowFilters' is assigned a value but never used                                                                   no-unused-vars
+  Line 195:9:   'handleClearFilters' is assigned a value but never used                                                               no-unused-vars
+
+src\containers\Application_TD_NH\Application_TD_NH_VNAdd.js
+  Line 5:8:     'Select' is defined but never used                                                                                                     no-unused-vars
+  Line 7:10:    'DatePicker' is defined but never used                                                                                                 no-unused-vars
+  Line 7:22:    'Radio' is defined but never used                                                                                                      no-unused-vars
+  Line 10:8:    'BrandBasicForm' is defined but never used                                                                                             no-unused-vars
+  Line 11:10:   'Table' is defined but never used                                                                                                      no-unused-vars
+  Line 11:17:   'Modal' is defined but never used                                                                                                      no-unused-vars
+  Line 13:8:    'FormTachDon' is defined but never used                                                                                                no-unused-vars
+  Line 24:12:   'donGoc' is assigned a value but never used                                                                                            no-unused-vars
+  Line 25:12:   'donSuaDoi' is assigned a value but never used                                                                                         no-unused-vars
+  Line 26:25:   'setIdKhachHang' is assigned a value but never used                                                                                    no-unused-vars
+  Line 28:12:   'hanTraLoi' is assigned a value but never used                                                                                         no-unused-vars
+  Line 29:12:   'hanXuLy' is assigned a value but never used                                                                                           no-unused-vars
+  Line 30:22:   'setIdDoiTac' is assigned a value but never used                                                                                       no-unused-vars
+  Line 31:12:   'maDoiTac' is assigned a value but never used                                                                                          no-unused-vars
+  Line 31:22:   'setMaDoiTac' is assigned a value but never used                                                                                       no-unused-vars
+  Line 32:24:   'setClientsRef' is assigned a value but never used                                                                                     no-unused-vars
+  Line 33:26:   'setNgayTiepNhan' is assigned a value but never used                                                                                   no-unused-vars
+  Line 34:22:   'setNgayXuLy' is assigned a value but never used                                                                                       no-unused-vars
+  Line 35:29:   'setTrangThaiVuViec' is assigned a value but never used                                                                                no-unused-vars
+  Line 36:12:   'nhanSuVuViec' is assigned a value but never used                                                                                      no-unused-vars
+  Line 36:26:   'setNhanSuVuViec' is assigned a value but never used                                                                                   no-unused-vars
+  Line 37:28:   'setNguoiXuLyChinh' is assigned a value but never used                                                                                 no-unused-vars
+  Line 38:26:   'setNguoiXuLyPhu' is assigned a value but never used                                                                                   no-unused-vars
+  Line 39:24:   'setNgayDongHS' is assigned a value but never used                                                                                     no-unused-vars
+  Line 40:23:   'setNgayRutHS' is assigned a value but never used                                                                                      no-unused-vars
+  Line 41:12:   'isModalHTOpen' is assigned a value but never used                                                                                     no-unused-vars
+  Line 42:12:   'isModalNDOpen' is assigned a value but never used                                                                                     no-unused-vars
+  Line 43:11:   'isEditOnly' is assigned a value but never used                                                                                        no-unused-vars
+  Line 106:12:  'brands' is assigned a value but never used                                                                                            no-unused-vars
+  Line 107:12:  'productAndService' is assigned a value but never used                                                                                 no-unused-vars
+  Line 109:12:  'errors' is assigned a value but never used                                                                                            no-unused-vars
+  Line 110:11:  'isFormValid' is assigned a value but never used                                                                                       no-unused-vars
+  Line 115:11:  'validateField' is assigned a value but never used                                                                                     no-unused-vars
+  Line 134:12:  'daChonNgayNopDon' is assigned a value but never used                                                                                  no-unused-vars
+  Line 135:12:  'daChonNgayHoanThanhHSTL' is assigned a value but never used                                                                           no-unused-vars
+  Line 136:12:  'daChonNgayThamDinhHinhThuc' is assigned a value but never used                                                                        no-unused-vars
+  Line 137:12:  'daChonNgayCongBoDon' is assigned a value but never used                                                                               no-unused-vars
+  Line 139:12:  'daChonNgayTraLoiThamDinhNoiDung' is assigned a value but never used                                                                   no-unused-vars
+  Line 140:12:  'daChonHoanTatThuTucNhapBang' is assigned a value but never used                                                                       no-unused-vars
+  Line 181:8:   React Hook useEffect has a missing dependency: 'detailApplication'. Either include it or remove the dependency array                   react-hooks/exhaustive-deps
+  Line 302:8:   React Hook useEffect has missing dependencies: 'ketQuaYKien' and 'ngayHetHanBang'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 325:11:  'formatOptions' is assigned a value but never used                                                                                     no-unused-vars
+  Line 497:11:  'handleTaiLieuChange' is assigned a value but never used                                                                               no-unused-vars
+
+src\containers\Application_TD_NH\Application_TD_NH_VNList.js
+  Line 169:6:   React Hook useEffect has missing dependencies: 'fetchApplications' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 193:10:  'showFilters' is assigned a value but never used                                                                                       no-unused-vars
+  Line 193:23:  'setShowFilters' is assigned a value but never used                                                                                    no-unused-vars
+  Line 210:9:   'handleClearFilters' is assigned a value but never used                                                                                no-unused-vars
+
+src\containers\Auth\RegisterStaff.js
+  Line 14:13:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\BillFull\VuViec_BillChuaDuyetList_ALL.js
+  Line 21:10:  'applicationTypes' is assigned a value but never used            no-unused-vars
+  Line 21:28:  'setApplicationTypes' is assigned a value but never used         no-unused-vars
+  Line 22:10:  'selectedApplicationTypes' is assigned a value but never used    no-unused-vars
+  Line 22:36:  'setSelectedApplicationType' is assigned a value but never used  no-unused-vars
+  Line 29:10:  'casetypes' is assigned a value but never used                   no-unused-vars
+  Line 29:21:  'setCasetypes' is assigned a value but never used                no-unused-vars
+  Line 30:28:  'setSelectedCasetype' is assigned a value but never used         no-unused-vars
+  Line 31:10:  'staffs' is assigned a value but never used                      no-unused-vars
+  Line 32:25:  'setSelectedStaff' is assigned a value but never used            no-unused-vars
+
+src\containers\BillFull\VuViec_BillDaDuyetList_ALL.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                       no-unused-vars
+  Line 21:12:  'applicationTypes' is assigned a value but never used                                                                           no-unused-vars
+  Line 21:30:  'setApplicationTypes' is assigned a value but never used                                                                        no-unused-vars
+  Line 22:12:  'selectedApplicationTypes' is assigned a value but never used                                                                   no-unused-vars
+  Line 22:38:  'setSelectedApplicationType' is assigned a value but never used                                                                 no-unused-vars
+  Line 29:12:  'casetypes' is assigned a value but never used                                                                                  no-unused-vars
+  Line 29:23:  'setCasetypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 30:30:  'setSelectedCasetype' is assigned a value but never used                                                                        no-unused-vars
+  Line 31:12:  'staffs' is assigned a value but never used                                                                                     no-unused-vars
+  Line 32:27:  'setSelectedStaff' is assigned a value but never used                                                                           no-unused-vars
+  Line 184:8:  React Hook useEffect has missing dependencies: 'fetchCases' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\BillFull\VuViec_Bill_Full_List_ALL.js
+  Line 10:10:   'exportToExcel' is defined but never used                                                                      no-unused-vars
+  Line 21:12:   'applicationTypes' is assigned a value but never used                                                          no-unused-vars
+  Line 21:30:   'setApplicationTypes' is assigned a value but never used                                                       no-unused-vars
+  Line 22:12:   'selectedApplicationTypes' is assigned a value but never used                                                  no-unused-vars
+  Line 22:38:   'setSelectedApplicationType' is assigned a value but never used                                                no-unused-vars
+  Line 23:12:   'countries' is assigned a value but never used                                                                 no-unused-vars
+  Line 23:23:   'setCountries' is assigned a value but never used                                                              no-unused-vars
+  Line 24:29:   'setSelectedCountry' is assigned a value but never used                                                        no-unused-vars
+  Line 29:12:   'casetypes' is assigned a value but never used                                                                 no-unused-vars
+  Line 29:23:   'setCasetypes' is assigned a value but never used                                                              no-unused-vars
+  Line 30:30:   'setSelectedCasetype' is assigned a value but never used                                                       no-unused-vars
+  Line 31:12:   'staffs' is assigned a value but never used                                                                    no-unused-vars
+  Line 32:27:   'setSelectedStaff' is assigned a value but never used                                                          no-unused-vars
+  Line 155:15:  'savedPage' is assigned a value but never used                                                                 no-unused-vars
+  Line 160:8:   React Hook useEffect has a missing dependency: 'fetchCases'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Bill\VuViec_Bil_KHBiTuChoiList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                       no-unused-vars
+  Line 21:12:  'applicationTypes' is assigned a value but never used                                                                           no-unused-vars
+  Line 21:30:  'setApplicationTypes' is assigned a value but never used                                                                        no-unused-vars
+  Line 22:12:  'selectedApplicationTypes' is assigned a value but never used                                                                   no-unused-vars
+  Line 22:38:  'setSelectedApplicationType' is assigned a value but never used                                                                 no-unused-vars
+  Line 29:12:  'casetypes' is assigned a value but never used                                                                                  no-unused-vars
+  Line 29:23:  'setCasetypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 30:30:  'setSelectedCasetype' is assigned a value but never used                                                                        no-unused-vars
+  Line 31:12:  'staffs' is assigned a value but never used                                                                                     no-unused-vars
+  Line 32:27:  'setSelectedStaff' is assigned a value but never used                                                                           no-unused-vars
+  Line 187:8:  React Hook useEffect has missing dependencies: 'fetchCases' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Bill\VuViec_BillBiTuChoiList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                       no-unused-vars
+  Line 21:12:  'applicationTypes' is assigned a value but never used                                                                           no-unused-vars
+  Line 21:30:  'setApplicationTypes' is assigned a value but never used                                                                        no-unused-vars
+  Line 22:12:  'selectedApplicationTypes' is assigned a value but never used                                                                   no-unused-vars
+  Line 22:38:  'setSelectedApplicationType' is assigned a value but never used                                                                 no-unused-vars
+  Line 29:12:  'casetypes' is assigned a value but never used                                                                                  no-unused-vars
+  Line 29:23:  'setCasetypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 30:30:  'setSelectedCasetype' is assigned a value but never used                                                                        no-unused-vars
+  Line 31:12:  'staffs' is assigned a value but never used                                                                                     no-unused-vars
+  Line 32:27:  'setSelectedStaff' is assigned a value but never used                                                                           no-unused-vars
+  Line 186:8:  React Hook useEffect has missing dependencies: 'fetchCases' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Bill\VuViec_BillChuaDuyetList.js
+  Line 21:10:  'applicationTypes' is assigned a value but never used            no-unused-vars
+  Line 21:28:  'setApplicationTypes' is assigned a value but never used         no-unused-vars
+  Line 22:10:  'selectedApplicationTypes' is assigned a value but never used    no-unused-vars
+  Line 22:36:  'setSelectedApplicationType' is assigned a value but never used  no-unused-vars
+  Line 29:10:  'casetypes' is assigned a value but never used                   no-unused-vars
+  Line 29:21:  'setCasetypes' is assigned a value but never used                no-unused-vars
+  Line 30:28:  'setSelectedCasetype' is assigned a value but never used         no-unused-vars
+  Line 31:10:  'staffs' is assigned a value but never used                      no-unused-vars
+  Line 32:25:  'setSelectedStaff' is assigned a value but never used            no-unused-vars
+
+src\containers\Bill\VuViec_BillList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                       no-unused-vars
+  Line 21:12:  'applicationTypes' is assigned a value but never used                                                                           no-unused-vars
+  Line 21:30:  'setApplicationTypes' is assigned a value but never used                                                                        no-unused-vars
+  Line 22:12:  'selectedApplicationTypes' is assigned a value but never used                                                                   no-unused-vars
+  Line 22:38:  'setSelectedApplicationType' is assigned a value but never used                                                                 no-unused-vars
+  Line 29:12:  'casetypes' is assigned a value but never used                                                                                  no-unused-vars
+  Line 29:23:  'setCasetypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 30:30:  'setSelectedCasetype' is assigned a value but never used                                                                        no-unused-vars
+  Line 31:12:  'staffs' is assigned a value but never used                                                                                     no-unused-vars
+  Line 32:27:  'setSelectedStaff' is assigned a value but never used                                                                           no-unused-vars
+  Line 184:8:  React Hook useEffect has missing dependencies: 'fetchCases' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Bill\VuViec_Bill_KHChuaDuyetList.js
+  Line 21:10:  'applicationTypes' is assigned a value but never used            no-unused-vars
+  Line 21:28:  'setApplicationTypes' is assigned a value but never used         no-unused-vars
+  Line 22:10:  'selectedApplicationTypes' is assigned a value but never used    no-unused-vars
+  Line 22:36:  'setSelectedApplicationType' is assigned a value but never used  no-unused-vars
+  Line 29:10:  'casetypes' is assigned a value but never used                   no-unused-vars
+  Line 29:21:  'setCasetypes' is assigned a value but never used                no-unused-vars
+  Line 30:28:  'setSelectedCasetype' is assigned a value but never used         no-unused-vars
+  Line 31:10:  'staffs' is assigned a value but never used                      no-unused-vars
+  Line 32:25:  'setSelectedStaff' is assigned a value but never used            no-unused-vars
+
+src\containers\Bill\VuViec_Bill_KHList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                       no-unused-vars
+  Line 21:12:  'applicationTypes' is assigned a value but never used                                                                           no-unused-vars
+  Line 21:30:  'setApplicationTypes' is assigned a value but never used                                                                        no-unused-vars
+  Line 22:12:  'selectedApplicationTypes' is assigned a value but never used                                                                   no-unused-vars
+  Line 22:38:  'setSelectedApplicationType' is assigned a value but never used                                                                 no-unused-vars
+  Line 29:12:  'casetypes' is assigned a value but never used                                                                                  no-unused-vars
+  Line 29:23:  'setCasetypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 30:30:  'setSelectedCasetype' is assigned a value but never used                                                                        no-unused-vars
+  Line 31:12:  'staffs' is assigned a value but never used                                                                                     no-unused-vars
+  Line 32:27:  'setSelectedStaff' is assigned a value but never used                                                                           no-unused-vars
+  Line 184:8:  React Hook useEffect has missing dependencies: 'fetchCases' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Bill\VuViec_Bill_KH_FullList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                       no-unused-vars
+  Line 21:12:  'applicationTypes' is assigned a value but never used                                                                           no-unused-vars
+  Line 21:30:  'setApplicationTypes' is assigned a value but never used                                                                        no-unused-vars
+  Line 22:12:  'selectedApplicationTypes' is assigned a value but never used                                                                   no-unused-vars
+  Line 22:38:  'setSelectedApplicationType' is assigned a value but never used                                                                 no-unused-vars
+  Line 29:12:  'casetypes' is assigned a value but never used                                                                                  no-unused-vars
+  Line 29:23:  'setCasetypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 30:30:  'setSelectedCasetype' is assigned a value but never used                                                                        no-unused-vars
+  Line 31:12:  'staffs' is assigned a value but never used                                                                                     no-unused-vars
+  Line 32:27:  'setSelectedStaff' is assigned a value but never used                                                                           no-unused-vars
+  Line 186:8:  React Hook useEffect has missing dependencies: 'fetchCases' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Bill\VuViec_Bill_VN_FullList.js
+  Line 10:10:   'exportToExcel' is defined but never used                                                                      no-unused-vars
+  Line 21:12:   'applicationTypes' is assigned a value but never used                                                          no-unused-vars
+  Line 21:30:   'setApplicationTypes' is assigned a value but never used                                                       no-unused-vars
+  Line 22:12:   'selectedApplicationTypes' is assigned a value but never used                                                  no-unused-vars
+  Line 22:38:   'setSelectedApplicationType' is assigned a value but never used                                                no-unused-vars
+  Line 23:12:   'countries' is assigned a value but never used                                                                 no-unused-vars
+  Line 23:23:   'setCountries' is assigned a value but never used                                                              no-unused-vars
+  Line 24:29:   'setSelectedCountry' is assigned a value but never used                                                        no-unused-vars
+  Line 29:12:   'casetypes' is assigned a value but never used                                                                 no-unused-vars
+  Line 29:23:   'setCasetypes' is assigned a value but never used                                                              no-unused-vars
+  Line 30:30:   'setSelectedCasetype' is assigned a value but never used                                                       no-unused-vars
+  Line 31:12:   'staffs' is assigned a value but never used                                                                    no-unused-vars
+  Line 32:27:   'setSelectedStaff' is assigned a value but never used                                                          no-unused-vars
+  Line 155:15:  'savedPage' is assigned a value but never used                                                                 no-unused-vars
+  Line 160:8:   React Hook useEffect has a missing dependency: 'fetchCases'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Brand\BrandAdd.js
+  Line 40:13:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\Brand\BrandDetail.js
+  Line 11:12:  'linkAnh' is assigned a value but never used            no-unused-vars
+  Line 14:11:  'handleImageChange' is assigned a value but never used  no-unused-vars
+
+src\containers\CaseType\CaseTypeAdd.js
+  Line 26:13:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\Case\CaseAdd.js
+  Line 11:8:   'ApplicationAdd' is defined but never used           no-unused-vars
+  Line 12:8:   'ApplicationAdd_KH' is defined but never used        no-unused-vars
+  Line 13:8:   'Application_GH_NH_VNAdd' is defined but never used  no-unused-vars
+  Line 69:11:  'processSteps' is assigned a value but never used    no-unused-vars
+
+src\containers\Case\CaseDetail.js
+  Line 4:8:     'Select' is defined but never used                                                                                  no-unused-vars
+  Line 5:10:    'showSuccess' is defined but never used                                                                             no-unused-vars
+  Line 5:23:    'showError' is defined but never used                                                                               no-unused-vars
+  Line 6:10:    'DatePicker' is defined but never used                                                                              no-unused-vars
+  Line 7:8:     'dayjs' is defined but never used                                                                                   no-unused-vars
+  Line 28:12:   'buocXuLyHienTai' is assigned a value but never used                                                                no-unused-vars
+  Line 29:12:   'nhanSuVuViec' is assigned a value but never used                                                                   no-unused-vars
+  Line 42:12:   'errors' is assigned a value but never used                                                                         no-unused-vars
+  Line 43:11:   'isFormValid' is assigned a value but never used                                                                    no-unused-vars
+  Line 51:11:   'validateField' is assigned a value but never used                                                                  no-unused-vars
+  Line 67:11:   'processSteps' is assigned a value but never used                                                                   no-unused-vars
+  Line 79:11:   'formatOptions' is assigned a value but never used                                                                  no-unused-vars
+  Line 90:11:   'handleSelectChange' is assigned a value but never used                                                             no-unused-vars
+  Line 227:8:   React Hook useEffect has a missing dependency: 'fetchCaseDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 228:45:  React Hook useEffect has a missing dependency: 'fetchTimesheets'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Case\CaseEdit.js
+  Line 11:8:   'ApplicationAdd' is defined but never used                                                                          no-unused-vars
+  Line 12:8:   'ApplicationAdd_KH' is defined but never used                                                                       no-unused-vars
+  Line 13:8:   'Application_GH_NH_VNAdd' is defined but never used                                                                 no-unused-vars
+  Line 70:11:  'processSteps' is assigned a value but never used                                                                   no-unused-vars
+  Line 240:8:  React Hook useEffect has a missing dependency: 'fetchCaseDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Case\CaseList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                       no-unused-vars
+  Line 11:8:   'AddVuViecModal' is defined but never used                                                                                      no-unused-vars
+  Line 23:12:  'applicationTypes' is assigned a value but never used                                                                           no-unused-vars
+  Line 24:12:  'selectedApplicationTypes' is assigned a value but never used                                                                   no-unused-vars
+  Line 24:38:  'setSelectedApplicationType' is assigned a value but never used                                                                 no-unused-vars
+  Line 31:12:  'casetypes' is assigned a value but never used                                                                                  no-unused-vars
+  Line 32:30:  'setSelectedCasetype' is assigned a value but never used                                                                        no-unused-vars
+  Line 33:12:  'staffs' is assigned a value but never used                                                                                     no-unused-vars
+  Line 34:27:  'setSelectedStaff' is assigned a value but never used                                                                           no-unused-vars
+  Line 210:8:  React Hook useEffect has missing dependencies: 'fetchCases' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Case\Case_KHList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                       no-unused-vars
+  Line 11:8:   'AddVuViecModal' is defined but never used                                                                                      no-unused-vars
+  Line 23:12:  'applicationTypes' is assigned a value but never used                                                                           no-unused-vars
+  Line 24:12:  'selectedApplicationTypes' is assigned a value but never used                                                                   no-unused-vars
+  Line 24:38:  'setSelectedApplicationType' is assigned a value but never used                                                                 no-unused-vars
+  Line 31:12:  'casetypes' is assigned a value but never used                                                                                  no-unused-vars
+  Line 32:30:  'setSelectedCasetype' is assigned a value but never used                                                                        no-unused-vars
+  Line 33:12:  'staffs' is assigned a value but never used                                                                                     no-unused-vars
+  Line 34:27:  'setSelectedStaff' is assigned a value but never used                                                                           no-unused-vars
+  Line 209:8:  React Hook useEffect has missing dependencies: 'fetchCases' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Country\CountryAdd.js
+  Line 53:13:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\Country\CountryDetail.js
+  Line 36:6:  React Hook useEffect has a missing dependency: 'maQuocGia'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Customer\CustomerDetail.js
+  Line 4:8:     'Select' is defined but never used                                                                     no-unused-vars
+  Line 28:11:   'formatOptions' is assigned a value but never used                                                     no-unused-vars
+  Line 66:8:    React Hook useEffect has a missing dependency: 'id'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 111:11:  'trangThaiOptions' is assigned a value but never used                                                  no-unused-vars
+
+src\containers\Customer\CustomerList.js
+  Line 238:6:  React Hook useEffect has missing dependencies: 'fetchCustomers' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\DebitNote\debitNoteAdd.js
+  Line 117:6:  React Hook useEffect has missing dependencies: 'fetchCustomer', 'fetchPartner', and 'nguoiNhan'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\DebitNote\debitNoteDetail.js
+  Line 4:10:   'Modal' is defined but never used                        no-unused-vars
+  Line 4:17:   'Radio' is defined but never used                        no-unused-vars
+  Line 6:10:   'DatePicker' is defined but never used                   no-unused-vars
+  Line 13:11:  'idDoiTac' is assigned a value but never used            no-unused-vars
+  Line 13:21:  'idKhachHang' is assigned a value but never used         no-unused-vars
+  Line 13:34:  'caseId' is assigned a value but never used              no-unused-vars
+  Line 18:10:  'isModalVisible' is assigned a value but never used      no-unused-vars
+  Line 18:26:  'setIsModalVisible' is assigned a value but never used   no-unused-vars
+  Line 19:10:  'selectedCaseId' is assigned a value but never used      no-unused-vars
+  Line 19:26:  'setSelectedCaseId' is assigned a value but never used   no-unused-vars
+  Line 20:10:  'showDeleteModal' is assigned a value but never used     no-unused-vars
+  Line 20:27:  'setShowDeleteModal' is assigned a value but never used  no-unused-vars
+  Line 21:10:  'caseToDelete' is assigned a value but never used        no-unused-vars
+  Line 21:24:  'setCaseToDelete' is assigned a value but never used     no-unused-vars
+
+src\containers\DebitNote\debitNoteList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                           no-unused-vars
+  Line 20:12:  'applicationTypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 20:30:  'setApplicationTypes' is assigned a value but never used                                                                            no-unused-vars
+  Line 21:12:  'selectedApplicationTypes' is assigned a value but never used                                                                       no-unused-vars
+  Line 21:38:  'setSelectedApplicationType' is assigned a value but never used                                                                     no-unused-vars
+  Line 28:12:  'casetypes' is assigned a value but never used                                                                                      no-unused-vars
+  Line 28:23:  'setCasetypes' is assigned a value but never used                                                                                   no-unused-vars
+  Line 29:30:  'setSelectedCasetype' is assigned a value but never used                                                                            no-unused-vars
+  Line 30:12:  'staffs' is assigned a value but never used                                                                                         no-unused-vars
+  Line 30:20:  'setStaffs' is assigned a value but never used                                                                                      no-unused-vars
+  Line 31:27:  'setSelectedStaff' is assigned a value but never used                                                                               no-unused-vars
+  Line 165:8:  React Hook useEffect has missing dependencies: 'fetchDebitNote' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\DebitNote\debitNoteList_ALL.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                           no-unused-vars
+  Line 20:12:  'applicationTypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 20:30:  'setApplicationTypes' is assigned a value but never used                                                                            no-unused-vars
+  Line 21:12:  'selectedApplicationTypes' is assigned a value but never used                                                                       no-unused-vars
+  Line 21:38:  'setSelectedApplicationType' is assigned a value but never used                                                                     no-unused-vars
+  Line 28:12:  'casetypes' is assigned a value but never used                                                                                      no-unused-vars
+  Line 28:23:  'setCasetypes' is assigned a value but never used                                                                                   no-unused-vars
+  Line 29:30:  'setSelectedCasetype' is assigned a value but never used                                                                            no-unused-vars
+  Line 30:12:  'staffs' is assigned a value but never used                                                                                         no-unused-vars
+  Line 30:20:  'setStaffs' is assigned a value but never used                                                                                      no-unused-vars
+  Line 31:27:  'setSelectedStaff' is assigned a value but never used                                                                               no-unused-vars
+  Line 167:8:  React Hook useEffect has missing dependencies: 'fetchDebitNote' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\DebitNote\debitNote_KHList.js
+  Line 10:10:  'exportToExcel' is defined but never used                                                                                           no-unused-vars
+  Line 20:12:  'applicationTypes' is assigned a value but never used                                                                               no-unused-vars
+  Line 20:30:  'setApplicationTypes' is assigned a value but never used                                                                            no-unused-vars
+  Line 21:12:  'selectedApplicationTypes' is assigned a value but never used                                                                       no-unused-vars
+  Line 21:38:  'setSelectedApplicationType' is assigned a value but never used                                                                     no-unused-vars
+  Line 28:12:  'casetypes' is assigned a value but never used                                                                                      no-unused-vars
+  Line 28:23:  'setCasetypes' is assigned a value but never used                                                                                   no-unused-vars
+  Line 29:30:  'setSelectedCasetype' is assigned a value but never used                                                                            no-unused-vars
+  Line 30:12:  'staffs' is assigned a value but never used                                                                                         no-unused-vars
+  Line 30:20:  'setStaffs' is assigned a value but never used                                                                                      no-unused-vars
+  Line 31:27:  'setSelectedStaff' is assigned a value but never used                                                                               no-unused-vars
+  Line 165:8:  React Hook useEffect has missing dependencies: 'fetchDebitNote' and 'pageSize'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\DebitNote\detailNoteEdit.js
+  Line 16:11:  'location' is assigned a value but never used  no-unused-vars
+
+src\containers\DsCongViec\DsCongViecAdd.js
+  Line 6:7:  'capitalizeFirstLetter' is assigned a value but never used  no-unused-vars
+
+src\containers\DsCongViec\DsCongViecEdit.js
+  Line 7:7:  'capitalizeFirstLetter' is assigned a value but never used  no-unused-vars
+
+src\containers\GCN_NH_CAM\AffidavitEdit.js
+  Line 54:8:    React Hook useEffect has a missing dependency: 'fetchAffidavitDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 101:25:  Imported JSX component GCN_NH_Info must be in PascalCase or SCREAMING_SNAKE_CASE                                         react/jsx-pascal-case
+  Line 111:25:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                                  react/jsx-pascal-case
+
+src\containers\GCN_NH_CAM\AffidavitList.js
+  Line 4:8:    'Select' is defined but never used                                                                           no-unused-vars
+  Line 13:12:  'countries' is assigned a value but never used                                                               no-unused-vars
+  Line 15:29:  'setSelectedCountry' is assigned a value but never used                                                      no-unused-vars
+  Line 63:8:   React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 80:11:  'formatOptions' is assigned a value but never used                                                           no-unused-vars
+
+src\containers\GCN_NH_CAM\GCN_NH_CAMAdd.js
+  Line 13:13:  't' is assigned a value but never used                  no-unused-vars
+  Line 21:12:  'maKhachHang' is assigned a value but never used        no-unused-vars
+  Line 22:12:  'maDoiTac' is assigned a value but never used           no-unused-vars
+  Line 35:12:  'productAndService' is assigned a value but never used  no-unused-vars
+  Line 39:12:  'maSPDVList' is assigned a value but never used         no-unused-vars
+  Line 39:24:  'setMaSPDVList' is assigned a value but never used      no-unused-vars
+  Line 46:26:  'setMaHoSoVuViec' is assigned a value but never used    no-unused-vars
+  Line 47:25:  'setMaDonDangKy' is assigned a value but never used     no-unused-vars
+
+src\containers\GCN_NH_CAM\GCN_NH_CAMDetail.js
+  Line 55:19:   'setSuaNhan' is assigned a value but never used                                                                 no-unused-vars
+  Line 56:21:   'setNdSuaNhan' is assigned a value but never used                                                               no-unused-vars
+  Line 57:23:   'setSuaNhomSPDV' is assigned a value but never used                                                             no-unused-vars
+  Line 58:25:   'setNdSuaNhomSPDV' is assigned a value but never used                                                           no-unused-vars
+  Line 75:6:    React Hook useEffect has a missing dependency: 'fetchDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 82:13:   'res' is assigned a value but never used                                                                        no-unused-vars
+  Line 115:13:  'res' is assigned a value but never used                                                                        no-unused-vars
+  Line 171:9:   Imported JSX component GCN_NH_Info must be in PascalCase or SCREAMING_SNAKE_CASE                                react/jsx-pascal-case
+  Line 246:15:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                         react/jsx-pascal-case
+  Line 325:15:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                         react/jsx-pascal-case
+
+src\containers\GCN_NH_CAM\GCN_NH_CAMEdit.js
+  Line 14:13:  't' is assigned a value but never used                                                                          no-unused-vars
+  Line 22:12:  'maKhachHang' is assigned a value but never used                                                                no-unused-vars
+  Line 23:12:  'maDoiTac' is assigned a value but never used                                                                   no-unused-vars
+  Line 36:12:  'productAndService' is assigned a value but never used                                                          no-unused-vars
+  Line 40:12:  'maSPDVList' is assigned a value but never used                                                                 no-unused-vars
+  Line 40:24:  'setMaSPDVList' is assigned a value but never used                                                              no-unused-vars
+  Line 109:8:  React Hook useEffect has a missing dependency: 'fetchDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\GCN_NH_CAM\GCN_NH_CAMList.js
+  Line 4:8:     'Select' is defined but never used                  no-unused-vars
+  Line 20:12:   'countries' is assigned a value but never used      no-unused-vars
+  Line 214:11:  'formatOptions' is assigned a value but never used  no-unused-vars
+
+src\containers\GCN_NH_CAM_SD\Application_SD_GCN_NH_KHList.js
+  Line 4:8:    'Select' is defined but never used                                                                           no-unused-vars
+  Line 13:12:  'countries' is assigned a value but never used                                                               no-unused-vars
+  Line 15:29:  'setSelectedCountry' is assigned a value but never used                                                      no-unused-vars
+  Line 63:8:   React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 80:11:  'formatOptions' is assigned a value but never used                                                           no-unused-vars
+
+src\containers\GCN_NH_CAM_SD\GCN_NH_CAM_SDList.js
+  Line 4:8:    'Select' is defined but never used                                                                           no-unused-vars
+  Line 13:12:  'countries' is assigned a value but never used                                                               no-unused-vars
+  Line 15:29:  'setSelectedCountry' is assigned a value but never used                                                      no-unused-vars
+  Line 63:8:   React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 80:11:  'formatOptions' is assigned a value but never used                                                           no-unused-vars
+
+src\containers\GCN_NH_VN\GCN_NH_VNAdd.js
+  Line 13:13:  't' is assigned a value but never used                  no-unused-vars
+  Line 21:12:  'maKhachHang' is assigned a value but never used        no-unused-vars
+  Line 22:12:  'maDoiTac' is assigned a value but never used           no-unused-vars
+  Line 35:12:  'productAndService' is assigned a value but never used  no-unused-vars
+  Line 39:12:  'maSPDVList' is assigned a value but never used         no-unused-vars
+  Line 39:24:  'setMaSPDVList' is assigned a value but never used      no-unused-vars
+  Line 46:26:  'setMaHoSoVuViec' is assigned a value but never used    no-unused-vars
+  Line 47:25:  'setMaDonDangKy' is assigned a value but never used     no-unused-vars
+
+src\containers\GCN_NH_VN\GCN_NH_VNDetail.js
+  Line 48:19:   'setSuaNhan' is assigned a value but never used                                                                 no-unused-vars
+  Line 49:21:   'setNdSuaNhan' is assigned a value but never used                                                               no-unused-vars
+  Line 69:6:    React Hook useEffect has a missing dependency: 'fetchDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 94:13:   'res' is assigned a value but never used                                                                        no-unused-vars
+  Line 151:9:   Imported JSX component GCN_NH_Info must be in PascalCase or SCREAMING_SNAKE_CASE                                react/jsx-pascal-case
+  Line 259:15:  Imported JSX component DocumentSection_KH must be in PascalCase or SCREAMING_SNAKE_CASE                         react/jsx-pascal-case
+
+src\containers\GCN_NH_VN\GCN_NH_VNEdit.js
+  Line 14:13:  't' is assigned a value but never used                                                                          no-unused-vars
+  Line 22:12:  'maKhachHang' is assigned a value but never used                                                                no-unused-vars
+  Line 23:12:  'maDoiTac' is assigned a value but never used                                                                   no-unused-vars
+  Line 36:12:  'productAndService' is assigned a value but never used                                                          no-unused-vars
+  Line 40:12:  'maSPDVList' is assigned a value but never used                                                                 no-unused-vars
+  Line 40:24:  'setMaSPDVList' is assigned a value but never used                                                              no-unused-vars
+  Line 47:26:  'setMaHoSoVuViec' is assigned a value but never used                                                            no-unused-vars
+  Line 48:25:  'setMaDonDangKy' is assigned a value but never used                                                             no-unused-vars
+  Line 109:8:  React Hook useEffect has a missing dependency: 'fetchDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\GCN_NH_VN\GCN_NH_VNList.js
+  Line 4:8:    'Select' is defined but never used                  no-unused-vars
+  Line 20:10:  'countries' is assigned a value but never used      no-unused-vars
+  Line 212:9:  'formatOptions' is assigned a value but never used  no-unused-vars
+
+src\containers\GCN_NH_VN_SD\Application_SD_GCN_NH_VNList.js
+  Line 4:8:    'Select' is defined but never used                                                                           no-unused-vars
+  Line 13:12:  'countries' is assigned a value but never used                                                               no-unused-vars
+  Line 15:29:  'setSelectedCountry' is assigned a value but never used                                                      no-unused-vars
+  Line 63:8:   React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 80:11:  'formatOptions' is assigned a value but never used                                                           no-unused-vars
+
+src\containers\GCN_NH_VN_SD\GCN_NH_VN_SDList.js
+  Line 4:8:    'Select' is defined but never used                                                                           no-unused-vars
+  Line 12:10:  'countries' is assigned a value but never used                                                               no-unused-vars
+  Line 14:27:  'setSelectedCountry' is assigned a value but never used                                                      no-unused-vars
+  Line 62:6:   React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 79:9:   'formatOptions' is assigned a value but never used                                                           no-unused-vars
+
+src\containers\GeneralAdvice\GeneralAdviceAdd_KH.js
+  Line 7:10:   'Upload' is defined but never used      no-unused-vars
+  Line 7:18:   'Button' is defined but never used      no-unused-vars
+  Line 11:13:  't' is assigned a value but never used  no-unused-vars
+
+src\containers\GeneralAdvice\GeneralAdviceAdd_VN.js
+  Line 7:10:   'Upload' is defined but never used      no-unused-vars
+  Line 7:18:   'Button' is defined but never used      no-unused-vars
+  Line 11:13:  't' is assigned a value but never used  no-unused-vars
+
+src\containers\GeneralAdvice\GeneralAdviceEdit_KH.js
+  Line 12:11:  't' is assigned a value but never used                                                                          no-unused-vars
+  Line 35:6:   React Hook useEffect has a missing dependency: 'fetchDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\GeneralAdvice\GeneralAdviceEdit_VN.js
+  Line 12:11:  't' is assigned a value but never used                                                                          no-unused-vars
+  Line 35:6:   React Hook useEffect has a missing dependency: 'fetchDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\GeneralAdvice\GeneralAdviceList_KH.js
+  Line 44:8:  React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\GeneralAdvice\GeneralAdviceList_VN.js
+  Line 44:8:  React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Group\GroupEdit.js
+  Line 50:6:  React Hook useEffect has a missing dependency: 'fetchGroupDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Group\GroupList.js
+  Line 48:6:  React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Home\HomePage.js
+  Line 5:49:  'UserCheck' is defined but never used     no-unused-vars
+  Line 6:28:  'ShoppingCart' is defined but never used  no-unused-vars
+
+src\containers\Home\HomeReport.js
+  Line 327:9:  'vnCurrentMonth' is assigned a value but never used  no-unused-vars
+  Line 332:9:  'khCurrentMonth' is assigned a value but never used  no-unused-vars
+
+src\containers\Job\JobAdd.js
+  Line 24:13:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\Job\JobDetail.js
+  Line 4:10:  'showSuccess' is defined but never used                                                                         no-unused-vars
+  Line 4:23:  'showError' is defined but never used                                                                           no-unused-vars
+  Line 38:6:  React Hook useEffect has a missing dependency: 'maNganhNghe'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Job\JobEdit.js
+  Line 39:6:  React Hook useEffect has a missing dependency: 'maNganhNghe'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Notification\NotificationPopup.js
+  Line 5:9:  'navigate' is assigned a value but never used  no-unused-vars
+
+src\containers\Partner\PartnerDetail.js
+  Line 44:6:  React Hook useEffect has a missing dependency: 'fetchPartnerDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Partner\PartnerEdit.js
+  Line 75:6:  React Hook useEffect has a missing dependency: 'fetchPartnerDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\Partner\PartnerList.js
+  Line 61:6:  React Hook useEffect has a missing dependency: 'pageSize'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\containers\PowerOfAttorney\PowerOfAttorneyAdd.js
+  Line 20:22:  'setSoDonGoc' is assigned a value but never used  no-unused-vars
+
+src\containers\PowerOfAttorney\PowerOfAttorneyList.js
+  Line 58:62:  The ref value 'blobUrlRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'blobUrlRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+src\containers\ProductAndServices\ProductAndServicesAdd.js
+  Line 26:13:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\Report\Application_KHListReport.js
+  Line 10:8:    'ExcelJS' is defined but never used                       no-unused-vars
+  Line 17:9:    'role' is assigned a value but never used                 no-unused-vars
+  Line 29:10:   'brands' is assigned a value but never used               no-unused-vars
+  Line 29:18:   'setBrands' is assigned a value but never used            no-unused-vars
+  Line 68:9:    'trangThaiDonOptions' is assigned a value but never used  no-unused-vars
+  Line 156:10:  'showFilters' is assigned a value but never used          no-unused-vars
+  Line 156:23:  'setShowFilters' is assigned a value but never used       no-unused-vars
+
+src\containers\Report\Application_VNListReport.js
+  Line 10:8:    'ExcelJS' is defined but never used                  no-unused-vars
+  Line 14:9:    'role' is assigned a value but never used            no-unused-vars
+  Line 190:10:  'showFilters' is assigned a value but never used     no-unused-vars
+  Line 190:23:  'setShowFilters' is assigned a value but never used  no-unused-vars
+
+src\containers\Staff\StaffAdd.js
+  Line 38:13:  'response' is assigned a value but never used  no-unused-vars
+
+src\containers\Staff\StaffDetail.js
+  Line 4:10:  'DatePicker' is defined but never used  no-unused-vars
+  Line 7:8:   'dayjs' is defined but never used       no-unused-vars
+
+src\containers\Staff\StaffEdit.js
+  Line 4:23:  'showError' is defined but never used  no-unused-vars
+
+src\containers\Staff\StaffList.js
+  Line 9:9:  'role' is assigned a value but never used  no-unused-vars
+
+src\containers\Timesheet\TimesheetList.js
+  Line 7:8:  'dayjs' is defined but never used  no-unused-vars
+
+src\routes\AppRoutes.js
+  Line 41:8:    'ApplicationDetail' is defined but never used                                                      no-unused-vars
+  Line 61:10:   'Home' is defined but never used                                                                   no-unused-vars
+  Line 61:16:   'Upload' is defined but never used                                                                 no-unused-vars
+  Line 72:8:    'Application_GH_VNAdd' is defined but never used                                                   no-unused-vars
+  Line 79:8:    'HomePage' is defined but never used                                                               no-unused-vars
+  Line 289:54:  Imported JSX component ApplicationList_KH must be in PascalCase or SCREAMING_SNAKE_CASE            react/jsx-pascal-case
+  Line 290:67:  Imported JSX component ApplicationAdd_KH must be in PascalCase or SCREAMING_SNAKE_CASE             react/jsx-pascal-case
+  Line 293:22:  Imported JSX component ApplicationAdd_KH must be in PascalCase or SCREAMING_SNAKE_CASE             react/jsx-pascal-case
+  Line 297:22:  Imported JSX component ApplicationAdd_KH must be in PascalCase or SCREAMING_SNAKE_CASE             react/jsx-pascal-case
+  Line 299:67:  Imported JSX component ApplicationEdit_KH must be in PascalCase or SCREAMING_SNAKE_CASE            react/jsx-pascal-case
+  Line 300:69:  Imported JSX component ApplicationDetail_KH must be in PascalCase or SCREAMING_SNAKE_CASE          react/jsx-pascal-case
+  Line 302:57:  Imported JSX component ApplicationKD_VNList must be in PascalCase or SCREAMING_SNAKE_CASE          react/jsx-pascal-case
+  Line 303:74:  Imported JSX component ApplicationKD_VNAdd must be in PascalCase or SCREAMING_SNAKE_CASE           react/jsx-pascal-case
+  Line 304:70:  Imported JSX component ApplicationKD_VNEdit must be in PascalCase or SCREAMING_SNAKE_CASE          react/jsx-pascal-case
+  Line 305:72:  Imported JSX component ApplicationKD_VNDetail must be in PascalCase or SCREAMING_SNAKE_CASE        react/jsx-pascal-case
+  Line 307:61:  Imported JSX component Application_GH_NH_VNList must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 308:60:  Imported JSX component Application_GH_NH_VNAdd must be in PascalCase or SCREAMING_SNAKE_CASE       react/jsx-pascal-case
+  Line 309:65:  Imported JSX component Application_GH_NH_VNEdit must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 310:67:  Imported JSX component Application_GH_NH_VNDetail must be in PascalCase or SCREAMING_SNAKE_CASE    react/jsx-pascal-case
+  Line 312:61:  Imported JSX component Application_GH_NH_KHList must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 313:60:  Imported JSX component Application_GH_NH_KHAdd must be in PascalCase or SCREAMING_SNAKE_CASE       react/jsx-pascal-case
+  Line 314:65:  Imported JSX component Application_GH_NH_KHEdit must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 315:67:  Imported JSX component Application_GH_NH_KHDetail must be in PascalCase or SCREAMING_SNAKE_CASE    react/jsx-pascal-case
+  Line 317:61:  Imported JSX component Application_GH_VNList must be in PascalCase or SCREAMING_SNAKE_CASE         react/jsx-pascal-case
+  Line 318:73:  Imported JSX component Application_SD_NH_VNAdd must be in PascalCase or SCREAMING_SNAKE_CASE       react/jsx-pascal-case
+  Line 319:73:  Imported JSX component Application_TD_NH_VNAdd must be in PascalCase or SCREAMING_SNAKE_CASE       react/jsx-pascal-case
+  Line 321:73:  Imported JSX component Application_SD_NH_KHAdd must be in PascalCase or SCREAMING_SNAKE_CASE       react/jsx-pascal-case
+  Line 323:47:  Imported JSX component VuViec_Bill_VN_FullList must be in PascalCase or SCREAMING_SNAKE_CASE       react/jsx-pascal-case
+  Line 324:56:  Imported JSX component VuViec_BillList must be in PascalCase or SCREAMING_SNAKE_CASE               react/jsx-pascal-case
+  Line 325:50:  Imported JSX component VuViec_Bill_KH_FullList must be in PascalCase or SCREAMING_SNAKE_CASE       react/jsx-pascal-case
+  Line 326:59:  Imported JSX component VuViec_Bill_KHList must be in PascalCase or SCREAMING_SNAKE_CASE            react/jsx-pascal-case
+  Line 327:58:  Imported JSX component VuViec_BillChuaDuyetList must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 328:61:  Imported JSX component VuViec_Bill_KHChuaDuyetList must be in PascalCase or SCREAMING_SNAKE_CASE   react/jsx-pascal-case
+  Line 330:55:  Imported JSX component VuViec_BillBiTuChoiList must be in PascalCase or SCREAMING_SNAKE_CASE       react/jsx-pascal-case
+  Line 331:58:  Imported JSX component VuViec_Bil_KHBiTuChoiList must be in PascalCase or SCREAMING_SNAKE_CASE     react/jsx-pascal-case
+  Line 335:53:  Imported JSX component DebitNote_KHList must be in PascalCase or SCREAMING_SNAKE_CASE              react/jsx-pascal-case
+  Line 339:47:  Imported JSX component Case_KHList must be in PascalCase or SCREAMING_SNAKE_CASE                   react/jsx-pascal-case
+  Line 340:46:  Imported JSX component GCN_NH_VNList must be in PascalCase or SCREAMING_SNAKE_CASE                 react/jsx-pascal-case
+  Line 341:49:  Imported JSX component GCN_NH_VN_SDList must be in PascalCase or SCREAMING_SNAKE_CASE              react/jsx-pascal-case
+  Line 342:52:  Imported JSX component GCN_NH_VNDetail must be in PascalCase or SCREAMING_SNAKE_CASE               react/jsx-pascal-case
+  Line 343:45:  Imported JSX component GCN_NH_VNAdd must be in PascalCase or SCREAMING_SNAKE_CASE                  react/jsx-pascal-case
+  Line 344:53:  Imported JSX component GCN_NH_VNEdit must be in PascalCase or SCREAMING_SNAKE_CASE                 react/jsx-pascal-case
+  Line 345:50:  Imported JSX component GCN_NH_CAMList must be in PascalCase or SCREAMING_SNAKE_CASE                react/jsx-pascal-case
+  Line 346:53:  Imported JSX component GCN_NH_CAM_SDList must be in PascalCase or SCREAMING_SNAKE_CASE             react/jsx-pascal-case
+  Line 347:49:  Imported JSX component GCN_NH_CAMAdd must be in PascalCase or SCREAMING_SNAKE_CASE                 react/jsx-pascal-case
+  Line 348:54:  Imported JSX component GCN_NH_CAMEdit must be in PascalCase or SCREAMING_SNAKE_CASE                react/jsx-pascal-case
+  Line 349:56:  Imported JSX component GCN_NH_CAMDetail must be in PascalCase or SCREAMING_SNAKE_CASE              react/jsx-pascal-case
+  Line 357:56:  Imported JSX component GeneralAdviceList_VN must be in PascalCase or SCREAMING_SNAKE_CASE          react/jsx-pascal-case
+  Line 358:55:  Imported JSX component GeneralAdviceAdd_VN must be in PascalCase or SCREAMING_SNAKE_CASE           react/jsx-pascal-case
+  Line 359:60:  Imported JSX component GeneralAdviceEdit_VN must be in PascalCase or SCREAMING_SNAKE_CASE          react/jsx-pascal-case
+  Line 360:56:  Imported JSX component GeneralAdviceList_KH must be in PascalCase or SCREAMING_SNAKE_CASE          react/jsx-pascal-case
+  Line 361:55:  Imported JSX component GeneralAdviceAdd_KH must be in PascalCase or SCREAMING_SNAKE_CASE           react/jsx-pascal-case
+  Line 362:60:  Imported JSX component GeneralAdviceEdit_KH must be in PascalCase or SCREAMING_SNAKE_CASE          react/jsx-pascal-case
+  Line 368:60:  Imported JSX component Application_SD_NH_VNList must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 369:60:  Imported JSX component Application_SD_NH_KHList must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 371:64:  Imported JSX component Application_SD_GCN_NH_KHList must be in PascalCase or SCREAMING_SNAKE_CASE  react/jsx-pascal-case
+  Line 372:64:  Imported JSX component Application_SD_GCN_NH_VNList must be in PascalCase or SCREAMING_SNAKE_CASE  react/jsx-pascal-case
+  Line 378:61:  Imported JSX component Application_VNListReport must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 379:61:  Imported JSX component Application_KHListReport must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 381:60:  Imported JSX component Application_TD_NH_VNList must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 382:60:  Imported JSX component Application_TD_NH_KHList must be in PascalCase or SCREAMING_SNAKE_CASE      react/jsx-pascal-case
+  Line 384:56:  Imported JSX component VuViec_Bill_Full_List_ALL must be in PascalCase or SCREAMING_SNAKE_CASE     react/jsx-pascal-case
+  Line 385:60:  Imported JSX component VuViec_BillDaDuyetList_ALL must be in PascalCase or SCREAMING_SNAKE_CASE    react/jsx-pascal-case
+  Line 386:62:  Imported JSX component VuViec_BillChuaDuyetList_ALL must be in PascalCase or SCREAMING_SNAKE_CASE  react/jsx-pascal-case
+  Line 387:54:  Imported JSX component DebitNoteList_ALL must be in PascalCase or SCREAMING_SNAKE_CASE             react/jsx-pascal-case
+
+src\utils\api.js
+  Line 4:10:  'useSelector' is defined but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  1.54 MB (+638 B)  build\static\js\main.e4015c23.js
+  10.34 kB          build\static\css\main.6c0675c9.css
+  1.77 kB           build\static\js\453.fa0c3b80.chunk.js
+
+The bundle size is significantly larger than recommended.
+Consider reducing it with code splitting: https://goo.gl/9VhYWB
+You can also analyze the project dependencies: https://goo.gl/LeUzfb
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+

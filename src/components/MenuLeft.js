@@ -59,7 +59,7 @@ function MenuLeft() {
 
       <nav className="flex-1 px-4 py-4">
         <ul className="space-y-2 text-[#009999] text-sm font-bold">
-          {role === "admin" && <li><NavLink to="/email-test" className={navLinkClass}>Email thử</NavLink></li>}
+          {/*{role === "admin" && <li><NavLink to="/email-test" className={navLinkClass}>Email thử</NavLink></li>}
           {/* ════════════════════════════════════
                TIMESHEET — menu tổng (mọi role đều thấy)
               ════════════════════════════════════ */}
