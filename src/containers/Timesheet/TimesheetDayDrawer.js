@@ -377,7 +377,7 @@ export default function TimesheetDayDrawer({ open, date, dateStr, records = [], 
         open={open}
         onClose={handleClose}
         afterOpenChange={handleAfterOpenChange}
-        width={540}
+        width={typeof window !== "undefined" ? Math.min(700, window.innerWidth) : 700}
         styles={{
           body: { padding: 0 },
           header: { borderBottom: "1px solid #f0f0f0" },

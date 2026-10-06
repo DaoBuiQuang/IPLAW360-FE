@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import callAPI from "../../utils/api";
 
@@ -10,9 +11,13 @@ const capitalizeFirstLetter = (str) => {
 
 function DsCongViecAdd() {
   const navigate = useNavigate();
+  const role = useSelector((state) => state.auth.role);
+  const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
+  const isAdmin = role === "admin" || role === "ceo";
 
   const [maVietTat, setMaVietTat] = useState("");
   const [moTa, setMoTa] = useState("");
+  const [loaiCongViec, setLoaiCongViec] = useState("HE_THONG");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -36,12 +41,16 @@ function DsCongViecAdd() {
 
     setLoading(true);
     try {
+      const isPersonal = !isAdmin || loaiCongViec === "CA_NHAN";
       await callAPI({
         method: "post",
         endpoint: "/ds-cong-viec/add",
         data: {
           maVietTat: maVietTat.trim().toUpperCase(),
           moTa: moTa.trim() ? moTa.trim().charAt(0).toUpperCase() + moTa.trim().slice(1) : "",
+          maNhanSu: isPersonal ? currentMaNhanSu : null,
+          isSystem: !isPersonal,
+          loaiCongViec: isPersonal ? "CA_NHAN" : "HE_THONG",
         },
       });
       toast.success("Thêm công việc thành công!", {
@@ -71,6 +80,48 @@ function DsCongViecAdd() {
         </h2>
 
         <div className="grid grid-cols-1 gap-5 mb-6">
+          {/* Phân loại công việc */}
+          {isAdmin ? (
+            <div>
+              <label className="block text-gray-700 text-left mb-1 font-medium">
+                Phân loại công việc
+              </label>
+              <div className="flex flex-col sm:flex-row gap-4 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="loaiCongViec"
+                    value="HE_THONG"
+                    checked={loaiCongViec === "HE_THONG"}
+                    onChange={() => setLoaiCongViec("HE_THONG")}
+                    className="accent-[#009999]"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Hệ thống (áp dụng chung toàn công ty)
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="loaiCongViec"
+                    value="CA_NHAN"
+                    checked={loaiCongViec === "CA_NHAN"}
+                    onChange={() => setLoaiCongViec("CA_NHAN")}
+                    className="accent-[#009999]"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Cá nhân (chỉ hiển thị cho tài khoản của bạn)
+                  </span>
+                </label>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-left">
+              <p className="text-xs text-emerald-800 font-medium">
+                📌 Công việc thường nhật này sẽ được lưu ở dạng <strong>Cá nhân</strong> (chỉ hiển thị cho riêng bạn trong ROUTINES & MYTIME).
+              </p>
+            </div>
+          )}
           {/* Ma viet tat */}
           <div>
             <label className="block text-gray-700 text-left mb-1">

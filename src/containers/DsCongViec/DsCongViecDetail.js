@@ -8,7 +8,7 @@ function DsCongViecDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const role = useSelector((state) => state.auth.role);
-  const staffRoles = ["admin", "staff"];
+  const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +55,11 @@ function DsCongViecDetail() {
 
   if (!item) return null;
 
+  const isAdmin = role === "admin" || role === "ceo";
+  const isSys = item.isSystem === true || item.loaiCongViec === "HE_THONG" || (!item.maNhanSu && item.isSystem !== false);
+  const isOwner = item.maNhanSu === currentMaNhanSu;
+  const canModify = isAdmin || (!isSys && isOwner);
+
   return (
     <div className="p-1 bg-gray-100 flex items-center justify-center min-h-screen">
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
@@ -73,15 +78,29 @@ function DsCongViecDetail() {
             </p>
           </div>
 
+          {/* Phân loại */}
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-1">
+              Phân loại
+            </label>
+            <p className="p-2 bg-gray-50 border rounded-lg text-gray-700 font-medium">
+              {isSys ? (
+                <span className="text-blue-600">🌐 Hệ thống (Toàn bộ)</span>
+              ) : (
+                <span className="text-emerald-600">👤 Cá nhân</span>
+              )}
+            </p>
+          </div>
+
           {/* Nhan su */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">
-              Nhân sự
+              Người tạo
             </label>
             <p className="p-2 bg-gray-50 border rounded-lg text-gray-700">
               {item.nhanSu?.hoTen
                 ? `${item.nhanSu.hoTen} (${item.maNhanSu})`
-                : item.maNhanSu || "Chung (toàn bộ)"}
+                : item.maNhanSu || "Hệ thống"}
             </p>
           </div>
 
@@ -124,7 +143,7 @@ function DsCongViecDetail() {
           >
             Quay lại
           </button>
-          {staffRoles.includes(role) && (
+          {canModify && (
             <button
               onClick={() => navigate(`/dscongviec_edit/${item.id}`)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"

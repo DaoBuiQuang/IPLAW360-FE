@@ -75,8 +75,8 @@ function MenuLeft() {
                   <User size={14} />
                   <span className="text-left w-full">MYTIME</span>
                 </NavLink>
-                {/* ROUTINES: hiện ra khi đang ở trang MYTIME */}
-                {location.pathname.startsWith("/timesheet/mytime") || location.pathname === "/dscongviec_list" ? (
+                {/* ROUTINES: hiện ra khi đang ở trang MYTIME hoặc các trang ROUTINES */}
+                {location.pathname.startsWith("/timesheet/mytime") || location.pathname.startsWith("/dscongviec") ? (
                   <ul className="ml-5 mt-1 space-y-1 text-sm">
                     <li>
                       <NavLink to="/dscongviec_list" className={navLinkClass}>

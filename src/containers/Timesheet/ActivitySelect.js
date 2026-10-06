@@ -36,8 +36,8 @@ export default function ActivitySelect({
 
         const dsCongViec = Array.isArray(res?.data) ? res.data : [];
 
-        // Tạo options từ Danh Sách Công Việc Thường Nhật
-        const customOptions = dsCongViec.map((item) => {
+        // Định dạng option hiển thị
+        const formatOption = (item) => {
           const displayLabel = item.maVietTat
             ? `[${item.maVietTat}] ${item.moTa}`
             : item.moTa;
@@ -51,48 +51,69 @@ export default function ActivitySelect({
             maVietTat: item.maVietTat,
             item,
           };
+        };
+
+        // Phân tách thành 2 dạng: Hệ thống (admin thêm) và Cá nhân (cá nhân thêm)
+        const heThongList = [];
+        const caNhanList = [];
+
+        dsCongViec.forEach((item) => {
+          const isSys =
+            item.isSystem === true ||
+            item.loaiCongViec === "HE_THONG" ||
+            (!item.maNhanSu && item.isSystem !== false);
+
+          if (isSys) {
+            heThongList.push(formatOption(item));
+          } else {
+            caNhanList.push(formatOption(item));
+          }
         });
 
-        // Tạo options từ danh mục cơ bản (nếu chưa có trong custom)
-        const baseOptions = defaultActivities
-          .filter(
-            (act) =>
-              !customOptions.some(
-                (c) =>
-                  c.moTa?.toLowerCase() === act.toLowerCase() ||
-                  c.value?.toLowerCase() === act.toLowerCase()
-              )
-          )
-          .map((act) => ({
-            value: act,
-            label: act,
-            moTa: act,
-            maVietTat: "",
-          }));
-
         const grouped = [];
-        if (customOptions.length > 0) {
+        if (heThongList.length > 0) {
           grouped.push({
-            label: "Công việc thường nhật (Hệ thống)",
-            options: customOptions,
+            label: "Hệ thống",
+            options: heThongList,
           });
         }
-        if (baseOptions.length > 0) {
+        if (caNhanList.length > 0) {
           grouped.push({
-            label: "Hoạt động chung",
-            options: baseOptions,
+            label: "Cá nhân",
+            options: caNhanList,
+          });
+        }
+
+        // Fallback nếu chưa có dữ liệu nào
+        if (grouped.length === 0) {
+          grouped.push({
+            label: "Hệ thống",
+            options: defaultActivities.map((act) => ({
+              value: act,
+              label: act,
+              moTa: act,
+              maVietTat: "",
+            })),
           });
         }
 
         if (isMounted) {
-          setOptions(grouped.length > 0 ? grouped : baseOptions);
+          setOptions(grouped);
         }
       } catch {
         // Fallback danh sách tĩnh nếu API lỗi
         if (isMounted) {
-          setOptions(
-            defaultActivities.map((act) => ({ value: act, label: act }))
-          );
+          setOptions([
+            {
+              label: "Hệ thống",
+              options: defaultActivities.map((act) => ({
+                value: act,
+                label: act,
+                moTa: act,
+                maVietTat: "",
+              })),
+            },
+          ]);
         }
       } finally {
         if (isMounted) setLoading(false);
