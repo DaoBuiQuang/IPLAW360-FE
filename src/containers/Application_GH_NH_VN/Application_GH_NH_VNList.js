@@ -1,68 +1,235 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useNavigationType } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import callAPI from "../../utils/api";
-import Select from "react-select";
 import { useSelector } from 'react-redux';
 import { useTranslation } from "react-i18next";
-import { Modal, Pagination } from "antd";
+import { Modal, Pagination, Spin } from "antd";
+import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+
+const FILTER_STORAGE_KEY_GH_VN = "applicationGhNhVnListFilters";
+const STATE_STORAGE_KEY_GH_VN = "applicationGhNhVnListState";
+const PAGE_STORAGE_KEY_GH_VN = "applicationGhNhVnListPage";
 
 function Application_GH_NH_VNList() {
     const { t } = useTranslation();
     const role = useSelector((state) => state.auth.role);
+    const navigate = useNavigate();
+    const navigationType = useNavigationType();
+
+    const [loading, setLoading] = useState(false);
     const [donGiaHans, setDonGiaHans] = useState([]);
-    const [countries, setCountries] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCountry, setSelectedCountry] = useState("");
+    const [customerName, setCustomerName] = useState("");
+    const [partnerName, setPartnerName] = useState("");
+    const [brandName, setBrandName] = useState("");
+    const [customerOptions, setCustomerOptions] = useState([]);
+    const [partnerOptions, setPartnerOptions] = useState([]);
+    const [brandOptions, setBrandOptions] = useState([]);
+
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [partnerToDelete, setPartnerToDelete] = useState(null);
     const [pageIndex, setPageIndex] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
-    const navigate = useNavigate();
 
-    const fetchGCNs = async (searchValue, countryCode, page = 1, size = 10) => {
+    const ghSearchOptions = React.useMemo(() => {
+        const list = [];
+        const seen = new Set();
+        (donGiaHans || []).forEach((item) => {
+            const gcn = item.gcn;
+            if (item.soDon && !seen.has(item.soDon)) {
+                seen.add(item.soDon);
+                list.push({
+                    value: item.soDon,
+                    label: `Số đơn GH: ${item.soDon}${gcn?.NhanHieu?.tenNhanHieu ? ` - ${gcn.NhanHieu.tenNhanHieu}` : ""}`,
+                });
+            }
+            if (gcn?.soBang && !seen.has(gcn.soBang)) {
+                seen.add(gcn.soBang);
+                list.push({
+                    value: gcn.soBang,
+                    label: `Số bằng: ${gcn.soBang}${gcn?.NhanHieu?.tenNhanHieu ? ` - ${gcn.NhanHieu.tenNhanHieu}` : ""}`,
+                });
+            }
+            if (gcn?.soDon && !seen.has(gcn.soDon)) {
+                seen.add(gcn.soDon);
+                list.push({
+                    value: gcn.soDon,
+                    label: `Số đơn gốc: ${gcn.soDon}${gcn?.NhanHieu?.tenNhanHieu ? ` - ${gcn.NhanHieu.tenNhanHieu}` : ""}`,
+                });
+            }
+            if (gcn?.maHoSo && !seen.has(gcn.maHoSo)) {
+                seen.add(gcn.maHoSo);
+                list.push({
+                    value: gcn.maHoSo,
+                    label: `Mã HS: ${gcn.maHoSo}${gcn?.NhanHieu?.tenNhanHieu ? ` - ${gcn.NhanHieu.tenNhanHieu}` : ""}`,
+                });
+            }
+        });
+        return list;
+    }, [donGiaHans]);
+
+    const fetchGCNs = async (
+        searchValue,
+        page = 1,
+        size = 10,
+        overrides = {}
+    ) => {
+        setLoading(true);
         try {
-            localStorage.setItem("partnerListPage", page);
+            localStorage.setItem(PAGE_STORAGE_KEY_GH_VN, page.toString());
+            const term = searchValue !== undefined ? searchValue : searchTerm;
+            const cn = overrides.customerName !== undefined ? overrides.customerName : customerName;
+            const pn = overrides.partnerName !== undefined ? overrides.partnerName : partnerName;
+            const bn = overrides.brandName !== undefined ? overrides.brandName : brandName;
+
             const response = await callAPI({
                 method: "post",
                 endpoint: "/application_gh_nh_vn/list",
                 data: {
-                    soBang: searchValue,
+                    soBang: term,
+                    searchText: term,
+                    customerName: cn,
+                    partnerName: pn,
+                    brandName: bn,
                     pageSize: size,
                     pageIndex: page,
                 },
             });
-            setDonGiaHans(response.data);
+            setDonGiaHans(response.data || []);
             setTotalItems(response.pagination?.totalItems || 0);
             setPageIndex(response.pagination?.pageIndex || 1);
             setPageSize(response.pagination?.pageSize || 10);
         } catch (error) {
-            console.error("Lỗi khi lấy dữ liệu đối tác:", error);
+            console.error("Lỗi khi lấy dữ liệu đơn gia hạn GCN VN:", error);
+            setDonGiaHans([]);
+            setTotalItems(0);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const fetchCountries = async () => {
+    const fetchFilterOptions = async () => {
         try {
-            const response = await callAPI({
-                method: "post",
-                endpoint: "/country/list",
-                data: {},
-            });
-            setCountries(response);
+            const [custRes, partnerRes, brandRes] = await Promise.allSettled([
+                callAPI({ method: "post", endpoint: "/customers/by-name", data: {} }),
+                callAPI({ method: "post", endpoint: "/partner/all", data: {} }),
+                callAPI({ method: "post", endpoint: "/brand/shortlist", data: {} }),
+            ]);
+            if (custRes.status === "fulfilled") {
+                const raw = Array.isArray(custRes.value) ? custRes.value : custRes.value?.data || [];
+                setCustomerOptions(
+                    raw.map((c) => ({
+                        value: c.tenKhachHang,
+                        label: `${c.tenKhachHang}${c.maKhachHang ? ` (${c.maKhachHang})` : ""}`,
+                    }))
+                );
+            }
+            if (partnerRes.status === "fulfilled") {
+                const raw = Array.isArray(partnerRes.value) ? partnerRes.value : partnerRes.value?.data || [];
+                setPartnerOptions(
+                    raw.map((p) => ({
+                        value: p.tenDoiTac,
+                        label: `${p.tenDoiTac}${p.maDoiTac ? ` (${p.maDoiTac})` : ""}`,
+                    }))
+                );
+            }
+            if (brandRes.status === "fulfilled") {
+                const raw = Array.isArray(brandRes.value) ? brandRes.value : brandRes.value?.data || [];
+                setBrandOptions(
+                    raw.map((b) => ({
+                        value: b.tenNhanHieu,
+                        label: `${b.tenNhanHieu}${b.maNhanHieu ? ` (${b.maNhanHieu})` : ""}`,
+                    }))
+                );
+            }
         } catch (error) {
-            console.error("Lỗi khi lấy dữ liệu quốc gia:", error);
+            console.error("Lỗi khi tải filter options:", error);
         }
     };
 
     useEffect(() => {
-        const savedPage = parseInt(localStorage.getItem("partnerListPage") || "1", 10);
-        fetchCountries();
+        const savedPage = parseInt(localStorage.getItem(PAGE_STORAGE_KEY_GH_VN) || "1", 10);
+        const savedFiltersString = localStorage.getItem(FILTER_STORAGE_KEY_GH_VN);
+        const savedStateString = localStorage.getItem(STATE_STORAGE_KEY_GH_VN);
 
-        fetchGCNs("", "", savedPage, pageSize);
-        localStorage.setItem("partnerListPage", "1");
-    }, []);
+        fetchFilterOptions();
 
-    // Hàm xử lý xóa đối tác
+        if (navigationType === "POP" && savedStateString) {
+            try {
+                const savedFilters = savedFiltersString ? JSON.parse(savedFiltersString) : {};
+                const savedState = JSON.parse(savedStateString);
+
+                setSearchTerm(savedFilters.searchTerm || "");
+                setCustomerName(savedFilters.customerName || "");
+                setPartnerName(savedFilters.partnerName || "");
+                setBrandName(savedFilters.brandName || "");
+
+                setDonGiaHans(savedState.donGiaHans || []);
+                setTotalItems(savedState.totalItems || 0);
+                setPageIndex(savedState.pageIndex || savedPage || 1);
+                setPageSize(savedState.pageSize || 10);
+
+                fetchGCNs(
+                    savedFilters.searchTerm || "",
+                    savedPage,
+                    savedState?.pageSize || pageSize,
+                    savedFilters
+                );
+            } catch (e) {
+                console.error("Error parsing saved state/filters (GH_NH_VN)", e);
+                fetchGCNs("", savedPage, pageSize);
+            }
+        } else {
+            if (savedFiltersString) {
+                try {
+                    const savedFilters = JSON.parse(savedFiltersString);
+                    setSearchTerm(savedFilters.searchTerm || "");
+                    setCustomerName(savedFilters.customerName || "");
+                    setPartnerName(savedFilters.partnerName || "");
+                    setBrandName(savedFilters.brandName || "");
+
+                    fetchGCNs(
+                        savedFilters.searchTerm || "",
+                        savedPage,
+                        pageSize,
+                        savedFilters
+                    );
+                } catch (e) {
+                    console.error("Error parsing saved filters (GH_NH_VN)", e);
+                    fetchGCNs("", savedPage, pageSize);
+                }
+            } else {
+                fetchGCNs("", savedPage, pageSize);
+            }
+        }
+
+        if (!localStorage.getItem(PAGE_STORAGE_KEY_GH_VN)) {
+            localStorage.setItem(PAGE_STORAGE_KEY_GH_VN, "1");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [navigationType]);
+
+    useEffect(() => {
+        const filtersToSave = {
+            searchTerm,
+            customerName,
+            partnerName,
+            brandName,
+        };
+        localStorage.setItem(FILTER_STORAGE_KEY_GH_VN, JSON.stringify(filtersToSave));
+    }, [searchTerm, customerName, partnerName, brandName]);
+
+    useEffect(() => {
+        const stateToSave = {
+            donGiaHans,
+            totalItems,
+            pageIndex,
+            pageSize,
+        };
+        localStorage.setItem(STATE_STORAGE_KEY_GH_VN, JSON.stringify(stateToSave));
+    }, [donGiaHans, totalItems, pageIndex, pageSize]);
+
     const handleDeletePartner = async () => {
         try {
             await callAPI({
@@ -72,162 +239,219 @@ function Application_GH_NH_VNList() {
             });
             setShowDeleteModal(false);
             setPartnerToDelete(null);
-            fetchGCNs(searchTerm, selectedCountry);
+            fetchGCNs(searchTerm, pageIndex, pageSize);
         } catch (error) {
             console.error("Lỗi khi xóa đối tác:", error);
         }
     };
-    const formatOptions = (data, valueKey, labelKey) => {
-        return data.map(item => ({
-            value: item[valueKey],
-            label: item[labelKey]
-        }));
+
+    const handleClearFilters = () => {
+        setSearchTerm("");
+        setCustomerName("");
+        setPartnerName("");
+        setBrandName("");
+        fetchGCNs("", 1, pageSize, {
+            customerName: "",
+            partnerName: "",
+            brandName: "",
+        });
     };
+
     return (
         <div className="p-1 bg-gray-100 min-h-screen">
             <div className="bg-white p-4 rounded-lg shadow-md">
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">📌 Danh sách đơn gia hạn văn bằng Việt Nam</h2>
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                fetchGCNs(searchTerm, selectedCountry, 1, pageSize);
-                            }
-                        }}
-                        placeholder="🔍 Nhập số bằng"
-                        className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
-                    />
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                    📌 Danh sách đơn gia hạn văn bằng Việt Nam
+                </h2>
 
-                    <div className="flex gap-3">
+                {/* Hàng search chính */}
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
+                    <div className="w-full md:w-1/3">
+                        <SearchCreatableSelect
+                            value={searchTerm}
+                            onChange={(val) => setSearchTerm(val)}
+                            onSearch={(keyword) =>
+                                fetchGCNs(keyword !== undefined ? keyword : searchTerm, 1, pageSize)
+                            }
+                            options={ghSearchOptions}
+                            placeholder="🔍 Nhập số bằng, số đơn hoặc mã hồ sơ"
+                        />
+                    </div>
+
+                    <div className="flex gap-3 flex-wrap">
                         <button
-                            onClick={() => fetchGCNs(searchTerm, selectedCountry, 1, pageSize)}
+                            onClick={() => fetchGCNs(searchTerm, 1, pageSize)}
                             className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
                         >
                             Tìm kiếm
                         </button>
-                        {/* <button
-                            onClick={() => navigate("/gcn_nh_camadd")}
-                            className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
+                        <button
+                            onClick={handleClearFilters}
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-3 rounded-lg shadow-md transition"
                         >
-                            Thêm mới
-                        </button> */}
+                            Xóa lọc
+                        </button>
                     </div>
                 </div>
+
+                {/* Bộ lọc nâng cao: Khách hàng / Đối tác / Nhãn hiệu */}
                 <div className="flex flex-wrap gap-3">
-                    {/* <div className="w-full md:w-1/6">
-            <label className="block text-sm font-medium text-gray-700 mb-1  text-left">Quốc gia</label>
-            <Select
-              options={formatOptions(countries, "maQuocGia", "tenQuocGia")}
-              value={selectedCountry ? formatOptions(countries, "maQuocGia", "tenQuocGia").find(opt => opt.value === selectedCountry) : null}
-              onChange={selectedOption => setSelectedCountry(selectedOption?.value)}
-              placeholder="Chọn quốc gia"
-              className="text-left"
-              isClearable
-            />
-          </div> */}
-                    {/* <Select
-            options={formatOptions(countries, "maQuocGia", "tenQuocGia")}
-            value={selectedCountry ? formatOptions(countries, "maQuocGia", "tenQuocGia").find(opt => opt.value === selectedCountry) : null}
-            onChange={selectedOption => setSelectedCountry(selectedOption?.value)}
-            placeholder="Chọn quốc gia"
-            className="w-full md:w-1/6 text-left"
-            isClearable
-          /> */}
+                    <div className="w-full md:w-1/4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                            Khách hàng
+                        </label>
+                        <SearchCreatableSelect
+                            value={customerName}
+                            onChange={(val) => setCustomerName(val)}
+                            onSearch={() => fetchGCNs(searchTerm, 1, pageSize)}
+                            options={customerOptions}
+                            placeholder="Nhập tên khách hàng"
+                        />
+                    </div>
+
+                    <div className="w-full md:w-1/4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                            Đối tác
+                        </label>
+                        <SearchCreatableSelect
+                            value={partnerName}
+                            onChange={(val) => setPartnerName(val)}
+                            onSearch={() => fetchGCNs(searchTerm, 1, pageSize)}
+                            options={partnerOptions}
+                            placeholder="Nhập tên đối tác"
+                        />
+                    </div>
+
+                    <div className="w-full md:w-1/4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                            Nhãn hiệu
+                        </label>
+                        <SearchCreatableSelect
+                            value={brandName}
+                            onChange={(val) => setBrandName(val)}
+                            onSearch={() => fetchGCNs(searchTerm, 1, pageSize)}
+                            options={brandOptions}
+                            placeholder="Nhập tên nhãn hiệu"
+                        />
+                    </div>
                 </div>
             </div>
+
             <div className="mb-2 text-left text-gray-600 text-xl">
                 {t("Tìm thấy")} <b className="text-blue-600">{totalItems}</b> {t("kết quả")}
             </div>
+
             <div className="w-full overflow-x-auto">
-                <table className="w-full border-collapse bg-white text-sm mt-4 overflow-hidden rounded-lg border shadow">
-                    <thead>
-                        <tr className=" text-[#667085] text-center font-normal">
-                            <th className="p-2 text-table">STT</th>
-                            <th className="p-2 text-table">Số đơn gia hạn</th>
-                            <th className="p-2 text-table">Ngày nộp yêu cầu gia hạn</th>
-                            <th className="p-2 text-table">Ngày quyết định gia hạn</th>
-                            <th className="p-2 text-table">Ngày đăng bạ</th>
-                            <th className="p-2 text-table">Ghi chú</th>
-                            <th className="p-2 text-table">Số bằng</th>
-                            <th className="p-2 text-table">Số đơn</th>
-                            <th className="p-2 text-table">Mã hồ sơ</th>
-                            <th className="p-2 text-table">Tên chủ bằng</th>
-                            <th className="p-2 text-table">Đại diện SHCN</th>
-                            <th className="p-2 text-table">Tên nhãn hiệu</th>
-                            <th className="p-2 text-table">Nhóm SPDV</th>
-                            <th className="p-2 text-table">Ngày nộp đơn</th>
-                            <th className="p-2 text-table">Ngày cấp bằng</th>
-                            <th className="p-2 text-table">Ngày yêu cầu gia hạn</th>
-                            <th className="p-2 text-center text-table"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {donGiaHans.map((donGiaHan, index) => (
-                            <tr key={donGiaHan.id || index} className="group hover:bg-gray-100 text-center border-b relative">
-                                <td className="p-2 text-table">{index + 1}</td>
-                                <td
-                                    className="p-2 text-table text-blue-500 cursor-pointer hover:underline"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigate(`/affidavitedit/${donGiaHan.id}`);
-                                    }}
-                                >
-                                    {donGiaHan.soDon}
-                                </td>
-                                <td className="p-2 text-table">{donGiaHan.ngayNopYCGiaHan ? new Date(donGiaHan.ngayNopYCGiaHan).toLocaleDateString("vi-VN") : ""}</td>
-                                <td className="p-2 text-table">{donGiaHan.ngayQuyetDinhGiaHan ? new Date(donGiaHan.ngayQuyetDinhGiaHan).toLocaleDateString("vi-VN") : ""}</td>
-                                <td className="p-2 text-table">{donGiaHan.ngayDangBa ? new Date(donGiaHan.ngayDangBa).toLocaleDateString("vi-VN") : ""}</td>
-                                <td className="p-2 text-table">{donGiaHan.ghiChu}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.soBang}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.soDon}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.maHoSo}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.KhachHangCuoi?.tenKhachHang}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.DoiTac?.tenDoiTac}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.NhanHieu?.tenNhanHieu}</td>
-                                {/* <td className="p-2 text-table">Màu</td> */}
-                                <td className="p-2 text-table">{donGiaHan.gcn?.dsNhomSPDV}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.ngayNopDon ? new Date(donGiaHan.gcn.ngayNopDon).toLocaleDateString("vi-VN") : ""}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.ngayCapBang ? new Date(donGiaHan.gcn.ngayCapBang).toLocaleDateString("vi-VN") : ""}</td>
-                                <td className="p-2 text-table">{donGiaHan.gcn?.hanGiaHan ? new Date(donGiaHan.gcn.hanGiaHan).toLocaleDateString("vi-VN") : ""}</td>
-                                <td className="p-2 relative">
-                                    {(role === "admin" || role === "staff") && (
-                                        <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
-                                            <button
-                                                className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                                                onClick={() => navigate(`/application_gh_nh_vn_edit/${donGiaHan.id}`)}
-                                            >
-                                                📝
-                                            </button>
-                                            <button
-                                                className="px-3 py-1 bg-red-200 text-red-600 rounded-md hover:bg-red-300"
-                                                onClick={() => {
-                                                    setPartnerToDelete(donGiaHan.gcn.id);
-                                                    setShowDeleteModal(true);
-                                                }}
-                                            >
-                                                🗑️
-                                            </button>
-                                        </div>
-                                    )}
-                                </td>
+                <Spin spinning={loading} tip="Đang tải dữ liệu..." size="large">
+                    <table className="w-full border-collapse bg-white text-sm mt-4 overflow-hidden rounded-lg border shadow">
+                        <thead>
+                            <tr className=" text-[#667085] text-center font-normal">
+                                <th className="p-2 text-table">STT</th>
+                                <th className="p-2 text-table">Số đơn gia hạn</th>
+                                <th className="p-2 text-table">Ngày nộp yêu cầu gia hạn</th>
+                                <th className="p-2 text-table">Ngày quyết định gia hạn</th>
+                                <th className="p-2 text-table">Ngày đăng bạ</th>
+                                <th className="p-2 text-table">Ghi chú</th>
+                                <th className="p-2 text-table">Số bằng</th>
+                                <th className="p-2 text-table">Số đơn</th>
+                                <th className="p-2 text-table">Mã hồ sơ</th>
+                                <th className="p-2 text-table">Tên chủ bằng</th>
+                                <th className="p-2 text-table">Đại diện SHCN</th>
+                                <th className="p-2 text-table">Tên nhãn hiệu</th>
+                                <th className="p-2 text-table">Nhóm SPDV</th>
+                                <th className="p-2 text-table">Ngày nộp đơn</th>
+                                <th className="p-2 text-table">Ngày cấp bằng</th>
+                                <th className="p-2 text-table">Ngày yêu cầu gia hạn</th>
+                                <th className="p-2 text-center text-table"></th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {donGiaHans.length > 0 ? (
+                                donGiaHans.map((donGiaHan, index) => (
+                                    <tr key={donGiaHan.id || index} className="group hover:bg-gray-100 text-center border-b relative">
+                                        <td className="p-2 text-table">{index + 1}</td>
+                                        <td
+                                            className="p-2 text-table text-blue-500 cursor-pointer hover:underline"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/application_gh_nh_vn_edit/${donGiaHan.id}`);
+                                            }}
+                                        >
+                                            {donGiaHan.soDon || "—"}
+                                        </td>
+                                        <td className="p-2 text-table">
+                                            {donGiaHan.ngayNopYCGiaHan ? new Date(donGiaHan.ngayNopYCGiaHan).toLocaleDateString("vi-VN") : ""}
+                                        </td>
+                                        <td className="p-2 text-table">
+                                            {donGiaHan.ngayQuyetDinhGiaHan ? new Date(donGiaHan.ngayQuyetDinhGiaHan).toLocaleDateString("vi-VN") : ""}
+                                        </td>
+                                        <td className="p-2 text-table">
+                                            {donGiaHan.ngayDangBa ? new Date(donGiaHan.ngayDangBa).toLocaleDateString("vi-VN") : ""}
+                                        </td>
+                                        <td className="p-2 text-table">{donGiaHan.ghiChu || ""}</td>
+                                        <td className="p-2 text-table font-medium text-blue-600">
+                                            {donGiaHan.gcn?.soBang || "—"}
+                                        </td>
+                                        <td className="p-2 text-table">{donGiaHan.gcn?.soDon || ""}</td>
+                                        <td className="p-2 text-table">{donGiaHan.gcn?.maHoSo || ""}</td>
+                                        <td className="p-2 text-table">{donGiaHan.gcn?.KhachHangCuoi?.tenKhachHang || ""}</td>
+                                        <td className="p-2 text-table">{donGiaHan.gcn?.DoiTac?.tenDoiTac || ""}</td>
+                                        <td className="p-2 text-table">{donGiaHan.gcn?.NhanHieu?.tenNhanHieu || ""}</td>
+                                        <td className="p-2 text-table">{donGiaHan.gcn?.dsNhomSPDV || ""}</td>
+                                        <td className="p-2 text-table">
+                                            {donGiaHan.gcn?.ngayNopDon ? new Date(donGiaHan.gcn.ngayNopDon).toLocaleDateString("vi-VN") : ""}
+                                        </td>
+                                        <td className="p-2 text-table">
+                                            {donGiaHan.gcn?.ngayCapBang ? new Date(donGiaHan.gcn.ngayCapBang).toLocaleDateString("vi-VN") : ""}
+                                        </td>
+                                        <td className="p-2 text-table">
+                                            {donGiaHan.gcn?.hanGiaHan ? new Date(donGiaHan.gcn.hanGiaHan).toLocaleDateString("vi-VN") : ""}
+                                        </td>
+                                        <td className="p-2 relative">
+                                            {(role === "admin" || role === "staff") && (
+                                                <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
+                                                    <button
+                                                        className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                                                        onClick={() => navigate(`/application_gh_nh_vn_edit/${donGiaHan.id}`)}
+                                                        title="Chỉnh sửa"
+                                                    >
+                                                        📝
+                                                    </button>
+                                                    <button
+                                                        className="px-3 py-1 bg-red-200 text-red-600 rounded-md hover:bg-red-300"
+                                                        onClick={() => {
+                                                            setPartnerToDelete(donGiaHan.gcn?.id || donGiaHan.id);
+                                                            setShowDeleteModal(true);
+                                                        }}
+                                                        title="Xóa"
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={17} className="p-4 text-center text-gray-500">
+                                        Không tìm thấy bản ghi nào
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </Spin>
             </div>
+
             <div className="mt-4 flex flex-col items-center space-y-2">
                 {totalItems > 0 && (
                     <div className="text-sm text-gray-500 text-center ">
-                        <span className="mr-1"></span>
                         <span className="font-medium text-gray-800">
                             {(pageIndex - 1) * pageSize + 1} - {Math.min(pageIndex * pageSize, totalItems)}
                         </span>
                         <span className="mx-1"> / </span>
                         <span className="font-medium text-gray-800">{totalItems}</span>
-                        <span className="ml-1"></span>
                     </div>
                 )}
                 <Pagination
@@ -237,13 +461,14 @@ function Application_GH_NH_VNList() {
                     onChange={(page, size) => {
                         setPageIndex(page);
                         setPageSize(size);
-                        fetchGCNs(searchTerm, selectedCountry, page, size)
+                        fetchGCNs(searchTerm, page, size);
                     }}
                     showSizeChanger
                     pageSizeOptions={['5', '10', '20', '50']}
                     locale={{ items_per_page: t("bản ghi") }}
                 />
             </div>
+
             <Modal
                 title="Xác nhận xóa"
                 open={showDeleteModal}
@@ -255,7 +480,7 @@ function Application_GH_NH_VNList() {
                     className: "bg-red-500 hover:bg-red-600 text-white",
                 }}
             >
-                <p>Bạn có chắc chắn muốn xóa đối tác này không?</p>
+                <p>Bạn có chắc chắn muốn xóa bản ghi này không?</p>
             </Modal>
         </div>
     );

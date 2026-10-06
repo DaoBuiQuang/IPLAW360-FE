@@ -34,11 +34,25 @@ function GCN_NH_VNList() {
     const list = [];
     const seen = new Set();
     (gcn_nhs || []).forEach((item) => {
-      if (item.soBang && !seen.has(item.soBang)) {
-        seen.add(item.soBang);
+      if (item.soBang && !seen.has(`soBang_${item.soBang}`)) {
+        seen.add(`soBang_${item.soBang}`);
         list.push({
           value: item.soBang,
           label: `Số bằng: ${item.soBang}${item.tenNhanHieu ? ` - ${item.tenNhanHieu}` : ""}`,
+        });
+      }
+      if (item.soDon && !seen.has(`soDon_${item.soDon}`)) {
+        seen.add(`soDon_${item.soDon}`);
+        list.push({
+          value: item.soDon,
+          label: `Số đơn: ${item.soDon}${item.tenNhanHieu ? ` - ${item.tenNhanHieu}` : ""}`,
+        });
+      }
+      if (item.maHoSo && !seen.has(`maHoSo_${item.maHoSo}`)) {
+        seen.add(`maHoSo_${item.maHoSo}`);
+        list.push({
+          value: item.maHoSo,
+          label: `Mã hồ sơ: ${item.maHoSo}${item.tenNhanHieu ? ` - ${item.tenNhanHieu}` : ""}`,
         });
       }
     });
@@ -163,7 +177,7 @@ function GCN_NH_VNList() {
     fetchFilterOptions();
 
     if (navigationType === "POP" && savedStateString) {
-      // 👉 Trường hợp Back: load từ cache, KHÔNG gọi API
+      // 👉 Trường hợp Back: load từ cache, sau đó refresh dữ liệu mới nhất
       try {
         const savedFilters = savedFiltersString
           ? JSON.parse(savedFiltersString)
@@ -180,6 +194,14 @@ function GCN_NH_VNList() {
         setTotalItems(savedState.totalItems || 0);
         setPageIndex(savedState.pageIndex || savedPage || 1);
         setPageSize(savedState.pageSize || 10);
+
+        fetchGCNs(
+          savedFilters.searchTerm || "",
+          savedFilters.selectedCountry || "",
+          savedPage,
+          savedState?.pageSize || pageSize,
+          savedFilters
+        );
       } catch (e) {
         console.error("Error parsing saved state/filters (GCN_VN)", e);
         fetchGCNs("", "", savedPage, pageSize);
@@ -268,6 +290,31 @@ function GCN_NH_VNList() {
     }
   };
 
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSelectedCountry("");
+    setCustomerName("");
+    setPartnerName("");
+    setBrandName("");
+    setPageIndex(1);
+    localStorage.setItem(PAGE_STORAGE_KEY_GCN_VN, "1");
+    localStorage.setItem(
+      FILTER_STORAGE_KEY_GCN_VN,
+      JSON.stringify({
+        searchTerm: "",
+        selectedCountry: "",
+        customerName: "",
+        partnerName: "",
+        brandName: "",
+      })
+    );
+    fetchGCNs("", "", 1, pageSize, {
+      customerName: "",
+      partnerName: "",
+      brandName: "",
+    });
+  };
+
   const formatOptions = (data, valueKey, labelKey) => {
     return data.map((item) => ({
       value: item[valueKey],
@@ -288,9 +335,16 @@ function GCN_NH_VNList() {
             <SearchCreatableSelect
               value={searchTerm}
               onChange={(val) => setSearchTerm(val)}
-              onSearch={(keyword) => fetchGCNs(keyword !== undefined ? keyword : searchTerm, selectedCountry, 1, pageSize)}
+              onSearch={(keyword) =>
+                fetchGCNs(
+                  keyword !== undefined ? keyword : searchTerm,
+                  selectedCountry,
+                  1,
+                  pageSize
+                )
+              }
               options={soBangSearchOptions}
-              placeholder="🔍 Nhập số bằng"
+              placeholder="🔍 Nhập số bằng, số đơn hoặc mã hồ sơ"
             />
           </div>
 
@@ -307,34 +361,48 @@ function GCN_NH_VNList() {
             >
               Thêm mới
             </button>
+            <button
+              onClick={handleClearFilters}
+              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-3 rounded-lg shadow-md transition"
+            >
+              Xóa lọc
+            </button>
           </div>
         </div>
 
-        {/* Hàng filter nâng cao: khách hàng / đối tác / nhãn hiệu / quốc gia (nếu muốn) */}
+        {/* Hàng filter nâng cao: chủ bằng / đại diện SHCN / nhãn hiệu / quốc gia (nếu muốn) */}
         <div className="flex flex-wrap gap-3">
           <div className="w-full md:w-1/4">
             <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-              Khách hàng
+              Chủ bằng
             </label>
             <SearchCreatableSelect
               value={customerName}
               onChange={(val) => setCustomerName(val)}
-              onSearch={() => fetchGCNs(searchTerm, selectedCountry, 1, pageSize)}
+              onSearch={(keyword) =>
+                fetchGCNs(searchTerm, selectedCountry, 1, pageSize, {
+                  customerName: keyword !== undefined ? keyword : customerName,
+                })
+              }
               options={customerOptions}
-              placeholder="Nhập tên khách hàng"
+              placeholder="Nhập tên chủ bằng"
             />
           </div>
 
           <div className="w-full md:w-1/4">
             <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-              Đối tác
+              Đại diện SHCN
             </label>
             <SearchCreatableSelect
               value={partnerName}
               onChange={(val) => setPartnerName(val)}
-              onSearch={() => fetchGCNs(searchTerm, selectedCountry, 1, pageSize)}
+              onSearch={(keyword) =>
+                fetchGCNs(searchTerm, selectedCountry, 1, pageSize, {
+                  partnerName: keyword !== undefined ? keyword : partnerName,
+                })
+              }
               options={partnerOptions}
-              placeholder="Nhập tên đối tác"
+              placeholder="Nhập tên đại diện SHCN"
             />
           </div>
 
@@ -345,7 +413,11 @@ function GCN_NH_VNList() {
             <SearchCreatableSelect
               value={brandName}
               onChange={(val) => setBrandName(val)}
-              onSearch={() => fetchGCNs(searchTerm, selectedCountry, 1, pageSize)}
+              onSearch={(keyword) =>
+                fetchGCNs(searchTerm, selectedCountry, 1, pageSize, {
+                  brandName: keyword !== undefined ? keyword : brandName,
+                })
+              }
               options={brandOptions}
               placeholder="Nhập tên nhãn hiệu"
             />
