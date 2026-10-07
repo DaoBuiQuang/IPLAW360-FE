@@ -420,7 +420,7 @@ export default function TimesheetList() {
                     <td className="p-3 text-table text-left font-medium text-indigo-600">
                       {row.activity}
                     </td>
-                    <td className="p-3 text-table text-left text-gray-600">
+                    <td className="p-3 text-table text-left text-gray-600 max-w-xs truncate" title={row.description}>
                       {row.description || "-"}
                     </td>
                     <td className="p-3 text-table font-semibold text-orange-600">

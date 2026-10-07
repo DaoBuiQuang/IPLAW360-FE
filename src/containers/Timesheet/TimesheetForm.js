@@ -91,6 +91,104 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
     ? options.find((option) => option.value === value) || { value, label: `${value}${fallbackName ? ` - ${fallbackName}` : ""}` }
     : null;
   const setField = (field, value) => setValues((previous) => ({ ...previous, [field]: value }));
+
+  // Xử lý khi chọn Khách hàng: chỉ autofill Đối tác (nếu khách hàng có liên kết đối tác)
+  const handleCustomerChange = (option) => {
+    const custCode = option?.value || "";
+    setValues((prev) => {
+      let nextPartner = prev.partnerCode;
+      if (custCode) {
+        const found = customers.find((c) => c.maKhachHang === custCode);
+        if (found?.maDoiTac) {
+          nextPartner = found.maDoiTac;
+        }
+      }
+      return {
+        ...prev,
+        customerCode: custCode,
+        partnerCode: nextPartner,
+      };
+    });
+  };
+
+  // Xử lý khi chọn hoặc nhập Mã hồ sơ: autofill Khách hàng và Đối tác (nếu có)
+  const handleCaseCodeChange = async (newCaseCode) => {
+    setValues((prev) => ({ ...prev, caseCode: newCaseCode }));
+    if (!newCaseCode || !newCaseCode.trim()) return;
+
+    try {
+      const response = await callAPI({
+        method: "post",
+        endpoint: "/timesheet/case-info",
+        data: { caseCode: newCaseCode.trim() },
+      });
+      if (response) {
+        setValues((prev) => {
+          // Tránh race condition nếu user đổi mã khác trước khi API phản hồi
+          if (prev.caseCode !== newCaseCode) return prev;
+
+          let nextCustomer = prev.customerCode;
+          let nextPartner = prev.partnerCode;
+          let nextCountry = prev.countryCode;
+
+          if (response.customerCode) {
+            nextCustomer = response.customerCode;
+          }
+          if (response.partnerCode) {
+            nextPartner = response.partnerCode;
+          } else if (response.customerCode) {
+            // Nếu hồ sơ chưa có đối tác nhưng có khách hàng, tự tìm đối tác mặc định của khách hàng đó
+            const foundKh = customers.find((c) => c.maKhachHang === response.customerCode);
+            if (foundKh?.maDoiTac) {
+              nextPartner = foundKh.maDoiTac;
+            }
+          }
+
+          if (response.countryCode) {
+            nextCountry = response.countryCode;
+          }
+
+          return {
+            ...prev,
+            customerCode: nextCustomer,
+            partnerCode: nextPartner,
+            countryCode: nextCountry,
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Lỗi khi tra cứu thông tin hồ sơ:", error);
+    }
+  };
+
+  // Tự động tra cứu nếu form mở với mã hồ sơ có sẵn (ví dụ mở từ chi tiết vụ việc) mà chưa có khách hàng
+  useEffect(() => {
+    if (initialValues.caseCode && !initialValues.customerCode) {
+      callAPI({
+        method: "post",
+        endpoint: "/timesheet/case-info",
+        data: { caseCode: initialValues.caseCode.trim() },
+      }).then((response) => {
+        if (response) {
+          setValues((prev) => {
+            let nextCustomer = prev.customerCode || response.customerCode || "";
+            let nextPartner = prev.partnerCode || response.partnerCode || "";
+            if (!nextPartner && nextCustomer) {
+              const foundKh = customers.find((c) => c.maKhachHang === nextCustomer);
+              if (foundKh?.maDoiTac) nextPartner = foundKh.maDoiTac;
+            }
+            return {
+              ...prev,
+              customerCode: nextCustomer,
+              partnerCode: nextPartner,
+              countryCode: prev.countryCode || response.countryCode || prev.countryCode,
+            };
+          });
+        }
+      }).catch(() => {});
+    }
+  }, [initialValues.caseCode, customers]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const validate = () => {
     const nextErrors = {};
     if (!values.employeeCode) nextErrors.employeeCode = "Không xác định được nhân sự đăng nhập";
@@ -105,6 +203,9 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
       }
     }
     if (!String(values.activity).trim()) nextErrors.activity = "Hoạt động không được để trống";
+    if (values.description && values.description.length > 10000) {
+      nextErrors.description = "Nội dung công việc không được vượt quá 10.000 ký tự";
+    }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -197,7 +298,7 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
           <Field label="Mã hồ sơ" error={errors.caseCode}>
             <CaseCodeSelect
               value={values.caseCode}
-              onChange={(value) => setField("caseCode", value)}
+              onChange={handleCaseCodeChange}
               isDisabled={lockedCaseCode}
               allowCustom
               placeholder="Chọn hoặc nhập mã hồ sơ"
@@ -225,7 +326,7 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
               className="text-left w-full"
               options={customerOptions}
               value={selectedOption(customerOptions, values.customerCode, initialValues.customerName)}
-              onChange={(option) => setField("customerCode", option?.value || "")}
+              onChange={handleCustomerChange}
               placeholder="Chọn khách hàng"
               isClearable
             />
@@ -288,21 +389,31 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
 
         {/* Hàng 5: Nội dung công việc | Ghi chú */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="Nội dung công việc">
+          <Field label="Nội dung công việc" error={errors.description}>
             <textarea
               value={values.description}
-              onChange={(event) => setField("description", event.target.value)}
-              className="w-full p-2 mt-1 border rounded-lg text-input resize-none"
-              rows={3}
-              placeholder="Nội dung công việc..."
+              onChange={(event) => {
+                setField("description", event.target.value);
+                if (errors.description) {
+                  setErrors((prev) => ({ ...prev, description: "" }));
+                }
+              }}
+              className="w-full p-2 mt-1 border rounded-lg text-input resize-y focus:outline-none focus:ring-1 focus:ring-[#009999]"
+              rows={4}
+              maxLength={10000}
+              placeholder="Nội dung công việc (tối đa 10.000 ký tự)..."
             />
+            <div className="flex justify-between items-center text-xs text-gray-400 mt-1">
+              <span>Có thể kéo góc dưới để mở rộng ô</span>
+              <span>{(values.description || "").length} / 10.000 ký tự</span>
+            </div>
           </Field>
           <Field label="Ghi chú">
             <textarea
               value={values.notes}
               onChange={(event) => setField("notes", event.target.value)}
-              className="w-full p-2 mt-1 border rounded-lg text-input resize-none"
-              rows={3}
+              className="w-full p-2 mt-1 border rounded-lg text-input resize-y focus:outline-none focus:ring-1 focus:ring-[#009999]"
+              rows={4}
               placeholder="Ghi chú thêm..."
             />
           </Field>

@@ -114,7 +114,7 @@ function RecordDetail({ record, onEdit, onDelete, canEditDelete }) {
             <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
               Nội dung công việc
             </span>
-            <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-3">
+            <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-3 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
               {record.description}
             </p>
           </div>
@@ -126,7 +126,7 @@ function RecordDetail({ record, onEdit, onDelete, canEditDelete }) {
             <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
               Ghi chú
             </span>
-            <p className="text-sm text-gray-600 leading-relaxed bg-amber-50 rounded-xl p-3 border border-amber-100">
+            <p className="text-sm text-gray-600 leading-relaxed bg-amber-50 rounded-xl p-3 border border-amber-100 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
               {record.notes}
             </p>
           </div>

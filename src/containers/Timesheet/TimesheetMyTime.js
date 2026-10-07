@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Select, DatePicker, Modal, Pagination, Spin } from "antd";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -33,6 +33,7 @@ function ContribBadge({ value }) {
 
 export default function TimesheetMyTime({ viewMode = "self", targetEmployeeCode = null }) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const role = useSelector((s) => s.auth.role);
   const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
 
@@ -43,7 +44,32 @@ export default function TimesheetMyTime({ viewMode = "self", targetEmployeeCode 
   const isReadOnly = viewMode === "other"; // manager/CEO chỉ xem
 
   // ── Tab ──
-  const [activeTab, setActiveTab] = useState("calendar"); // "calendar" | "task"
+  const tabFromUrl = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabFromUrl === "task" ? "task" : "calendar");
+
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (tab === "task") {
+        next.set("tab", "task");
+      } else {
+        next.delete("tab");
+      }
+      return next;
+    }, { replace: true });
+    if (tab === "calendar") fetchCalendarData();
+    else fetchTasks(1, 20);
+  };
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "task") {
+      setActiveTab("task");
+    } else {
+      setActiveTab("calendar");
+    }
+  }, [searchParams]);
 
   // ════════════════════════════════════════
   //  CALENDAR STATE
@@ -218,7 +244,7 @@ export default function TimesheetMyTime({ viewMode = "self", targetEmployeeCode 
         {/* ── Tab buttons ── */}
         <div className="flex gap-2 mt-4">
           <button
-            onClick={() => { setActiveTab("calendar"); fetchCalendarData(); }}
+            onClick={() => switchTab("calendar")}
             className={`px-5 py-2 rounded-lg text-sm font-semibold border transition cursor-pointer ${
               activeTab === "calendar"
                 ? "bg-[#009999] text-white border-[#009999]"
@@ -228,7 +254,7 @@ export default function TimesheetMyTime({ viewMode = "self", targetEmployeeCode 
             📅 CALENDAR
           </button>
           <button
-            onClick={() => { setActiveTab("task"); fetchTasks(1, 20); }}
+            onClick={() => switchTab("task")}
             className={`px-5 py-2 rounded-lg text-sm font-semibold border transition cursor-pointer ${
               activeTab === "task"
                 ? "bg-[#009999] text-white border-[#009999]"
@@ -395,7 +421,9 @@ export default function TimesheetMyTime({ viewMode = "self", targetEmployeeCode 
                       <td className="p-3 text-xs text-gray-600">{row.customerCode || "-"}</td>
                       <td className="p-3 text-xs text-gray-600">{row.partnerCode || "-"}</td>
                       <td className="p-3 text-xs text-left font-medium text-indigo-600">{row.activity}</td>
-                      <td className="p-3 text-xs text-left text-gray-600">{row.description || "-"}</td>
+                      <td className="p-3 text-xs text-left text-gray-600 max-w-xs truncate" title={row.description}>
+                        {row.description || "-"}
+                      </td>
                       <td className="p-3 text-xs font-semibold text-orange-600">{Number(row.hours || 0)}</td>
                       <td className="p-3 text-xs"><ContribBadge value={row.contributionPercentage ?? row.contributionRate ?? 100} /></td>
                       <td className="p-3 text-xs">{money(row.hourlyRate)}</td>

@@ -18,6 +18,14 @@ export default function TimesheetDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/timesheet/mytime?tab=task");
+    }
+  };
+
   return <Spin spinning={loading}><div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
     <h2 className="text-2xl font-semibold text-gray-700 mb-6">Chi tiết Time record</h2>
     {item && <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
@@ -36,11 +44,25 @@ export default function TimesheetDetail() {
       <Info label="Trạng thái" value={statusMap[item.status] || item.status} />
       <Info label="Người duyệt" value={item.approvedBy || "-"} />
       <Info label="Thời điểm duyệt" value={item.approvedAt || "-"} />
-      <Info label="Mô tả công việc" value={item.description || "-"} />
-      <Info label="Ghi chú" value={item.notes || "-"} />
-      {item.rejectionReason && <Info label="Lý do từ chối" value={item.rejectionReason} />}
+      <Info label="Mô tả công việc" value={item.description || "-"} fullWidth />
+      <Info label="Ghi chú" value={item.notes || "-"} fullWidth />
+      {item.rejectionReason && <Info label="Lý do từ chối" value={item.rejectionReason} fullWidth />}
     </div>}
-    <div className="flex justify-center gap-4 mt-8"><button onClick={() => navigate(-1)} className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg">Quay lại</button></div>
+    <div className="flex justify-center gap-4 mt-8">
+      <button onClick={handleBack} className="bg-gray-300 hover:bg-gray-400 px-6 py-2 rounded-lg font-medium transition cursor-pointer">
+        Quay lại
+      </button>
+    </div>
   </div></Spin>;
 }
-function Info({ label, value }) { return <div><p className="text-sm text-gray-500">{label}</p><p className="font-medium text-gray-800">{value || "-"}</p></div>; }
+
+function Info({ label, value, fullWidth = false }) {
+  return (
+    <div className={`min-w-0 ${fullWidth ? "md:col-span-2" : ""}`}>
+      <p className="text-sm text-gray-500 mb-1">{label}</p>
+      <div className="font-medium text-gray-800 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
+        {value || "-"}
+      </div>
+    </div>
+  );
+}

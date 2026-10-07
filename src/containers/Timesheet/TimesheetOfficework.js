@@ -642,7 +642,7 @@ export default function TimesheetOfficework() {
             {viewingRecord.description && (
               <div>
                 <span className="text-gray-400">Nội dung công việc:</span>
-                <p className="p-2.5 bg-gray-50 rounded-xl text-gray-700 mt-1 leading-relaxed">
+                <p className="p-2.5 bg-gray-50 rounded-xl text-gray-700 mt-1 leading-relaxed break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
                   {viewingRecord.description}
                 </p>
               </div>
@@ -651,7 +651,7 @@ export default function TimesheetOfficework() {
             {viewingRecord.notes && (
               <div>
                 <span className="text-gray-400">Ghi chú:</span>
-                <p className="p-2.5 bg-amber-50 rounded-xl text-amber-800 mt-1 border border-amber-100">
+                <p className="p-2.5 bg-amber-50 rounded-xl text-amber-800 mt-1 border border-amber-100 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
                   {viewingRecord.notes}
                 </p>
               </div>
