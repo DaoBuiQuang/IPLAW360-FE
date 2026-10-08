@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useNavigationType } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import callAPI from "../../utils/api";
 import Select from "react-select";
@@ -8,26 +8,28 @@ import dayjs from 'dayjs';
 import { useSelector } from 'react-redux';
 import { DatePicker, Modal, Spin, Pagination } from 'antd';
 import { useTranslation } from "react-i18next";
+import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+
+const FILTER_STORAGE_KEY_TD = "applicationTdNhVnListFilters";
+const STATE_STORAGE_KEY_TD = "applicationTdNhVnListState";
+const PAGE_STORAGE_KEY_TD = "applicationTdNhVnListPage";
+
 function Application_TD_NH_VNList() {
   const role = useSelector((state) => state.auth.role);
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const navigationType = useNavigationType();
+
   const [loading, setLoading] = useState(false);
-  const [applications, setApplications] = useState([
-    {
-      soDon: "123456",
-      maHoSoVuViec: "HSVV001",
-      tenNhanHieu: "Nhãn hiệu mẫu",
-    }
-  ]);
+  const [applications, setApplications] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [applicationToDelete, setApplicationToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
   const [productAndService, setProductAndService] = useState([]);
   const [selectedProductAndService, setSelectedProductAndService] = useState([]);
   const [selectedTrangThaiDon, setSelectedTrangThaiDon] = useState(null);
 
-  const [selectedField, setSelectedField] = useState("");
+  const [selectedField, setSelectedField] = useState(null);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [selectedHanXuLy, setSelectedHanXuLy] = useState(null);
@@ -37,9 +39,36 @@ function Application_TD_NH_VNList() {
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
+
   const [customerName, setCustomerName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [brandName, setBrandName] = useState("");
+  const [customerOptions, setCustomerOptions] = useState([]);
+  const [partnerOptions, setPartnerOptions] = useState([]);
+  const [brandOptions, setBrandOptions] = useState([]);
+
+  const applicationSearchOptions = React.useMemo(() => {
+    const list = [];
+    const seen = new Set();
+    (applications || []).forEach((app) => {
+      if (app.soDon && !seen.has(app.soDon)) {
+        seen.add(app.soDon);
+        list.push({
+          value: app.soDon,
+          label: `Số đơn: ${app.soDon}${app.tenNhanHieu ? ` - ${app.tenNhanHieu}` : ""}`,
+        });
+      }
+      if (app.maHoSoVuViec && !seen.has(app.maHoSoVuViec)) {
+        seen.add(app.maHoSoVuViec);
+        list.push({
+          value: app.maHoSoVuViec,
+          label: `Mã HSVV: ${app.maHoSoVuViec}${app.tenNhanHieu ? ` - ${app.tenNhanHieu}` : ""}`,
+        });
+      }
+    });
+    return list;
+  }, [applications]);
+
   const filterCondition = {
     selectedField: selectedField?.value || "",
     fromDate,
@@ -49,6 +78,7 @@ function Application_TD_NH_VNList() {
     sortByHanXuLy: sortByHanXuLy,
     sortByHanTraLoi: sortByHanTraLoi,
   };
+
   const trangThaiDonOptions = [
     { value: "Nộp đơn", label: "Nộp đơn" },
     { value: "Hoàn thành tài liệu", label: "Hoàn thành tài liệu" },
@@ -62,7 +92,6 @@ function Application_TD_NH_VNList() {
   ];
 
   const allFieldOptions = [
-    // { label: "Mã đơn DK", labelEn: "Matter code", key: "maDonDangKy" },
     { label: "Số Đơn", labelEn: "App No", key: "soDon" },
     { label: "Mã HSVV", labelEn: "Matter code", key: "maHoSoVuViec" },
     { label: "Ngày yêu cầu sửa đổi", key: "ngayYeuCau" },
@@ -93,10 +122,8 @@ function Application_TD_NH_VNList() {
     { label: "Ngày hết hạn bằng", key: "ngayHetHanBang" },
     { label: "Ngày gửi bằng cho khách hàng", key: "ngayGuiBangChoKhachHang" },
     { label: "Loại đơn", labelEn: "Application Type", key: "loaiDon" },
-
-    
-
   ];
+
   const hiddenFieldKeys = [
     "ngayHoanThanhHoSoTaiLieu",
     "ngayKQThamDinhHinhThuc",
@@ -115,27 +142,52 @@ function Application_TD_NH_VNList() {
     "hanNopPhiCapBang",
     "ngayNopDon",
   ];
+
   const [showFieldModal, setShowFieldModal] = useState(false);
   const [selectedFields, setSelectedFields] = useState(
     allFieldOptions
-      .filter(field => !hiddenFieldKeys.includes(field.key))
-      .map(field => field.key)
+      .filter((field) => !hiddenFieldKeys.includes(field.key))
+      .map((field) => field.key)
   );
-  const fetchApplications = async (searchValue, page = 1, size = 10) => {
+
+  const fetchApplications = async (
+    searchValue,
+    page = 1,
+    size = 10,
+    customFilterCondition = null,
+    overrides = {}
+  ) => {
     setLoading(true);
     try {
-      localStorage.setItem("applicationListPage", page);
+      localStorage.setItem(PAGE_STORAGE_KEY_TD, page.toString());
+
+      const payload = {
+        searchText: searchValue !== undefined ? searchValue : searchTerm,
+        customerName: overrides.customerName !== undefined ? overrides.customerName : customerName,
+        partnerName: overrides.partnerName !== undefined ? overrides.partnerName : partnerName,
+        brandName: overrides.brandName !== undefined ? overrides.brandName : brandName,
+        maSPDVList: overrides.selectedProductAndService !== undefined ? overrides.selectedProductAndService : selectedProductAndService,
+        trangThaiDon: overrides.selectedTrangThaiDon !== undefined ? overrides.selectedTrangThaiDon : selectedTrangThaiDon,
+        fields: overrides.selectedFields !== undefined ? overrides.selectedFields : selectedFields,
+        filterCondition: customFilterCondition || filterCondition,
+        pageIndex: page,
+        pageSize: size,
+      };
+
       const response = await callAPI({
         method: "post",
         endpoint: "/application_td_nh_vn/list",
-        data: { searchText: searchValue, customerName, partnerName, brandName, maSPDVList: selectedProductAndService, trangThaiDon: selectedTrangThaiDon, fields: selectedFields, filterCondition, pageIndex: page, pageSize: size, },
+        data: payload,
       });
+
       setApplications(response.data || []);
       setTotalItems(response.pagination?.totalItems || 0);
       setPageIndex(response.pagination?.pageIndex || 1);
       setPageSize(response.pagination?.pageSize || 10);
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách đơn đăng ký:", error);
+      console.error("Lỗi khi lấy danh sách tờ khai tách đơn đăng ký:", error);
+      setApplications([]);
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }
@@ -153,24 +205,204 @@ function Application_TD_NH_VNList() {
       console.error("Lỗi khi lấy danh sách sản phẩm/dịch vụ:", error);
     }
   };
+
+  const fetchFilterOptions = async () => {
+    try {
+      const [custRes, partnerRes, brandRes] = await Promise.allSettled([
+        callAPI({ method: "post", endpoint: "/customers/by-name", data: {} }),
+        callAPI({ method: "post", endpoint: "/partner/all", data: {} }),
+        callAPI({ method: "post", endpoint: "/brand/shortlist", data: {} }),
+      ]);
+      if (custRes.status === "fulfilled") {
+        const raw = Array.isArray(custRes.value) ? custRes.value : custRes.value?.data || [];
+        setCustomerOptions(
+          raw.map((c) => ({
+            value: c.tenKhachHang,
+            label: `${c.tenKhachHang}${c.maKhachHang ? ` (${c.maKhachHang})` : ""}`,
+          }))
+        );
+      }
+      if (partnerRes.status === "fulfilled") {
+        const raw = Array.isArray(partnerRes.value) ? partnerRes.value : partnerRes.value?.data || [];
+        setPartnerOptions(
+          raw.map((p) => ({
+            value: p.tenDoiTac,
+            label: `${p.tenDoiTac}${p.maDoiTac ? ` (${p.maDoiTac})` : ""}`,
+          }))
+        );
+      }
+      if (brandRes.status === "fulfilled") {
+        const raw = Array.isArray(brandRes.value) ? brandRes.value : brandRes.value?.data || [];
+        setBrandOptions(
+          raw.map((b) => ({
+            value: b.tenNhanHieu,
+            label: `${b.tenNhanHieu}${b.maNhanHieu ? ` (${b.maNhanHieu})` : ""}`,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải filter options:", error);
+    }
+  };
+
   const formatOptions = (data, valueKey, labelKey) => {
-    return data.map(item => ({
+    return data.map((item) => ({
       value: item[valueKey],
-      label: item[labelKey]
+      label: item[labelKey],
     }));
   };
-  useEffect(() => {
-    const savedPage = parseInt(localStorage.getItem("applicationListPage") || "1", 10);
-    fetchApplications("", savedPage, pageSize);
-    if (!localStorage.getItem("applicationListPage")) {
-      localStorage.setItem("applicationListPage", "1");
-    }
-    fetchItems();
-  }, []);
-  const columns = allFieldOptions
-    .filter(field => selectedFields.includes(field.key))
-    .map(field => ({ label: field.label, labelEn: field.labelEn, key: field.key }));
 
+  useEffect(() => {
+    const savedPage = parseInt(localStorage.getItem(PAGE_STORAGE_KEY_TD) || "1", 10);
+    const savedFiltersString = localStorage.getItem(FILTER_STORAGE_KEY_TD);
+    const savedStateString = localStorage.getItem(STATE_STORAGE_KEY_TD);
+
+    fetchItems();
+    fetchFilterOptions();
+
+    if (navigationType === "POP" && savedStateString) {
+      try {
+        const savedFilters = savedFiltersString ? JSON.parse(savedFiltersString) : {};
+        const savedState = JSON.parse(savedStateString);
+
+        setSearchTerm(savedFilters.searchTerm || "");
+        setCustomerName(savedFilters.customerName || "");
+        setPartnerName(savedFilters.partnerName || "");
+        setBrandName(savedFilters.brandName || "");
+        setSelectedProductAndService(savedFilters.selectedProductAndService || []);
+        setSelectedTrangThaiDon(savedFilters.selectedTrangThaiDon || null);
+        setSelectedField(savedFilters.selectedField || null);
+        setFromDate(savedFilters.fromDate || "");
+        setToDate(savedFilters.toDate || "");
+        setSelectedHanXuLy(savedFilters.selectedHanXuLy || null);
+        setSortByHanXuLy(savedFilters.sortByHanXuLy || false);
+        setSelectedHanTraLoi(savedFilters.selectedHanTraLoi || null);
+        setSortByHanTraLoi(savedFilters.sortByHanTraLoi || false);
+
+        setApplications(savedState.applications || []);
+        setTotalItems(savedState.totalItems || 0);
+        setPageIndex(savedState.pageIndex || savedPage || 1);
+        setPageSize(savedState.pageSize || 10);
+
+        const restoredFilterCondition = {
+          selectedField: savedFilters.selectedField?.value || "",
+          fromDate: savedFilters.fromDate || "",
+          toDate: savedFilters.toDate || "",
+          hanXuLyFilter: savedFilters.selectedHanXuLy?.value || "",
+          hanTraLoiFilter: savedFilters.selectedHanTraLoi?.value || "",
+          sortByHanXuLy: savedFilters.sortByHanXuLy || false,
+          sortByHanTraLoi: savedFilters.sortByHanTraLoi || false,
+        };
+
+        fetchApplications(
+          savedFilters.searchTerm || "",
+          savedPage,
+          savedState?.pageSize || pageSize,
+          restoredFilterCondition,
+          savedFilters
+        );
+      } catch (e) {
+        console.error("Error parsing saved state/filters (TD_NH_VN)", e);
+        fetchApplications("", savedPage, pageSize);
+      }
+    } else {
+      if (savedFiltersString) {
+        try {
+          const savedFilters = JSON.parse(savedFiltersString);
+          setSearchTerm(savedFilters.searchTerm || "");
+          setCustomerName(savedFilters.customerName || "");
+          setPartnerName(savedFilters.partnerName || "");
+          setBrandName(savedFilters.brandName || "");
+          setSelectedProductAndService(savedFilters.selectedProductAndService || []);
+          setSelectedTrangThaiDon(savedFilters.selectedTrangThaiDon || null);
+          setSelectedField(savedFilters.selectedField || null);
+          setFromDate(savedFilters.fromDate || "");
+          setToDate(savedFilters.toDate || "");
+          setSelectedHanXuLy(savedFilters.selectedHanXuLy || null);
+          setSortByHanXuLy(savedFilters.sortByHanXuLy || false);
+          setSelectedHanTraLoi(savedFilters.selectedHanTraLoi || null);
+          setSortByHanTraLoi(savedFilters.sortByHanTraLoi || false);
+
+          const restoredFilterCondition = {
+            selectedField: savedFilters.selectedField?.value || "",
+            fromDate: savedFilters.fromDate || "",
+            toDate: savedFilters.toDate || "",
+            hanXuLyFilter: savedFilters.selectedHanXuLy?.value || "",
+            hanTraLoiFilter: savedFilters.selectedHanTraLoi?.value || "",
+            sortByHanXuLy: savedFilters.sortByHanXuLy || false,
+            sortByHanTraLoi: savedFilters.sortByHanTraLoi || false,
+          };
+
+          fetchApplications(
+            savedFilters.searchTerm || "",
+            savedPage,
+            pageSize,
+            restoredFilterCondition,
+            savedFilters
+          );
+        } catch (e) {
+          console.error("Error parsing saved filters (TD_NH_VN)", e);
+          fetchApplications("", savedPage, pageSize);
+        }
+      } else {
+        fetchApplications("", savedPage, pageSize);
+      }
+    }
+
+    if (!localStorage.getItem(PAGE_STORAGE_KEY_TD)) {
+      localStorage.setItem(PAGE_STORAGE_KEY_TD, "1");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigationType]);
+
+  useEffect(() => {
+    const filtersToSave = {
+      searchTerm,
+      customerName,
+      partnerName,
+      brandName,
+      selectedProductAndService,
+      selectedTrangThaiDon,
+      selectedField,
+      fromDate,
+      toDate,
+      selectedHanXuLy,
+      sortByHanXuLy,
+      selectedHanTraLoi,
+      sortByHanTraLoi,
+      selectedFields,
+    };
+    localStorage.setItem(FILTER_STORAGE_KEY_TD, JSON.stringify(filtersToSave));
+  }, [
+    searchTerm,
+    customerName,
+    partnerName,
+    brandName,
+    selectedProductAndService,
+    selectedTrangThaiDon,
+    selectedField,
+    fromDate,
+    toDate,
+    selectedHanXuLy,
+    sortByHanXuLy,
+    selectedHanTraLoi,
+    sortByHanTraLoi,
+    selectedFields,
+  ]);
+
+  useEffect(() => {
+    const stateToSave = {
+      applications,
+      totalItems,
+      pageIndex,
+      pageSize,
+    };
+    localStorage.setItem(STATE_STORAGE_KEY_TD, JSON.stringify(stateToSave));
+  }, [applications, totalItems, pageIndex, pageSize]);
+
+  const columns = allFieldOptions
+    .filter((field) => selectedFields.includes(field.key))
+    .map((field) => ({ label: field.label, labelEn: field.labelEn, key: field.key }));
 
   const fieldOptions = [
     { value: "ngayNopDon", label: "Ngày nộp đơn" },
@@ -182,73 +414,96 @@ function Application_TD_NH_VNList() {
     { value: "ngayNopPhiCapBang", label: "Ngày nộp phí cấp bằng" },
     { value: "ngayGuiBangChoKhachHang", label: "Ngày gửi bằng cho khách hàng" },
     { value: "ngayHetHanBang", label: "Ngày hết hạn bằng" },
-    // Thêm trường khác nếu cần
-  ];
-  const hanOptions = [
-    { value: "<7", label: "Còn hạn dưới 7 ngày" },
-    { value: "<3", label: "Còn hạn dưới 3 ngày" },
-    { value: "overdue", label: "Đã quá hạn" }
   ];
 
-  const [showFilters, setShowFilters] = useState(false);
+  const hanOptions = [
+    { value: "<30", label: "Còn hạn dưới 30 ngày" },
+    { value: "<15", label: "Còn hạn dưới 15 ngày" },
+    { value: "<7", label: "Còn hạn dưới 7 ngày" },
+    { value: "overdue", label: "Đã quá hạn" },
+  ];
+
   const getTenSPDVChuoi = (spdvList) => {
     if (!Array.isArray(spdvList) || spdvList.length === 0) return "";
-
     return spdvList
-      .map(sp => {
-        const found = productAndService.find(p => p.maSPDV === sp.maSPDV);
+      .map((sp) => {
+        const found = productAndService.find((p) => p.maSPDV === sp.maSPDV);
         return found?.tenSPDV || `${sp.maSPDV}`;
       })
       .join(", ");
   };
+
   const handleDeleteApplication = async () => {
-    await callAPI({ method: "post", endpoint: "/application/delete", data: { maDonDangKy: applicationToDelete } });
+    await callAPI({
+      method: "post",
+      endpoint: "/application/delete",
+      data: { maDonDangKy: applicationToDelete },
+    });
     setShowDeleteModal(false);
     setApplicationToDelete(null);
-    fetchApplications(searchTerm);
+    fetchApplications(searchTerm, pageIndex, pageSize);
   };
+
   const handleClearFilters = () => {
     setSelectedProductAndService([]);
     setSelectedTrangThaiDon(null);
     setSelectedField(null);
-    setFromDate(null);
-    setToDate(null);
+    setFromDate("");
+    setToDate("");
     setSelectedHanXuLy(null);
     setSortByHanXuLy(false);
+    setSelectedHanTraLoi(null);
+    setSortByHanTraLoi(false);
+    setCustomerName("");
+    setPartnerName("");
+    setBrandName("");
+    setSearchTerm("");
+    fetchApplications("", 1, pageSize, {
+      selectedField: "",
+      fromDate: "",
+      toDate: "",
+      hanXuLyFilter: "",
+      hanTraLoiFilter: "",
+      sortByHanXuLy: false,
+      sortByHanTraLoi: false,
+    }, {
+      customerName: "",
+      partnerName: "",
+      brandName: "",
+      selectedProductAndService: [],
+      selectedTrangThaiDon: null,
+    });
   };
 
   return (
     <div className="p-1 bg-gray-100 min-h-screen">
       <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">📌 Danh sách tờ khai tách đơn đăng ký nhãn hiệu Việt Nam</h2>
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+          📌 Danh sách tờ khai tách đơn đăng ký nhãn hiệu Việt Nam
+        </h2>
+
+        {/* Hàng Search chính */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                fetchApplications(searchTerm, 1, pageSize);
+          <div className="w-full md:w-1/3">
+            <SearchCreatableSelect
+              value={searchTerm}
+              onChange={(val) => setSearchTerm(val)}
+              onSearch={(keyword) =>
+                fetchApplications(keyword !== undefined ? keyword : searchTerm, 1, pageSize)
               }
-            }}
-            placeholder="🔍 Nhập số đơn hoặc mã hồ sơ"
-            className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
-          />
-          <div className="flex gap-3">
+              options={applicationSearchOptions}
+              placeholder="🔍 Nhập số đơn hoặc mã hồ sơ"
+            />
+          </div>
+          <div className="flex gap-3 flex-wrap">
             <button
               onClick={() => fetchApplications(searchTerm, 1, pageSize)}
               className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
             >
               Tìm kiếm
             </button>
-            {/* <button
-              onClick={() => navigate("/applicationadd")}
-              className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
-            >
-              Thêm mới
-            </button> */}
             <button
-              onClick={() => exportToExcel(applications, allFieldOptions, 'DanhSachDonDK')}
+              onClick={() => exportToExcel(applications, allFieldOptions, "DanhSachDonDK_TachDon")}
               className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
             >
               Xuất Excel
@@ -259,72 +514,69 @@ function Application_TD_NH_VNList() {
             >
               Chọn cột hiển thị
             </button>
+            <button
+              onClick={handleClearFilters}
+              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-3 rounded-lg shadow-md transition"
+            >
+              Xóa lọc
+            </button>
           </div>
         </div>
-        <div className="">
+
+        {/* Filters */}
+        <div>
           <div className="flex flex-wrap gap-3">
             <div className="w-full md:w-1/6">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Khách hàng
               </label>
-              <input
-                type="text"
+              <SearchCreatableSelect
                 value={customerName || ""}
-                onChange={e => setCustomerName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    fetchApplications(searchTerm, 1, pageSize);
-                  }
-                }}
+                onChange={(val) => setCustomerName(val)}
+                onSearch={() => fetchApplications(searchTerm, 1, pageSize)}
+                options={customerOptions}
                 placeholder="Nhập tên khách hàng"
-                className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
             <div className="w-full md:w-1/6">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Đối tác
               </label>
-              <input
-                type="text"
+              <SearchCreatableSelect
                 value={partnerName || ""}
-                onChange={e => setPartnerName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    fetchApplications(searchTerm, 1, pageSize);
-                  }
-                }}
+                onChange={(val) => setPartnerName(val)}
+                onSearch={() => fetchApplications(searchTerm, 1, pageSize)}
+                options={partnerOptions}
                 placeholder="Nhập tên đối tác"
-                className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
             <div className="w-full md:w-1/6">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Nhãn hiệu
               </label>
-              <input
-                type="text"
+              <SearchCreatableSelect
                 value={brandName || ""}
-                onChange={e => setBrandName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    fetchApplications(searchTerm, 1, pageSize);
-                  }
-                }}
+                onChange={(val) => setBrandName(val)}
+                onSearch={() => fetchApplications(searchTerm, 1, pageSize)}
+                options={brandOptions}
                 placeholder="Nhập tên nhãn hiệu"
-                className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
 
             {/* Sản phẩm dịch vụ */}
             <div className="w-full md:w-1/6">
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Sản phẩm dịch vụ</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Sản phẩm dịch vụ
+              </label>
               <Select
                 options={formatOptions(productAndService, "maSPDV", "tenSPDV")}
-                value={formatOptions(productAndService, "maSPDV", "tenSPDV").filter(opt =>
+                value={formatOptions(productAndService, "maSPDV", "tenSPDV").filter((opt) =>
                   selectedProductAndService?.includes(opt.value)
                 )}
-                onChange={selectedOptions =>
-                  setSelectedProductAndService(selectedOptions ? selectedOptions.map(opt => opt.value) : [])
+                onChange={(selectedOptions) =>
+                  setSelectedProductAndService(
+                    selectedOptions ? selectedOptions.map((opt) => opt.value) : []
+                  )
                 }
                 placeholder="Chọn SPDV"
                 className="text-left"
@@ -335,11 +587,13 @@ function Application_TD_NH_VNList() {
 
             {/* Trạng thái đơn */}
             <div className="w-full md:w-1/6">
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Trạng thái đơn</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Trạng thái đơn
+              </label>
               <Select
                 options={trangThaiDonOptions}
-                value={trangThaiDonOptions.find(opt => opt.value === selectedTrangThaiDon)}
-                onChange={selectedOption =>
+                value={trangThaiDonOptions.find((opt) => opt.value === selectedTrangThaiDon)}
+                onChange={(selectedOption) =>
                   setSelectedTrangThaiDon(selectedOption ? selectedOption.value : null)
                 }
                 placeholder="Chọn trạng thái đơn"
@@ -347,8 +601,12 @@ function Application_TD_NH_VNList() {
                 isClearable
               />
             </div>
+
+            {/* Hạn xử lý */}
             <div className="w-full md:w-1/6">
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Lọc theo hạn xử lý</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Lọc theo hạn xử lý
+              </label>
               <Select
                 options={hanOptions}
                 value={selectedHanXuLy}
@@ -370,9 +628,11 @@ function Application_TD_NH_VNList() {
               </div>
             </div>
 
-            {/* --- Hạn trả lời --- */}
+            {/* Hạn trả lời */}
             <div className="w-full md:w-1/6">
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Lọc theo hạn trả lời</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Lọc theo hạn trả lời
+              </label>
               <Select
                 options={hanOptions}
                 value={selectedHanTraLoi}
@@ -393,8 +653,6 @@ function Application_TD_NH_VNList() {
                 <label>Sắp xếp theo hạn trả lời</label>
               </div>
             </div>
-            {/* </div> */}
-
 
             {/* Dòng 2: Lọc theo thời gian */}
             <div className="w-full ">
@@ -412,7 +670,7 @@ function Application_TD_NH_VNList() {
                 <DatePicker
                   value={fromDate ? dayjs(fromDate) : null}
                   onChange={(date) =>
-                    setFromDate(dayjs.isDayjs(date) && date.isValid() ? date.format("YYYY-MM-DD") : null)
+                    setFromDate(dayjs.isDayjs(date) && date.isValid() ? date.format("YYYY-MM-DD") : "")
                   }
                   format="DD/MM/YYYY"
                   placeholder="Từ ngày"
@@ -421,7 +679,7 @@ function Application_TD_NH_VNList() {
                 <DatePicker
                   value={toDate ? dayjs(toDate) : null}
                   onChange={(date) =>
-                    setToDate(dayjs.isDayjs(date) && date.isValid() ? date.format("YYYY-MM-DD") : null)
+                    setToDate(dayjs.isDayjs(date) && date.isValid() ? date.format("YYYY-MM-DD") : "")
                   }
                   format="DD/MM/YYYY"
                   placeholder="Đến ngày"
@@ -431,7 +689,6 @@ function Application_TD_NH_VNList() {
             </div>
           </div>
         </div>
-
       </div>
       <div className="mb-2 text-left text-gray-600 text-xl">
         {t("Tìm thấy")} <b className="text-blue-600">{totalItems}</b> {t("kết quả")}
