@@ -88,8 +88,13 @@ function AddVuViecModal({
   });
 
   useEffect(() => {
-    fetchNhanSu();
-    fetchCustomers();
+    if (isOpen) {
+      fetchNhanSu();
+      fetchCustomers();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
 
     if (record) {
       setMaHoSo(record.maHoSo || initialMaHoSo || "");
@@ -142,10 +147,10 @@ function AddVuViecModal({
     try {
       const response = await callAPI({
         method: "post",
-        endpoint: "/staff/list",
+        endpoint: "/staff/basiclist",
         data: {},
       });
-      setDsNhanSu(response);
+      setDsNhanSu(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Lỗi lấy danh sách nhân sự:", error);
     }
@@ -656,7 +661,7 @@ function AddVuViecModal({
               style={{ width: "100%" }}
               options={dsNhanSu.map((ns) => ({
                 value: ns.maNhanSu,
-                label: ns.tenNhanSu,
+                label: ns.hoTen ? `${ns.maNhanSu} - ${ns.hoTen}` : ns.tenNhanSu || ns.maNhanSu,
               }))}
             />
             <div className="min-h-[22px]" />

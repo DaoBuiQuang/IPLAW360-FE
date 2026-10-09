@@ -3,7 +3,8 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   PieChart, Users, Briefcase, Handshake, Globe, UserCheck,
   FileText, Settings, Tag, ShoppingCart, LayoutDashboard,
-  Key, User, ChevronDown, ChevronUp, DollarSign, Search, FileSignature, BarChart3, Stamp, Timer, Calendar
+  Key, User, ChevronDown, ChevronUp, DollarSign, Search, FileSignature, BarChart3, Stamp, Timer, Calendar,
+  FolderKanban
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -139,6 +140,14 @@ function MenuLeft() {
                   ) : null}
                 </li>
               )}
+
+              {/* ── MATTER — Xem hồ sơ vụ việc của nhân sự (tất cả các role) ── */}
+              <li>
+                <NavLink to="/timesheet/matter" className={navLinkClass}>
+                  <FolderKanban size={14} />
+                  <span className="text-left w-full">MATTER</span>
+                </NavLink>
+              </li>
             </>
           )}
 

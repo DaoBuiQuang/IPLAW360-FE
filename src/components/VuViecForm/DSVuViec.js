@@ -170,18 +170,20 @@ const DSVuViec = ({
         </Button>
       )}
 
-      <AddVuViecModal
-        initialMaHoSo={maHoSo}
-        maDonDangKy={maDonDangKy}
-        isOpen={modalState.isOpen}
-        onClose={() => setModalState({ isOpen: false, editingIndex: null, record: null })}
-        onSave={handleAddOrUpdate}
-        record={modalState.record}
-        isMainCaseCheck={modalState.isMainCaseCheck}
-        tenLoaiDon={tenLoaiDon}
-        isGeneralAdvice={isGeneralAdvice}
-        isKH={isKH}
-      />
+      {modalState.isOpen && (
+        <AddVuViecModal
+          initialMaHoSo={maHoSo}
+          maDonDangKy={maDonDangKy}
+          isOpen={modalState.isOpen}
+          onClose={() => setModalState({ isOpen: false, editingIndex: null, record: null })}
+          onSave={handleAddOrUpdate}
+          record={modalState.record}
+          isMainCaseCheck={modalState.isMainCaseCheck}
+          tenLoaiDon={tenLoaiDon}
+          isGeneralAdvice={isGeneralAdvice}
+          isKH={isKH}
+        />
+      )}
     </div>
   );
 };

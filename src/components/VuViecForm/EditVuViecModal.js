@@ -66,7 +66,12 @@ function EditVuViecModal({
     const canSave = isTenVuViecValid && isMoTaValid && isSoTienValid;
 
     useEffect(() => {
-        fetchNhanSu();
+        if (isOpen) {
+            fetchNhanSu();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
 
         if (record) {
             setMaHoSo(record.maHoSo || initialMaHoSo || "");
@@ -117,10 +122,10 @@ function EditVuViecModal({
         try {
             const response = await callAPI({
                 method: "post",
-                endpoint: "/staff/list",
+                endpoint: "/staff/basiclist",
                 data: {},
             });
-            setDsNhanSu(response);
+            setDsNhanSu(Array.isArray(response) ? response : []);
         } catch (error) {
             console.error("Lỗi lấy danh sách nhân sự:", error);
         }
@@ -450,7 +455,7 @@ function EditVuViecModal({
                         style={{ width: "100%" }}
                         options={dsNhanSu.map((ns) => ({
                             value: ns.maNhanSu,
-                            label: ns.tenNhanSu,
+                            label: ns.hoTen ? `${ns.maNhanSu} - ${ns.hoTen}` : ns.tenNhanSu || ns.maNhanSu,
                         }))}
                     />
                     {/* Đệm chiều cao để cân với vùng lỗi cột bên trái */}

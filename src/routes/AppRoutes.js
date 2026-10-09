@@ -142,6 +142,7 @@ import TimesheetAdd from "../containers/Timesheet/TimesheetAdd";
 import TimesheetEdit from "../containers/Timesheet/TimesheetEdit";
 import TimesheetDetail from "../containers/Timesheet/TimesheetDetail";
 import TimesheetMyTime from "../containers/Timesheet/TimesheetMyTime";
+import TimesheetMatter from "../containers/Timesheet/TimesheetMatter";
 import TimesheetMyTeam from "../containers/Timesheet/TimesheetMyTeam";
 import TimesheetMyOffice from "../containers/Timesheet/TimesheetMyOffice";
 import TimesheetTeamwork from "../containers/Timesheet/TimesheetTeamwork";
@@ -397,6 +398,7 @@ const AppRoutes = ({ notification, setNotification }) => {
 
           {/* TIMESHEET — Cấu trúc menu mới */}
           <Route path="/timesheet/mytime" element={<TimesheetMyTime />} />
+          <Route path="/timesheet/matter" element={<TimesheetMatter />} />
           <Route path="/timesheet/myteam" element={<TimesheetMyTeam />} />
           <Route path="/timesheet/teamwork" element={<TimesheetTeamwork />} />
           <Route path="/timesheet/myoffice" element={<TimesheetMyOffice />} />
