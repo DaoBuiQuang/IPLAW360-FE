@@ -9,6 +9,7 @@ import TimesheetDayDrawer from "./TimesheetDayDrawer";
 import KpiSummaryBar from "./KpiSummaryBar";
 import CaseCodeSelect from "./CaseCodeSelect";
 import ActivitySelect from "./ActivitySelect";
+import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
 import callAPI from "../../utils/api";
 
 const money = (v) => Number(v || 0).toLocaleString("vi-VN");
@@ -109,18 +110,94 @@ export default function TimesheetMyTime({ viewMode = "self", targetEmployeeCode 
     }
   }, [employeeCode, calendarMonth]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const MYTIME_FILTER_KEY = "timesheetMyTimeFilters";
+
   // ════════════════════════════════════════
   //  TASK (bảng thống kê) STATE
   // ════════════════════════════════════════
   const [rows, setRows] = useState([]);
   const [taskLoading, setTaskLoading] = useState(false);
-  const [filters, setFilters] = useState({
-    caseCode: "", activity: "", customerCode: "", partnerCode: "",
-    fromDate: "", toDate: "",
+  const [filters, setFilters] = useState(() => {
+    try {
+      const saved = localStorage.getItem(MYTIME_FILTER_KEY);
+      return saved ? JSON.parse(saved) : {
+        caseCode: "", activity: "", customerCode: "", partnerCode: "",
+        fromDate: "", toDate: "",
+      };
+    } catch {
+      return {
+        caseCode: "", activity: "", customerCode: "", partnerCode: "",
+        fromDate: "", toDate: "",
+      };
+    }
   });
   const [pagination, setPagination] = useState({ pageIndex: 1, pageSize: 20, totalItems: 0 });
   const [taskSummary, setTaskSummary] = useState({ totalItems: 0, totalHours: 0, totalAmount: 0 });
   const [deleting, setDeleting] = useState(null);
+
+  // Tự động lưu filter vào localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(MYTIME_FILTER_KEY, JSON.stringify(filters));
+    } catch {}
+  }, [filters]);
+
+  const [customerOptions, setCustomerOptions] = useState([]);
+  const [partnerOptions, setPartnerOptions] = useState([]);
+  const [caseOptions, setCaseOptions] = useState([]);
+
+  useEffect(() => {
+    callAPI({ method: "post", endpoint: "/customers/by-name", data: {} })
+      .then((res) => {
+        const raw = Array.isArray(res) ? res : res?.data || [];
+        setCustomerOptions(raw.map((c) => ({
+          value: c.tenKhachHang || c.maKhachHang,
+          label: `${c.tenKhachHang || ""}${c.maKhachHang ? ` (${c.maKhachHang})` : ""}`,
+        })));
+      }).catch(() => {});
+
+    callAPI({ method: "post", endpoint: "/partner/all", data: {} })
+      .then((res) => {
+        const raw = Array.isArray(res) ? res : res?.data || [];
+        setPartnerOptions(raw.map((p) => ({
+          value: p.tenDoiTac || p.maDoiTac,
+          label: `${p.tenDoiTac || ""}${p.maDoiTac ? ` (${p.maDoiTac})` : ""}`,
+        })));
+      }).catch(() => {});
+
+    callAPI({ method: "post", endpoint: "/timesheet/case-options", data: { pageSize: 50 } })
+      .then((res) => {
+        const raw = res?.data || [];
+        setCaseOptions(raw.map((item) => ({
+          value: item.caseCode,
+          label: item.caseCode,
+        })));
+      }).catch(() => {});
+  }, []);
+
+  const handleFieldSearch = (fieldKey, value) => {
+    const nextFilters = { ...filters, [fieldKey]: value };
+    setFilters(nextFilters);
+    const payload = {
+      employeeCode,
+      status: "APPROVED",
+      caseCode: nextFilters.caseCode || undefined,
+      activity: nextFilters.activity || undefined,
+      customerCode: nextFilters.customerCode || undefined,
+      partnerCode: nextFilters.partnerCode || undefined,
+      fromDate: nextFilters.fromDate || undefined,
+      toDate: nextFilters.toDate || undefined,
+    };
+    setTaskLoading(true);
+    Promise.all([
+      callAPI({ method: "post", endpoint: "/timesheet/list", data: { ...payload, pageIndex: 1, pageSize: pagination.pageSize } }),
+      callAPI({ method: "post", endpoint: "/timesheet/summary", data: payload }),
+    ]).then(([res, sumRes]) => {
+      setRows(res?.data || []);
+      setPagination((p) => ({ ...p, pageIndex: 1, totalItems: res?.pagination?.totalItems || 0 }));
+      setTaskSummary(sumRes?.summary || { totalItems: 0, totalHours: 0, totalAmount: 0 });
+    }).finally(() => setTaskLoading(false));
+  };
 
   const setFilter = (key, value) => setFilters((f) => ({ ...f, [key]: value }));
 
@@ -324,47 +401,80 @@ export default function TimesheetMyTime({ viewMode = "self", targetEmployeeCode 
               <div className="w-full md:w-1/6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
                 <DatePicker className="w-full" placeholder="Từ ngày" format="DD/MM/YYYY"
-                  onChange={(d) => setFilter("fromDate", d?.format("YYYY-MM-DD") || "")} />
+                  onChange={(d) => handleFieldSearch("fromDate", d?.format("YYYY-MM-DD") || "")} />
               </div>
               <div className="w-full md:w-1/6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
                 <DatePicker className="w-full" placeholder="Đến ngày" format="DD/MM/YYYY"
-                  onChange={(d) => setFilter("toDate", d?.format("YYYY-MM-DD") || "")} />
+                  onChange={(d) => handleFieldSearch("toDate", d?.format("YYYY-MM-DD") || "")} />
               </div>
               <div className="w-full md:w-1/6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Mã hồ sơ</label>
-                <CaseCodeSelect value={filters.caseCode} onChange={(v) => setFilter("caseCode", v)}
-                  allowCustom placeholder="Chọn hoặc nhập mã hồ sơ" />
+                <SearchCreatableSelect
+                  value={filters.caseCode}
+                  onChange={(v) => setFilter("caseCode", v)}
+                  onSearch={(v) => handleFieldSearch("caseCode", v)}
+                  options={caseOptions}
+                  placeholder="Chọn hoặc nhập mã HS..."
+                />
               </div>
               <div className="w-full md:w-1/6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Hoạt động</label>
-                <ActivitySelect value={filters.activity} onChange={(v) => setFilter("activity", v || "")}
+                <ActivitySelect value={filters.activity} onChange={(v) => handleFieldSearch("activity", v || "")}
                   placeholder="Chọn hoạt động" className="text-left" />
               </div>
               <div className="w-full md:w-1/6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mã KH</label>
-                <input
-                  type="text" placeholder="Mã khách hàng"
+                <label className="block text-sm font-medium text-gray-700 mb-1">Khách hàng</label>
+                <SearchCreatableSelect
                   value={filters.customerCode}
-                  onChange={(e) => setFilter("customerCode", e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-[#009999] focus:outline-none"
+                  onChange={(v) => setFilter("customerCode", v)}
+                  onSearch={(v) => handleFieldSearch("customerCode", v)}
+                  options={customerOptions}
+                  placeholder="Mã hoặc tên khách hàng..."
                 />
               </div>
               <div className="w-full md:w-1/6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mã đối tác</label>
-                <input
-                  type="text" placeholder="Mã đối tác"
+                <label className="block text-sm font-medium text-gray-700 mb-1">Đối tác</label>
+                <SearchCreatableSelect
                   value={filters.partnerCode}
-                  onChange={(e) => setFilter("partnerCode", e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-[#009999] focus:outline-none"
+                  onChange={(v) => setFilter("partnerCode", v)}
+                  onSearch={(v) => handleFieldSearch("partnerCode", v)}
+                  options={partnerOptions}
+                  placeholder="Mã hoặc tên đối tác..."
                 />
               </div>
-              <button
-                type="submit"
-                className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-2 rounded-lg shadow-md transition font-medium h-[38px] flex items-center cursor-pointer"
-              >
-                Tìm kiếm
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="submit"
+                  className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-2 rounded-lg shadow-md transition font-medium h-[38px] flex items-center cursor-pointer whitespace-nowrap"
+                >
+                  Tìm kiếm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const empty = {
+                      caseCode: "", activity: "", customerCode: "", partnerCode: "",
+                      fromDate: "", toDate: "",
+                    };
+                    setFilters(empty);
+                    try { localStorage.removeItem(MYTIME_FILTER_KEY); } catch {}
+                    setTaskLoading(true);
+                    const payload = { employeeCode, status: "APPROVED" };
+                    Promise.all([
+                      callAPI({ method: "post", endpoint: "/timesheet/list", data: { ...payload, pageIndex: 1, pageSize: pagination.pageSize } }),
+                      callAPI({ method: "post", endpoint: "/timesheet/summary", data: payload }),
+                    ]).then(([res, sumRes]) => {
+                      setRows(res?.data || []);
+                      setPagination((p) => ({ ...p, pageIndex: 1, totalItems: res?.pagination?.totalItems || 0 }));
+                      setTaskSummary(sumRes?.summary || { totalItems: 0, totalHours: 0, totalAmount: 0 });
+                    }).finally(() => setTaskLoading(false));
+                  }}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-lg transition font-medium h-[38px] flex items-center cursor-pointer whitespace-nowrap text-sm"
+                >
+                  Xóa lọc
+                </button>
+              </div>
             </form>
 
             {/* Summary mini-cards */}

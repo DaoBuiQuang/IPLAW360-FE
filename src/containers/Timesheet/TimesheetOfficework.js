@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import CaseCodeSelect from "./CaseCodeSelect";
 import ActivitySelect from "./ActivitySelect";
+import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+import dayjs from "dayjs";
 import callAPI from "../../utils/api";
 
 const statusMap = { APPROVED: "Đã duyệt" };
@@ -37,19 +39,44 @@ export default function TimesheetOfficework() {
   const [allStaffList, setAllStaffList] = useState([]);
   const [selectedTeamManager, setSelectedTeamManager] = useState("");
 
+  const OFFICEWORK_FILTER_KEY = "timesheetOfficeworkFilters";
+
   // ── Bảng dữ liệu ──
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState({
-    employeeCode: "",
-    caseCode: "",
-    customerCode: "",
-    partnerCode: "",
-    activity: "",
-    searchText: "",
-    fromDate: "",
-    toDate: "",
+  const [filters, setFilters] = useState(() => {
+    try {
+      const saved = localStorage.getItem(OFFICEWORK_FILTER_KEY);
+      return saved ? JSON.parse(saved) : {
+        employeeCode: "",
+        caseCode: "",
+        customerCode: "",
+        partnerCode: "",
+        activity: "",
+        searchText: "",
+        fromDate: "",
+        toDate: "",
+      };
+    } catch {
+      return {
+        employeeCode: "",
+        caseCode: "",
+        customerCode: "",
+        partnerCode: "",
+        activity: "",
+        searchText: "",
+        fromDate: "",
+        toDate: "",
+      };
+    }
   });
+
+  // Tự động lưu bộ lọc vào localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(OFFICEWORK_FILTER_KEY, JSON.stringify(filters));
+    } catch {}
+  }, [filters]);
   const [pagination, setPagination] = useState({
     pageIndex: 1,
     pageSize: 20,
@@ -68,36 +95,65 @@ export default function TimesheetOfficework() {
   const setFilter = (key, value) =>
     setFilters((old) => ({ ...old, [key]: value }));
 
-  // ── Fetch danh sách teams & nhân sự ──
+  const [customerOptions, setCustomerOptions] = useState([]);
+  const [partnerOptions, setPartnerOptions] = useState([]);
+  const [caseOptions, setCaseOptions] = useState([]);
+
+  // ── Fetch danh sách teams & nhân sự & gợi ý ──
   useEffect(() => {
     Promise.all([
       callAPI({ method: "post", endpoint: "/team/list", data: { pageSize: 100 } }),
       callAPI({ method: "post", endpoint: "/staff/basiclist", data: {} }),
+      callAPI({ method: "post", endpoint: "/customers/by-name", data: {} }),
+      callAPI({ method: "post", endpoint: "/partner/all", data: {} }),
+      callAPI({ method: "post", endpoint: "/timesheet/case-options", data: { pageSize: 50 } }),
     ])
-      .then(([tRes, sRes]) => {
+      .then(([tRes, sRes, cRes, pRes, csRes]) => {
         setTeamsList(tRes?.teams || []);
         setAllStaffList(Array.isArray(sRes) ? sRes : sRes?.data || []);
+
+        const rawC = Array.isArray(cRes) ? cRes : cRes?.data || [];
+        setCustomerOptions(rawC.map((c) => ({
+          value: c.tenKhachHang || c.maKhachHang,
+          label: `${c.tenKhachHang || ""}${c.maKhachHang ? ` (${c.maKhachHang})` : ""}`,
+        })));
+
+        const rawP = Array.isArray(pRes) ? pRes : pRes?.data || [];
+        setPartnerOptions(rawP.map((p) => ({
+          value: p.tenDoiTac || p.maDoiTac,
+          label: `${p.tenDoiTac || ""}${p.maDoiTac ? ` (${p.maDoiTac})` : ""}`,
+        })));
+
+        const rawCs = csRes?.data || [];
+        setCaseOptions(rawCs.map((item) => ({
+          value: item.caseCode,
+          label: item.caseCode,
+        })));
       })
       .catch(() => {});
   }, []);
 
   // ── Tạo payload filter ──
-  const getFilterPayload = useCallback(() => {
+  const getFilterPayload = useCallback((customFilters = null, customManager = undefined) => {
+    const activeF = customFilters || filters;
+    const activeMgr = customManager !== undefined ? customManager : selectedTeamManager;
     const payload = {
       status: "APPROVED",
-      caseCode: filters.caseCode || undefined,
-      customerCode: filters.customerCode || undefined,
-      partnerCode: filters.partnerCode || undefined,
-      activity: filters.activity || undefined,
-      searchText: filters.searchText || undefined,
-      fromDate: filters.fromDate || undefined,
-      toDate: filters.toDate || undefined,
+      caseCode: activeF.caseCode || undefined,
+      customerCode: activeF.customerCode || undefined,
+      customerName: activeF.customerCode || undefined,
+      partnerCode: activeF.partnerCode || undefined,
+      partnerName: activeF.partnerCode || undefined,
+      activity: activeF.activity || undefined,
+      searchText: activeF.searchText || undefined,
+      fromDate: activeF.fromDate || undefined,
+      toDate: activeF.toDate || undefined,
     };
 
-    if (filters.employeeCode) {
-      payload.employeeCode = filters.employeeCode;
-    } else if (selectedTeamManager) {
-      payload.teamManagerCode = selectedTeamManager;
+    if (activeF.employeeCode) {
+      payload.employeeCode = activeF.employeeCode;
+    } else if (activeMgr) {
+      payload.teamManagerCode = activeMgr;
     }
 
     return payload;
@@ -105,10 +161,10 @@ export default function TimesheetOfficework() {
 
   // ── Fetch danh sách time records toàn công ty ──
   const fetchRows = useCallback(
-    async (pageIndex = pagination.pageIndex, pageSize = pagination.pageSize) => {
+    async (pageIndex = pagination.pageIndex, pageSize = pagination.pageSize, overrideFilters = null, overrideManager = undefined) => {
       setLoading(true);
       try {
-        const payload = getFilterPayload();
+        const payload = getFilterPayload(overrideFilters, overrideManager);
 
         const [response, summaryResponse] = await Promise.all([
           callAPI({
@@ -145,6 +201,12 @@ export default function TimesheetOfficework() {
     },
     [getFilterPayload, pagination.pageIndex, pagination.pageSize]
   );
+
+  const handleFieldSearch = (fieldKey, value) => {
+    const nextFilters = { ...filters, [fieldKey]: value };
+    setFilters(nextFilters);
+    fetchRows(1, pagination.pageSize, nextFilters);
+  };
 
   useEffect(() => {
     fetchRows(1, pagination.pageSize);
@@ -285,8 +347,11 @@ export default function TimesheetOfficework() {
               placeholder="Tất cả các nhóm"
               value={selectedTeamManager || undefined}
               onChange={(val) => {
-                setSelectedTeamManager(val || "");
-                setFilter("employeeCode", ""); // reset nhân sự cụ thể
+                const newMgr = val || "";
+                setSelectedTeamManager(newMgr);
+                const nextFilters = { ...filters, employeeCode: "" };
+                setFilters(nextFilters);
+                fetchRows(1, pagination.pageSize, nextFilters, newMgr);
               }}
               options={teamsList.map((t) => ({
                 value: t.managerCode,
@@ -305,7 +370,7 @@ export default function TimesheetOfficework() {
               allowClear
               placeholder="Tất cả nhân sự"
               value={filters.employeeCode || undefined}
-              onChange={(val) => setFilter("employeeCode", val || "")}
+              onChange={(val) => handleFieldSearch("employeeCode", val || "")}
               options={availableStaffOptions}
               filterOption={(input, option) =>
                 (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -319,8 +384,9 @@ export default function TimesheetOfficework() {
               className="w-full"
               placeholder="Từ ngày"
               format="DD/MM/YYYY"
+              value={filters.fromDate ? dayjs(filters.fromDate) : null}
               onChange={(date) =>
-                setFilter("fromDate", date?.format("YYYY-MM-DD") || "")
+                handleFieldSearch("fromDate", date?.format("YYYY-MM-DD") || "")
               }
             />
           </div>
@@ -331,19 +397,21 @@ export default function TimesheetOfficework() {
               className="w-full"
               placeholder="Đến ngày"
               format="DD/MM/YYYY"
+              value={filters.toDate ? dayjs(filters.toDate) : null}
               onChange={(date) =>
-                setFilter("toDate", date?.format("YYYY-MM-DD") || "")
+                handleFieldSearch("toDate", date?.format("YYYY-MM-DD") || "")
               }
             />
           </div>
 
           <div className="w-full sm:w-1/2 md:w-1/6">
             <label className="block text-xs font-medium text-gray-700 mb-1">Mã hồ sơ</label>
-            <CaseCodeSelect
+            <SearchCreatableSelect
               value={filters.caseCode}
               onChange={(v) => setFilter("caseCode", v)}
-              allowCustom
-              placeholder="Chọn hoặc nhập mã HS"
+              onSearch={(v) => handleFieldSearch("caseCode", v)}
+              options={caseOptions}
+              placeholder="Chọn hoặc nhập mã HS..."
             />
           </div>
 
@@ -351,31 +419,31 @@ export default function TimesheetOfficework() {
             <label className="block text-xs font-medium text-gray-700 mb-1">Hoạt động</label>
             <ActivitySelect
               value={filters.activity}
-              onChange={(v) => setFilter("activity", v || "")}
+              onChange={(v) => handleFieldSearch("activity", v || "")}
               placeholder="Chọn hoạt động"
               className="text-left"
             />
           </div>
 
           <div className="w-full sm:w-1/2 md:w-1/6">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Mã KH</label>
-            <input
-              type="text"
-              placeholder="Mã khách hàng"
+            <label className="block text-xs font-medium text-gray-700 mb-1">Khách hàng</label>
+            <SearchCreatableSelect
               value={filters.customerCode}
-              onChange={(e) => setFilter("customerCode", e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:border-[#009999] focus:outline-none h-[32px]"
+              onChange={(v) => setFilter("customerCode", v)}
+              onSearch={(v) => handleFieldSearch("customerCode", v)}
+              options={customerOptions}
+              placeholder="Mã hoặc tên KH..."
             />
           </div>
 
           <div className="w-full sm:w-1/2 md:w-1/6">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Mã đối tác</label>
-            <input
-              type="text"
-              placeholder="Mã đối tác"
+            <label className="block text-xs font-medium text-gray-700 mb-1">Đối tác</label>
+            <SearchCreatableSelect
               value={filters.partnerCode}
-              onChange={(e) => setFilter("partnerCode", e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:border-[#009999] focus:outline-none h-[32px]"
+              onChange={(v) => setFilter("partnerCode", v)}
+              onSearch={(v) => handleFieldSearch("partnerCode", v)}
+              options={partnerOptions}
+              placeholder="Mã hoặc tên đối tác..."
             />
           </div>
 
@@ -386,6 +454,12 @@ export default function TimesheetOfficework() {
               placeholder="Từ khóa..."
               value={filters.searchText}
               onChange={(e) => setFilter("searchText", e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  fetchRows(1, pagination.pageSize);
+                }
+              }}
               className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:border-[#009999] focus:outline-none h-[32px]"
             />
           </div>
@@ -402,7 +476,7 @@ export default function TimesheetOfficework() {
               type="button"
               onClick={() => {
                 setSelectedTeamManager("");
-                setFilters({
+                const empty = {
                   employeeCode: "",
                   caseCode: "",
                   customerCode: "",
@@ -411,7 +485,21 @@ export default function TimesheetOfficework() {
                   searchText: "",
                   fromDate: "",
                   toDate: "",
-                });
+                };
+                setFilters(empty);
+                try { localStorage.removeItem(OFFICEWORK_FILTER_KEY); } catch {}
+                setLoading(true);
+                const payload = {
+                  status: "APPROVED",
+                };
+                Promise.all([
+                  callAPI({ method: "post", endpoint: "/timesheet/list", data: { ...payload, pageIndex: 1, pageSize: pagination.pageSize } }),
+                  callAPI({ method: "post", endpoint: "/timesheet/summary", data: payload }),
+                ]).then(([res, sumRes]) => {
+                  setRows(res?.data || []);
+                  setPagination((p) => ({ ...p, pageIndex: 1, totalItems: res?.pagination?.totalItems || 0 }));
+                  setSummary(sumRes?.summary || { totalItems: 0, totalHours: 0, totalAmount: 0 });
+                }).finally(() => setLoading(false));
               }}
               className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-medium h-[32px] transition cursor-pointer"
             >

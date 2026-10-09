@@ -5,6 +5,10 @@ import { Modal, Pagination, Spin } from "antd";
 import { toast } from "react-toastify";
 import callAPI from "../../utils/api";
 
+import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+
+const FILTER_STORAGE_KEY = "dsCongViecListFilters";
+
 function DsCongViecList() {
   const navigate = useNavigate();
   const role = useSelector((state) => state.auth.role);
@@ -22,7 +26,14 @@ function DsCongViecList() {
   };
 
   const [rows, setRows] = useState([]);
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState(() => {
+    try {
+      const saved = localStorage.getItem(FILTER_STORAGE_KEY);
+      return saved ? JSON.parse(saved).keyword || "" : "";
+    } catch {
+      return "";
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     pageIndex: 1,
@@ -32,8 +43,38 @@ function DsCongViecList() {
   });
   const [deleting, setDeleting] = useState(null);
 
+  // Lưu filter vào localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify({ keyword }));
+    } catch {}
+  }, [keyword]);
+
+  // Options gợi ý từ danh sách công việc
+  const searchOptions = React.useMemo(() => {
+    const list = [];
+    const seen = new Set();
+    (rows || []).forEach((item) => {
+      if (item.maVietTat && !seen.has(item.maVietTat)) {
+        seen.add(item.maVietTat);
+        list.push({
+          value: item.maVietTat,
+          label: `${item.maVietTat}${item.moTaCongViec ? ` - ${item.moTaCongViec}` : ""}`,
+        });
+      }
+      if (item.moTaCongViec && !seen.has(item.moTaCongViec)) {
+        seen.add(item.moTaCongViec);
+        list.push({
+          value: item.moTaCongViec,
+          label: item.moTaCongViec,
+        });
+      }
+    });
+    return list;
+  }, [rows]);
+
   // -----------------------------------------------------------------------
-  const fetchList = useCallback(async (page = 1, size = 50, kw = "") => {
+  const fetchList = useCallback(async (page = 1, size = 50, kw = keyword) => {
     setLoading(true);
     try {
       const res = await callAPI({
@@ -55,11 +96,19 @@ function DsCongViecList() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [keyword]);
 
   useEffect(() => {
-    fetchList(1, 50, "");
-  }, [fetchList]);
+    fetchList(1, 50, keyword);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleClearFilters = () => {
+    setKeyword("");
+    try {
+      localStorage.removeItem(FILTER_STORAGE_KEY);
+    } catch {}
+    fetchList(1, pagination.pageSize, "");
+  };
 
   // -----------------------------------------------------------------------
   const handleDelete = async () => {
@@ -89,27 +138,35 @@ function DsCongViecList() {
           Danh sách công việc thường nhật
         </h2>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") fetchList(1, pagination.pageSize, keyword);
-            }}
-            placeholder="Tìm theo mã viết tắt hoặc mô tả..."
-            className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
-          />
+          <div className="w-full md:w-1/3">
+            <SearchCreatableSelect
+              value={keyword}
+              onChange={(val) => setKeyword(val)}
+              onSearch={(kw) => {
+                const target = kw !== undefined ? kw : keyword;
+                fetchList(1, pagination.pageSize, target);
+              }}
+              options={searchOptions}
+              placeholder="🔍 Tìm theo mã viết tắt hoặc mô tả..."
+            />
+          </div>
           <div className="flex gap-3">
             <button
               onClick={() => fetchList(1, pagination.pageSize, keyword)}
-              className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
+              className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-2.5 rounded-lg shadow-md transition font-medium cursor-pointer text-sm"
             >
               Tìm kiếm
+            </button>
+            <button
+              onClick={handleClearFilters}
+              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2.5 rounded-lg shadow-md transition font-medium cursor-pointer text-sm"
+            >
+              Xóa lọc
             </button>
             {staffRoles.includes(role) && (
               <button
                 onClick={() => navigate("/dscongviec_add")}
-                className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
+                className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-2.5 rounded-lg shadow-md transition font-medium cursor-pointer text-sm"
               >
                 + Thêm mới
               </button>
