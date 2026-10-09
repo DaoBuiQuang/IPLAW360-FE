@@ -8,6 +8,7 @@ const ThongTinHoSo = ({
     maHoSoVuViec,
     loaiDon,
     noiDungVuViec,
+    clientsRef,
     maKhachHang,
     tenKhachHang,
     diaChi,
@@ -61,7 +62,7 @@ const ThongTinHoSo = ({
                     {/* Thông tin chung */}
                     <div className="text-left"><span className="font-medium">Mã hồ sơ:</span> {maHoSoVuViec}</div>
                     <div className="text-left"><span className="font-medium">Loại đơn:</span> {loaiDon === 1 ? "Đơn gốc" : loaiDon === 2 ? "Đơn sửa đổi" : loaiDon === 3 ? "Đơn tách" : loaiDon === 4 ? "Đơn chuyển nhượng" : ""}</div>
-                    <div className="text-left"><span className="font-medium">Client ref's:</span> {noiDungVuViec}</div>
+                    <div className="text-left"><span className="font-medium">Client ref's:</span> {clientsRef || noiDungVuViec}</div>
                     <div className="text-left"><span className="font-medium">Mã khách hàng:</span> {maKhachHang}</div>
                     <div className="text-left"><span className="font-medium">Tên khách hàng:</span> {tenKhachHang}</div>
                     <div className="text-left"><span className="font-medium">Địa chỉ:</span> {diaChi}</div>

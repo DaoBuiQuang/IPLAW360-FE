@@ -15,6 +15,7 @@ function ApplicationDetailTest() {
     const [openModal, setOpenModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [noiDungVuViec, setNoiDungVuViec] = useState("");
+    const [clientsRef, setClientsRef] = useState("");
     const [maKhachHang, setMaKhachHang] = useState("");
     const [tenKhachHang, setTenKhachHang] = useState("");
     const [diaChi, setDiaChi] = useState("");
@@ -145,7 +146,8 @@ function ApplicationDetailTest() {
             if (response) {
                 setMaHoSoVuViec(response.maHoSoVuViec);
                 setLoaiDon(response.loaiDon);
-                setNoiDungVuViec(response.noiDung || "");
+                setNoiDungVuViec(response.noiDung || response.clientsRef || response.clientRef || "");
+                setClientsRef(response.clientsRef || response.clientRef || response.noiDungVuViec || response.noiDung || "");
                 setMaKhachHang(response.maKhachHang || "");
                 setTenKhachHang(response.khachHang?.tenKhachHang || "");
                 setDiaChi(response.khachHang?.diaChi || "");
@@ -261,7 +263,7 @@ function ApplicationDetailTest() {
                             {/* Thông tin chung */}
                             <div className="text-left"><span className="font-medium">Mã hồ sơ:</span> {maHoSoVuViec}</div>
                             <div className="text-left"><span className="font-medium">Loại đơn:</span> {loaiDon === 1 ? "Đơn gốc" : loaiDon === 2 ? "Đơn sửa đổi" : loaiDon === 3 ? "Đơn tách" : loaiDon === 4 ? "Đơn chuyển nhượng" : ""}</div>
-                            <div className="text-left"><span className="font-medium">Client ref's:</span> {noiDungVuViec}</div>
+                            <div className="text-left"><span className="font-medium">Client ref's:</span> {clientsRef || noiDungVuViec}</div>
                             <div className="text-left"><span className="font-medium">Mã khách hàng:</span> {maKhachHang}</div>
                             <div className="text-left"><span className="font-medium">Tên khách hàng:</span> {tenKhachHang}</div>
                             <div className="text-left"><span className="font-medium">Địa chỉ:</span> {diaChi}</div>

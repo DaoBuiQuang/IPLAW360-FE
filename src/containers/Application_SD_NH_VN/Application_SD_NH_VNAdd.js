@@ -358,7 +358,7 @@ function Application_SD_NH_VNAdd() {
             if (response) {
                 setMaHoSoVuViec(response.maHoSoVuViec);
                 setLoaiDon(response.loaiDon);
-                setNoiDungVuViec(response.noiDung || "");
+                setNoiDungVuViec(response.clientsRef || response.clientRef || response.noiDungVuViec || response.noiDung || "");
                 setMaKhachHang(response.maKhachHang || "");
                 setTenKhachHang(response.khachHang?.tenKhachHang || "");
                 setDiaChi(response.khachHang?.diaChi || "");
@@ -489,6 +489,7 @@ function Application_SD_NH_VNAdd() {
                     maHoSoVuViec={maHoSoVuViec}
                     loaiDon={loaiDon}
                     noiDungVuViec={noiDungVuViec}
+                    clientsRef={clientsRef || noiDungVuViec}
                     maKhachHang={maKhachHang}
                     tenKhachHang={tenKhachHang}
                     diaChi={diaChi}
