@@ -22,9 +22,11 @@ import FormHoSo from "../../components/commom/FormHoSo.js";
 import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
 import FormSuaDoi from "../../components/commom/FormSuaDoi.js";
 import FormTachDon from "../../components/commom/FormTachDon.js";
+import useVietnamTrademarkDeadlines from "../../utils/useVietnamTrademarkDeadlines";
 function ApplicationEdit() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [applicationLoaded, setApplicationLoaded] = useState(false);
     const { maDonDangKy } = useParams();
     const [loaiDon, setLoaiDon] = useState(null); // 1: Đơn gốc, 2: Đơn sửa đổi, 3: Đơn tách, 4: Đơn chuyển nhượng
     const [idKhachHang, setIdKhachHang] = useState(null);
@@ -69,6 +71,15 @@ function ApplicationEdit() {
     const [ngayCongBo, setNgayCongBo] = useState(null);
 
     const [ngayKQThamDinhND_DuKien, setNgayKQThamDinhND_DuKien] = useState(null);
+    const isNewProcess = useVietnamTrademarkDeadlines({
+        filingDate: ngayNopDon,
+        formalAcceptanceDate: ngayKQThamDinhHinhThuc,
+        publicationDate: ngayCongBo,
+        setPublicationDeadline: setNgayCongBo_DuKien,
+        setContentReviewDeadline: setNgayKQThamDinhND_DuKien,
+        ready: applicationLoaded,
+        preserveOnLoad: true,
+    });
     const [ngayKQThamDinhND, setNgayKQThamDinhND] = useState(null);
     const [lichSuThamDinhND, setLichSuThamDinhND] = useState([]);
     const [ngayKQThamDinhND_DK_SauKN, setNgayKQThamDinhND_DK_SauKN] = useState(null)
@@ -165,7 +176,6 @@ function ApplicationEdit() {
     };
     const [daChonNgayNopDon, setDaChonNgayNopDon] = useState(false);
     const [daChonNgayHoanThanhHSTL, setDaChonNgayHoanThanhHSTL] = useState(false);
-    const [daChonNgayThamDinhHinhThuc, setDaChonNgayThamDinhHinhThuc] = useState(false);
     const [daChonNgayCongBoDon, setDaChonNgayCongBoDon] = useState(false);
     const [daChonNgayThamDinhNoiDung, setDaChonNgayThamDinhNoiDung] = useState(false);
     const [daChonNgayTraLoiThamDinhNoiDung, setDaChonNgayTraLoiThamDinhNoiDung] = useState(false)
@@ -257,24 +267,11 @@ function ApplicationEdit() {
         // }
 
         if (ngayKQThamDinhHinhThuc) {
-            // if (!ngayCongBo_DuKien) {
-            const duKien = dayjs(ngayKQThamDinhHinhThuc).add(2, 'month').format('YYYY-MM-DD');
-            setNgayCongBo_DuKien(duKien);
-            // }
-            setDaChonNgayThamDinhHinhThuc(true);
             updateTrangThaiDon("Công bố đơn");
-        } else {
-            setNgayCongBo_DuKien(null);
         }
         if (ngayCongBo) {
-            // if (!ngayKQThamDinhND_DuKien) {
-            const duKien = dayjs(ngayCongBo).add(9, 'month').format('YYYY-MM-DD');
-            setNgayKQThamDinhND_DuKien(duKien);
-            // }
             setDaChonNgayCongBoDon(true);
             updateTrangThaiDon("Thẩm định nội dung");
-        } else {
-            setNgayKQThamDinhND_DuKien(null);
         }
 
         if (ngayKQThamDinhND) {
@@ -464,6 +461,7 @@ function ApplicationEdit() {
                     setNgayGhiNhanTD(response.donTach.ngayGhiNhanTachDon ? formatDate(response.donTach.ngayGhiNhanTachDon) : null);
                     setLanTachDon(response.donTach.lanTachDon ?? 1);
                 }
+                setApplicationLoaded(true);
             }
         } catch (error) {
             console.error("Lỗi khi gọi API chi tiết đơn:", error);
@@ -794,7 +792,7 @@ function ApplicationEdit() {
                                 />
                             </div>
                         )}
-                        {daChonNgayThamDinhHinhThuc && (
+                        {(ngayKQThamDinhHinhThuc || (isNewProcess && ngayNopDon)) && (
                             <div className="col-span-2">
                                 <AnnouncementOfApplication
                                     ngayCongBo_DuKien={ngayCongBo_DuKien}
