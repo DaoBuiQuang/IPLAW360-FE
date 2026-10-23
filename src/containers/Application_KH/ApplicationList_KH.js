@@ -1131,7 +1131,12 @@ function ApplicationList_KH() {
                 applications.map((app, index) => (
                   <tr
                     key={app.maDonDangKy || index}
-                    className="group hover:bg-gray-100 text-center border-b relative"
+                    className="group hover:bg-gray-100 text-center border-b relative cursor-pointer"
+                    onClick={() => {
+                      if (app.maDonDangKy) {
+                        navigate(`/applicationdetail_kh/${app.maDonDangKy}`);
+                      }
+                    }}
                   >
                     <td className="p-2 text-table ">{index + 1}</td>
                     {columns.map((col, colIndex) => {
@@ -1519,18 +1524,23 @@ function ApplicationList_KH() {
                     <td className="p-2 text-table">
                       {(role === "admin" || role === "staff") &&
                         app.donGoc !== 1 && (
-                          <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
+                          <div
+                            className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <button
                               className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                              onClick={() =>
-                                navigate(`/applicationedit_kh/${app.maDonDangKy}`)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/applicationedit_kh/${app.maDonDangKy}`);
+                              }}
                             >
                               📝
                             </button>
                             <button
                               className="px-3 py-1 bg-red-200 text-red-600 rounded-md hover:bg-red-300"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setApplicationToDelete(app.maDonDangKy);
                                 setShowDeleteModal(true);
                               }}

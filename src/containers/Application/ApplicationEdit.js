@@ -21,7 +21,6 @@ import { Spin } from "antd";
 import FormHoSo from "../../components/commom/FormHoSo.js";
 import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
 import FormSuaDoi from "../../components/commom/FormSuaDoi.js";
-import FormTachDon from "../../components/commom/FormTachDon.js";
 function ApplicationEdit() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -940,27 +939,23 @@ function ApplicationEdit() {
                                 />
                             )}
                         </div>
-                        <div className="col-span-2">
-                            {loaiDon === 3 && (
-                                <FormTachDon
-                                    soDonTD={soDonTD}
-                                    setSoDonTD={setSoDonTD}
-                                    ngayYeuCauTD={ngayYeuCauTD}
-                                    setNgayYeuCauTD={setNgayYeuCauTD}
-                                    ngayGhiNhanTD={ngayGhiNhanTD}
-                                    setNgayGhiNhanTD={setNgayGhiNhanTD}
-                                    dsNhomSPDV={dsNhomSPDV}
-                                    setDsNhomSPDV={setDsNhomSPDV}
-                                    ndTachDon={ndTachDon}
-                                    setNdTachDon={setNdTachDon}
-                                    moTa={moTa}
-                                    setMoTa={setMoTa}
-                                    maDonDangKyGoc={maDonDangKyGoc}
-                                    lanTachDon={lanTachDon}
-                                    setLanTachDon={setLanTachDon}
-                                    isEditOnly={isEditOnly}
-                                ></FormTachDon>
-                            )}
+                        <div className="col-span-2 pt-4 border-t border-gray-200">
+                            <div className="flex flex-wrap gap-4 items-center justify-center">
+                                <button
+                                    type="button"
+                                    onClick={() => window.open(`/application_sd_nh_vn_add/${maDonDangKy}`, "_blank")}
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                                >
+                                    <span>Sửa đổi đơn đăng ký</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => window.open(`/application_td_nh_vn_add/${maDonDangKy}`, "_blank")}
+                                    className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                                >
+                                    <span>Tách đơn đăng ký</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </Spin>

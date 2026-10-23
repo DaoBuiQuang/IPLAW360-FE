@@ -70,13 +70,6 @@ function AddVuViecModal({
   const isSoTienValid = Number(soTien) > 0;
   const canSave = isTenVuViecValid && isMoTaValid && isSoTienValid;
 
-  // 🔹 STATE cho modal TÁCH ĐƠN
-  const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
-  const [splitCount, setSplitCount] = useState(1);
-  const [splitList, setSplitList] = useState([
-    { nhomSPDV: "", ngayYeuCau: null, ngayGhiNhanSuaDoi: null, soDon: "" },
-  ]);
-
   // 🔹 STATE cho modal CHUYỂN QUYỀN
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [transferForm, setTransferForm] = useState({
@@ -195,14 +188,10 @@ function AddVuViecModal({
     onSave(formatted);
   };
 
-  // 🔹 Gọi khi bấm các nút “Chuyển quyền / Sửa đổi / Tách đơn” (VN)
+  // 🔹 Gọi khi bấm nút “Chuyển quyền” (VN)
   const handleSelectLoaiDon = (type) => {
     if (type === "chuyen_quyen") {
       openTransferModal();                    // ✅ mở modal chuyển quyền
-    } else if (type === "sua_doi") {
-      window.open(`/application_sd_nh_vn_add/${maDonDangKy}`, "_blank");
-    } else if (type === "tach_don") {
-      openSplitModal();
     } else if (type === "nhan_moi") {
       setIsDangKy(false);
       setIsTiepQuan(false);
@@ -214,8 +203,6 @@ function AddVuViecModal({
   const handleSelectLoaiDonKH = (type) => {
     if (type === "chuyen_quyen") {
       openTransferModal();                    // ✅ khách hàng cũng mở modal
-    } else if (type === "sua_doi") {
-      window.open(`/application_sd_nh_kh_add/${maDonDangKy}`, "_blank");
     }
   };
 
@@ -247,107 +234,6 @@ function AddVuViecModal({
     return raw.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
   };
 
-  // 🔹 HÀM mở modal tách đơn
-  const openSplitModal = () => {
-    setIsSplitModalOpen(true);
-    setSplitCount(1);
-    setSplitList([
-      { nhomSPDV: "", ngayYeuCau: null, ngayGhiNhanSuaDoi: null, soDon: "" },
-    ]);
-  };
-
-  // 🔹 Khi thay đổi số lượng đơn tách
-  const handleChangeSplitCount = (val) => {
-    const n = Math.max(1, Number(val) || 1);
-    setSplitCount(n);
-
-    setSplitList((prev) => {
-      const clone = [...prev];
-      if (n > clone.length) {
-        while (clone.length < n) {
-          clone.push({
-            nhomSPDV: "",
-            ngayYeuCau: null,
-            ngayGhiNhanSuaDoi: null,
-            soDon: "",
-          });
-        }
-      } else if (n < clone.length) {
-        clone.length = n;
-      }
-      return clone;
-    });
-  };
-
-  // 🔹 Thay đổi field từng đơn tách
-  const handleChangeSplitField = (index, field, value) => {
-    setSplitList((prev) => {
-      const clone = [...prev];
-      clone[index] = {
-        ...clone[index],
-        [field]: value,
-      };
-      return clone;
-    });
-  };
-
-  const isValidNhomSPDV = (value) => {
-    if (!value) return false;
-    const regex = /^(\d{1,2})(\s*,\s*\d{1,2})*$/;
-    return regex.test(value.trim());
-  };
-
-  // 🔹 OK trên modal tách đơn
-  const handleSplitModalOk = async () => {
-    try {
-      for (const item of splitList) {
-        if (!item.soDon || !item.soDon.trim()) {
-          message.error("Vui lòng nhập Số đơn tách cho tất cả các đơn.");
-          return;
-        }
-
-        if (!isValidNhomSPDV(item.nhomSPDV)) {
-          message.error(
-            "Nhóm SPDV phải đúng định dạng (ví dụ: 1, 5, 10, 35)."
-          );
-          return;
-        }
-      }
-
-      const listDonTach = splitList.map((item) => ({
-        soDon: item.soDon.trim(),
-        nhomSPDV: item.nhomSPDV.trim(),
-        ngayYeuCau: item.ngayYeuCau
-          ? item.ngayYeuCau.format("YYYY-MM-DD")
-          : null,
-        ngayGhiNhanSuaDoi: item.ngayGhiNhanSuaDoi
-          ? item.ngayGhiNhanSuaDoi.format("YYYY-MM-DD")
-          : null,
-      }));
-
-      await callAPI({
-        method: "post",
-        endpoint: isKH
-          ? "/application_td_nh_kh/add"
-          : "/application_td_nh_vn/add",
-        data: {
-          maHoSo,
-          maDonDangKyCu: maDonDangKy,
-          listDonTach,
-        },
-      });
-
-      message.success("Tách đơn thành công!");
-      setIsSplitModalOpen(false);
-    } catch (error) {
-      console.error("Lỗi tách đơn:", error);
-      message.error("Tách đơn thất bại!");
-    }
-  };
-
-  const handleSplitModalCancel = () => {
-    setIsSplitModalOpen(false);
-  };
 
   // 🔹 HÀM mở modal CHUYỂN QUYỀN
   const openTransferModal = () => {
@@ -494,50 +380,18 @@ function AddVuViecModal({
 
         {/* Các shortcut thao tác nhanh */}
         {!isGeneralAdvice && (
-          <>
-            {isKH ? (
-              <div className="mb-4 grid grid-cols-2 gap-6">
-                <Button
-                  onClick={() => handleSelectLoaiDonKH("sua_doi")}
-                  className="justify-start text-left text-blue-600"
-                >
-                  Sửa đổi đơn đăng ký
-                </Button>
-                <Button
-                  onClick={() => handleSelectLoaiDonKH("chuyen_quyen")}
-                  className="justify-start text-left text-blue-600"
-                >
-                  Chuyển quyền sở hữu đơn đăng ký
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="mb-4 grid grid-cols-2 gap-6">
-                  <Button
-                    onClick={() => handleSelectLoaiDon("chuyen_quyen")}
-                    className="justify-start text-left text-blue-600"
-                  >
-                    Chuyển quyền sở hữu đơn đăng ký
-                  </Button>
-                  <Button
-                    onClick={() => handleSelectLoaiDon("sua_doi")}
-                    className="justify-start text-left text-blue-600"
-                  >
-                    Sửa đổi đơn đăng ký
-                  </Button>
-                </div>
-
-                <div className="mb-4 grid grid-cols-2 gap-6">
-                  <Button
-                    onClick={() => handleSelectLoaiDon("tach_don")}
-                    className="justify-start text-left text-blue-600"
-                  >
-                    Tách đơn đăng ký
-                  </Button>
-                </div>
-              </>
-            )}
-          </>
+          <div className="mb-4">
+            <Button
+              onClick={() =>
+                isKH
+                  ? handleSelectLoaiDonKH("chuyen_quyen")
+                  : handleSelectLoaiDon("chuyen_quyen")
+              }
+              className="justify-start text-left text-blue-600"
+            >
+              Chuyển quyền sở hữu đơn đăng ký
+            </Button>
+          </div>
         )}
 
         {/* Form chính */}
@@ -701,99 +555,6 @@ function AddVuViecModal({
         </div>
       </Modal>
 
-      {/* 🔹 MODAL TÁCH ĐƠN */}
-      <Modal
-        open={isSplitModalOpen}
-        title="TÁCH ĐƠN ĐĂNG KÝ"
-        onOk={handleSplitModalOk}
-        onCancel={handleSplitModalCancel}
-        width={800}
-        okText="Xác nhận tách"
-        cancelText="Hủy"
-      >
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">
-            Số lượng đơn muốn tách
-          </label>
-          <InputNumber
-            min={1}
-            value={splitCount}
-            onChange={handleChangeSplitCount}
-          />
-        </div>
-
-        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-          {splitList.map((item, index) => (
-            <div
-              key={index}
-              className="border rounded-md p-3 bg-gray-50 space-y-3"
-            >
-              <div className="font-semibold text-gray-700 mb-1">
-                Đơn tách #{index + 1}
-              </div>
-
-              <div>
-                <label className="block text-gray-700 text-sm font-medium">
-                  Số đơn tách <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  value={item.soDon}
-                  onChange={(e) =>
-                    handleChangeSplitField(index, "soDon", e.target.value)
-                  }
-                  placeholder="Nhập số đơn tách"
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 text-sm font-medium">
-                  Danh sách nhóm sản phẩm/dịch vụ mới{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  value={item.nhomSPDV}
-                  onChange={(e) =>
-                    handleChangeSplitField(index, "nhomSPDV", e.target.value)
-                  }
-                  placeholder="Nhập nhóm SPDV (vd: 1, 5, 10, 35)"
-                  className="mt-1"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium">
-                    Ngày yêu cầu tách đơn
-                  </label>
-                  <DatePicker
-                    value={item.ngayYeuCau}
-                    onChange={(d) =>
-                      handleChangeSplitField(index, "ngayYeuCau", d)
-                    }
-                    format="DD/MM/YYYY"
-                    className="mt-1 w-full"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium">
-                    Ngày ghi nhận tách đơn
-                  </label>
-                  <DatePicker
-                    value={item.ngayGhiNhanSuaDoi}
-                    onChange={(d) =>
-                      handleChangeSplitField(index, "ngayGhiNhanSuaDoi", d)
-                    }
-                    format="DD/MM/YYYY"
-                    className="mt-1 w-full"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Modal>
 
       {/* 🔹 MODAL CHUYỂN QUYỀN */}
       <Modal

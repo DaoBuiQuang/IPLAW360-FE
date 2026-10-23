@@ -61,9 +61,9 @@ function Application_TD_NH_KHList() {
   const allFieldOptions = [
     { label: "Số Đơn", labelEn: "App No", key: "soDon" },
     { label: "Mã HSVV", labelEn: "Matter code", key: "maHoSoVuViec" },
-    { label: "Ngày yêu cầu sửa đổi", key: "ngayYeuCau" },
-    { label: "Ngày ghi nhận sửa đổi", key: "ngayGhiNhanSuaDoi" },
-    { label: "Lần sửa đổi", key: "lanSuaDoi" },
+    { label: "Ngày yêu cầu tách đơn", key: "ngayYeuCau" },
+    { label: "Ngày ghi nhận tách đơn", key: "ngayGhiNhanTachDon" },
+    { label: "Lần tách đơn", key: "lanTachDon" },
     { label: "Tên khách hàng", labelEn: "Client Name", key: "tenKhachHang" },
     { label: "Tên đối tác", labelEn: "Partner Name", key: "tenDoiTac" },
     { label: "Tên nhãn hiệu", labelEn: "Trademark", key: "tenNhanHieu" },
@@ -113,7 +113,27 @@ function Application_TD_NH_KHList() {
       const response = await callAPI({
         method: "post",
         endpoint: "/application_td_nh_kh/list",
-        data: { searchText: searchValue, customerName, partnerName, brandName, maSPDVList: selectedProductAndService, trangThaiDon: selectedTrangThaiDon, fields: selectedFields, filterCondition, pageIndex: page, pageSize: size, },
+        data: {
+          searchText: searchValue,
+          customerName,
+          partnerName,
+          brandName,
+          maSPDVList: selectedProductAndService,
+          trangThaiDon: selectedTrangThaiDon,
+          fields: (() => {
+            const fieldsToSend = [...selectedFields];
+            if (fieldsToSend.includes("ngayGhiNhanTachDon") && !fieldsToSend.includes("ngayGhiNhanSuaDoi")) {
+              fieldsToSend.push("ngayGhiNhanSuaDoi");
+            }
+            if (fieldsToSend.includes("lanTachDon") && !fieldsToSend.includes("lanSuaDoi")) {
+              fieldsToSend.push("lanSuaDoi");
+            }
+            return fieldsToSend;
+          })(),
+          filterCondition,
+          pageIndex: page,
+          pageSize: size,
+        },
       });
       setApplications(response.data || []);
       setTotalItems(response.pagination?.totalItems || 0);
@@ -159,6 +179,8 @@ function Application_TD_NH_KHList() {
 
   const fieldOptions = [
     { value: "ngayNopDon", label: "Ngày nộp đơn" },
+    { value: "ngayYeuCau", label: "Ngày yêu cầu tách đơn" },
+    { value: "ngayGhiNhanTachDon", label: "Ngày ghi nhận tách đơn" },
     // { value: "ngayHoanThanhHoSoTaiLieu", label: "Ngày Hoàn thành tài liệu" },
     // { value: "ngayKQThamDinhHinhThuc", label: "Ngày chấp nhận đơn hợp lệ" },
     // { value: "ngayCongBoDon", label: "Ngày công bố đơn" },
@@ -467,11 +489,19 @@ function Application_TD_NH_KHList() {
                     const commonClass = `p-2 text-table ${colIndex < columns.length - 1 ? "" : ""}`;
                     let content = app[col.key];
 
+                    if (col.key === "ngayGhiNhanTachDon" || col.key === "ngayGhiNhanSuaDoi") {
+                      content = app.ngayGhiNhanTachDon || app.ngayGhiNhanSuaDoi;
+                    }
+                    if (col.key === "lanTachDon" || col.key === "lanSuaDoi") {
+                      content = app.lanTachDon ?? app.lanSuaDoi;
+                    }
+
                     const isDateField = [
                       "ngayNopDon", "ngayHoanThanhHoSoTaiLieu", "ngayKQThamDinhHinhThuc",
                       "ngayCongBoDon", "ngayKQThamDinhND", "ngayTraLoiKQThamDinhND",
                       "ngayThongBaoCapBang", "ngayNopPhiCapBang", "ngayNhanBang",
-                      "ngayCapBang", "ngayHetHanBang", "ngayGuiBangChoKhachHang", "hanNopPhiCapBang"
+                      "ngayCapBang", "ngayHetHanBang", "ngayGuiBangChoKhachHang", "hanNopPhiCapBang",
+                      "ngayYeuCau", "ngayGhiNhanTachDon", "ngayGhiNhanSuaDoi"
                     ];
 
                     if (isDateField.includes(col.key)) {
