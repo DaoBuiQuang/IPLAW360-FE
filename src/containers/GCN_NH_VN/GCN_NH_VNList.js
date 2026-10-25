@@ -60,7 +60,7 @@ function GCN_NH_VNList() {
   }, [gcn_nhs]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [partnerToDelete, setPartnerToDelete] = useState(null);
+  const [gcnToDelete, setGcnToDelete] = useState(null);
 
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -274,19 +274,20 @@ function GCN_NH_VNList() {
     );
   }, [gcn_nhs, totalItems, pageIndex, pageSize]);
 
-  // Xử lý xóa (nếu sau này dùng)
-  const handleDeletePartner = async () => {
+  // Xử lý xóa Giấy chứng nhận
+  const handleDeleteGCN = async () => {
+    if (!gcnToDelete?.id) return;
     try {
       await callAPI({
         method: "post",
-        endpoint: "/partner/delete",
-        data: { id: partnerToDelete },
+        endpoint: "/gcn_nh_vn/delete",
+        data: { id: gcnToDelete.id },
       });
       setShowDeleteModal(false);
-      setPartnerToDelete(null);
+      setGcnToDelete(null);
       fetchGCNs(searchTerm, selectedCountry, pageIndex, pageSize);
     } catch (error) {
-      console.error("Lỗi khi xóa đối tác:", error);
+      console.error("Lỗi khi xóa giấy chứng nhận:", error);
     }
   };
 
@@ -482,15 +483,16 @@ function GCN_NH_VNList() {
             {gcn_nhs.map((gcn_nh, index) => (
               <tr
                 key={gcn_nh.id || index}
-                className="group hover:bg-gray-100 text-center border-b relative"
+                className="group hover:bg-gray-100 text-center border-b relative cursor-pointer"
+                onClick={() => {
+                  if (gcn_nh.id) {
+                    navigate(`/gcn_nhdetail/${gcn_nh.id}`);
+                  }
+                }}
               >
                 <td className="p-2 text-table">{index + 1}</td>
                 <td
-                  className="p-2 text-table text-blue-500 cursor-pointer hover:underline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/gcn_nhdetail/${gcn_nh.id}`);
-                  }}
+                  className="p-2 text-table text-blue-500 hover:underline font-medium"
                 >
                   {gcn_nh.soBang}
                 </td>
@@ -608,12 +610,30 @@ function GCN_NH_VNList() {
 
                 <td className="p-2 relative">
                   {(role === "admin" || role === "staff") && (
-                    <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
+                    <div
+                      className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                        onClick={() => navigate(`/gcn_nh_vnedit/${gcn_nh.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/gcn_nh_vnedit/${gcn_nh.id}`);
+                        }}
+                        title="Sửa thông tin"
                       >
                         📝
+                      </button>
+                      <button
+                        className="px-3 py-1 bg-red-200 text-red-600 rounded-md hover:bg-red-300"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setGcnToDelete(gcn_nh);
+                          setShowDeleteModal(true);
+                        }}
+                        title="Xóa giấy chứng nhận"
+                      >
+                        🗑️
                       </button>
                     </div>
                   )}
@@ -651,19 +671,28 @@ function GCN_NH_VNList() {
         />
       </div>
 
-      {/* Modal xóa (nếu dùng sau này) */}
+      {/* Modal xóa Giấy chứng nhận */}
       <Modal
         title="Xác nhận xóa"
         open={showDeleteModal}
-        onOk={handleDeletePartner}
-        onCancel={() => setShowDeleteModal(false)}
+        onOk={handleDeleteGCN}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setGcnToDelete(null);
+        }}
         okText="Xác nhận xóa"
         cancelText="Hủy"
         okButtonProps={{
           className: "bg-red-500 hover:bg-red-600 text-white",
         }}
       >
-        <p>Bạn có chắc chắn muốn xóa đối tác này không?</p>
+        <p>
+          Bạn có chắc chắn muốn xóa Giấy chứng nhận số{" "}
+          <b className="text-red-600">{gcnToDelete?.soBang || gcnToDelete?.id}</b> không?
+        </p>
+        <p className="text-xs text-gray-500 mt-2">
+          Thao tác này sẽ hủy các vụ việc và giải phóng liên kết liên quan đến giấy chứng nhận.
+        </p>
       </Modal>
     </div>
   );

@@ -92,10 +92,15 @@ export default function TimesheetMyTeam() {
       callAPI({ method: "post", endpoint: "/team/list", data: { pageSize: 100 } })
         .then((res) => {
           const teams = res?.teams || [];
-          const mgrs = teams.map((t) => ({
-            value: t.managerCode,
-            label: `${t.managerCode} - ${t.managerName} (${(t.members || []).length} TV)`,
-          }));
+          const mgrs = teams.map((t) => {
+            const groupName = t.tenNhom || t.members?.[0]?.tenNhom;
+            return {
+              value: t.managerCode,
+              label: groupName
+                ? `${groupName} — ${t.managerName} (${(t.members || []).length} TV)`
+                : `${t.managerCode} - ${t.managerName} (${(t.members || []).length} TV)`,
+            };
+          });
           setManagersList(mgrs);
           if (!selectedManagerCode && mgrs.length > 0) {
             setSelectedManagerCode(mgrs[0].value);
@@ -301,11 +306,20 @@ export default function TimesheetMyTeam() {
               {isAdmin ? "MYTEAM — Giám sát Team" : "MYTEAM — Team của tôi"}
             </h1>
           </div>
-          <p className="text-sm text-gray-500 mt-1">
-            {managerInfo
-              ? `Trưởng nhóm: ${managerInfo.hoTen} (${managerInfo.maNhanSu}) — ${managerInfo.chucVu || "Trưởng nhóm"}`
-              : "Theo dõi chỉ số KPI và tiến độ báo cáo công việc của các nhân viên trong team"}
-          </p>
+          <div className="text-sm text-gray-500 mt-1">
+            {managerInfo ? (
+              managerInfo.tenNhom ? (
+                <>
+                  <span className="font-bold text-gray-800 text-base block mb-0.5">{managerInfo.tenNhom}</span>
+                  <span>Trưởng nhóm: <strong className="text-gray-700">{managerInfo.hoTen}</strong> ({managerInfo.maNhanSu}) — {managerInfo.chucVu || "Trưởng nhóm"}</span>
+                </>
+              ) : (
+                `Trưởng nhóm: ${managerInfo.hoTen} (${managerInfo.maNhanSu}) — ${managerInfo.chucVu || "Trưởng nhóm"}`
+              )
+            ) : (
+              "Theo dõi chỉ số KPI và tiến độ báo cáo công việc của các nhân viên trong team"
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-3">

@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { DatePicker, Modal, Spin, Pagination } from 'antd';
 import { useTranslation } from "react-i18next";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+import { showInfo } from "../../components/commom/Notification";
 
 const FILTER_STORAGE_KEY_SD = "applicationSdNhVnListFilters";
 const STATE_STORAGE_KEY_SD = "applicationSdNhVnListState";
@@ -434,14 +435,20 @@ function Application_SD_NH_VNList() {
   };
 
   const handleDeleteApplication = async () => {
-    await callAPI({
-      method: "post",
-      endpoint: "/application/delete",
-      data: { maDonDangKy: applicationToDelete },
-    });
-    setShowDeleteModal(false);
-    setApplicationToDelete(null);
-    fetchApplications(searchTerm, pageIndex, pageSize);
+    try {
+      await callAPI({
+        method: "post",
+        endpoint: "/application/delete",
+        data: { maDonDangKy: applicationToDelete },
+      });
+      setShowDeleteModal(false);
+      setApplicationToDelete(null);
+      fetchApplications(searchTerm, pageIndex, pageSize);
+    } catch (error) {
+      console.error("Lỗi khi xóa đơn đăng ký:", error);
+      setShowDeleteModal(false);
+      setApplicationToDelete(null);
+    }
   };
 
   const handleClearFilters = () => {
@@ -501,6 +508,13 @@ function Application_SD_NH_VNList() {
               className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
             >
               Tìm kiếm
+            </button>
+            <button
+              type="button"
+              onClick={() => showInfo("Thông báo", "Vui lòng sửa đổi đơn trong danh sách Đơn đăng ký.")}
+              className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
+            >
+              Thêm mới
             </button>
             <button
               onClick={() => exportToExcel(applications, allFieldOptions, "DanhSachDonDK_SuaDoi")}
@@ -977,7 +991,7 @@ function Application_SD_NH_VNList() {
                     );
                   })}
                   <td className="p-2 text-table">
-                    {(role === "admin" || role === "staff") && app.donGoc !== 1 && (
+                    {(role === "admin" || role === "staff") && (
                       <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
                         <button
                           className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"

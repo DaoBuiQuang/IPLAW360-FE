@@ -955,6 +955,13 @@ function ApplicationEdit() {
                                 >
                                     <span>Tách đơn đăng ký</span>
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={() => window.open(`/application_cq_nh_vn_add/${maDonDangKy}`, "_blank")}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                                >
+                                    <span>Chuyển quyền sở hữu</span>
+                                </button>
                             </div>
                         </div>
                     </div>

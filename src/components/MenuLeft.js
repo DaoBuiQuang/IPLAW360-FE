@@ -4,7 +4,7 @@ import {
   PieChart, Users, Briefcase, Handshake, Globe, UserCheck,
   FileText, Settings, Tag, ShoppingCart, LayoutDashboard,
   Key, User, ChevronDown, ChevronUp, DollarSign, Search, FileSignature, BarChart3, Stamp, Timer, Calendar,
-  FolderKanban
+  FolderKanban, Shield
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -613,15 +613,21 @@ function MenuLeft() {
               {(role === "admin" || role === "ceo") && (
                 <>
                   <li>
-                    <NavLink to="/stafflist" className={navLinkClass}>
+                    <NavLink to="/employeelist" className={navLinkClass}>
                       <UserCheck size={14} />
-                      <span className="text-left w-full">{t("nhanSu")}</span>
+                      <span className="text-left w-full">Nhân viên</span>
                     </NavLink>
                   </li>
                   <li>
                     <NavLink to="/teamlist" className={navLinkClass}>
                       <Users size={14} />
                       <span className="text-left w-full">Quản lý Team</span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/stafflist" className={navLinkClass}>
+                      <Shield size={14} />
+                      <span className="text-left w-full">Tài khoản</span>
                     </NavLink>
                   </li>
                 </>

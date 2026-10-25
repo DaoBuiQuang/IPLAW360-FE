@@ -187,10 +187,16 @@ function Application_SD_NH_KHList() {
       .join(", ");
   };
   const handleDeleteApplication = async () => {
-    await callAPI({ method: "post", endpoint: "/application_kh/delete", data: { maDonDangKy: applicationToDelete } });
-    setShowDeleteModal(false);
-    setApplicationToDelete(null);
-    fetchApplications(searchTerm);
+    try {
+      await callAPI({ method: "post", endpoint: "/application_kh/delete", data: { maDonDangKy: applicationToDelete } });
+      setShowDeleteModal(false);
+      setApplicationToDelete(null);
+      fetchApplications(searchTerm);
+    } catch (error) {
+      console.error("Lỗi khi xóa đơn đăng ký:", error);
+      setShowDeleteModal(false);
+      setApplicationToDelete(null);
+    }
   };
   const handleClearFilters = () => {
     setSelectedBrand(null);
@@ -696,7 +702,7 @@ function Application_SD_NH_KHList() {
                   })}
 
                   <td className="p-2 text-table">
-                    {(role === "admin" || role === "staff") && app.donGoc !== 1 && (
+                    {(role === "admin" || role === "staff") && (
                       <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
                         <button
                           className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"

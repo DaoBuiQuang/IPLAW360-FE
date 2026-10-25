@@ -110,7 +110,8 @@ export default function TimesheetOfficework() {
     ])
       .then(([tRes, sRes, cRes, pRes, csRes]) => {
         setTeamsList(tRes?.teams || []);
-        setAllStaffList(Array.isArray(sRes) ? sRes : sRes?.data || []);
+        const rawStaff = Array.isArray(sRes) ? sRes : sRes?.data || [];
+        setAllStaffList(rawStaff.filter((s) => (s.phongBan || "").trim().toUpperCase() !== "CNTT"));
 
         const rawC = Array.isArray(cRes) ? cRes : cRes?.data || [];
         setCustomerOptions(rawC.map((c) => ({
@@ -180,7 +181,9 @@ export default function TimesheetOfficework() {
         ]);
 
         const rawData = response?.data || [];
-        setRows(rawData);
+        // Lọc loại trừ nhân sự thuộc phòng ban CNTT
+        const filteredData = rawData.filter((r) => (r.phongBan || "").trim().toUpperCase() !== "CNTT");
+        setRows(filteredData);
         setPagination({
           pageIndex: response?.pagination?.pageIndex || pageIndex,
           pageSize: response?.pagination?.pageSize || pageSize,
@@ -353,10 +356,15 @@ export default function TimesheetOfficework() {
                 setFilters(nextFilters);
                 fetchRows(1, pagination.pageSize, nextFilters, newMgr);
               }}
-              options={teamsList.map((t) => ({
-                value: t.managerCode,
-                label: `Team ${t.managerName} (${(t.members || []).length} TV)`,
-              }))}
+              options={teamsList.map((t) => {
+                const groupName = t.tenNhom || t.members?.[0]?.tenNhom;
+                return {
+                  value: t.managerCode,
+                  label: groupName
+                    ? `${groupName} — ${t.managerName} (${(t.members || []).length} TV)`
+                    : `Team ${t.managerName} (${(t.members || []).length} TV)`,
+                };
+              })}
             />
           </div>
 

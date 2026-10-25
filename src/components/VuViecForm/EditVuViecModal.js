@@ -320,15 +320,6 @@ function EditVuViecModal({
                 </div>
             )}
 
-            {/* Các shortcut thao tác nhanh */}
-            <div className="mb-4">
-                <Button
-                    onClick={() => handleSelectLoaiDon("chuyen_quyen")}
-                    className="justify-start text-left text-blue-600"
-                >
-                    Chuyển quyền sở hữu đơn đăng ký
-                </Button>
-            </div>
 
             {/* Form chính */}
             <div className="grid grid-cols-2 gap-6">

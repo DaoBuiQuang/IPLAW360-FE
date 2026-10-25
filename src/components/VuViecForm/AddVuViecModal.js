@@ -50,7 +50,6 @@ function AddVuViecModal({
   const [isTiepQuan, setIsTiepQuan] = useState(false);
 
   const [dsNhanSu, setDsNhanSu] = useState([]);
-  const [customers, setCustomers] = useState([]); // 🔹 DS khách hàng cho chuyển quyền
 
   // trạng thái để hiển thị lỗi đẹp hơn
   const [touched, setTouched] = useState({
@@ -70,20 +69,37 @@ function AddVuViecModal({
   const isSoTienValid = Number(soTien) > 0;
   const canSave = isTenVuViecValid && isMoTaValid && isSoTienValid;
 
-  // 🔹 STATE cho modal CHUYỂN QUYỀN
-  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
-  const [transferForm, setTransferForm] = useState({
-    customerId: null,
-    soDonChuyenQuyen: "",
-    ngayYeuCau: null,
-    ngayGhiNhan: null,
-    ghiChu: "",
-  });
+  const onToggleDangKy = (checked) => {
+    setIsDangKy(checked);
+    if (checked) {
+      setIsTiepQuan(false);
+      setTenVuViec(tenLoaiDon || "Nộp đơn đăng ký nhãn hiệu");
+    } else {
+      setTenVuViec("");
+    }
+  };
+
+  const onToggleTiepQuan = (checked) => {
+    setIsTiepQuan(checked);
+    if (checked) {
+      setIsDangKy(false);
+      setTenVuViec("Tiếp quản và theo đuổi");
+    } else {
+      setTenVuViec("");
+    }
+  };
+
+  const isAutoName = isDangKy || isTiepQuan;
+
+  const formatGroup = (value, sep = ".") => {
+    if (value === undefined || value === null) return "";
+    const raw = String(value).replace(/[^\d]/g, "");
+    return raw.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+  };
 
   useEffect(() => {
     if (isOpen) {
       fetchNhanSu();
-      fetchCustomers();
     }
   }, [isOpen]);
 
@@ -149,20 +165,6 @@ function AddVuViecModal({
     }
   };
 
-  // 🔹 Lấy khách hàng cho chuyển quyền
-  const fetchCustomers = async () => {
-    try {
-      const response = await callAPI({
-        method: "post",
-        endpoint: "/customers/by-name",
-        data: {},
-      });
-      setCustomers(response);
-    } catch (error) {
-      console.error("Lỗi lấy danh sách khách hàng:", error);
-    }
-  };
-
   const handleOk = () => {
     if (!canSave) {
       setTouched({ tenVuViec: true, moTa: true, soTien: true });
@@ -188,120 +190,7 @@ function AddVuViecModal({
     onSave(formatted);
   };
 
-  // 🔹 Gọi khi bấm nút “Chuyển quyền” (VN)
-  const handleSelectLoaiDon = (type) => {
-    if (type === "chuyen_quyen") {
-      openTransferModal();                    // ✅ mở modal chuyển quyền
-    } else if (type === "nhan_moi") {
-      setIsDangKy(false);
-      setIsTiepQuan(false);
-      setTenVuViec("Đăng ký nhãn hiệu mới");
-    }
-  };
 
-  // 🔹 Gọi khi là KH
-  const handleSelectLoaiDonKH = (type) => {
-    if (type === "chuyen_quyen") {
-      openTransferModal();                    // ✅ khách hàng cũng mở modal
-    }
-  };
-
-  const onToggleDangKy = (checked) => {
-    setIsDangKy(checked);
-    if (checked) {
-      setIsTiepQuan(false);
-      setTenVuViec(tenLoaiDon || "Nộp đơn đăng ký nhãn hiệu");
-    } else {
-      setTenVuViec("");
-    }
-  };
-
-  const onToggleTiepQuan = (checked) => {
-    setIsTiepQuan(checked);
-    if (checked) {
-      setIsDangKy(false);
-      setTenVuViec("Tiếp quản và theo đuổi");
-    } else {
-      setTenVuViec("");
-    }
-  };
-
-  const isAutoName = isDangKy || isTiepQuan;
-
-  const formatGroup = (value, sep = ".") => {
-    if (value === undefined || value === null) return "";
-    const raw = String(value).replace(/[^\d]/g, "");
-    return raw.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
-  };
-
-
-  // 🔹 HÀM mở modal CHUYỂN QUYỀN
-  const openTransferModal = () => {
-    setTransferForm({
-      customerId: null,
-      soDonChuyenQuyen: "",
-      ngayYeuCau: null,
-      ngayGhiNhan: null,
-      ghiChu: "",
-    });
-    setIsTransferModalOpen(true);
-  };
-
-  const handleChangeTransferField = (field, value) => {
-    setTransferForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleTransferModalOk = async () => {
-    const { customerId, soDonChuyenQuyen, ngayYeuCau, ngayGhiNhan, ghiChu } =
-      transferForm;
-
-    if (!customerId) {
-      message.error("Vui lòng chọn khách hàng nhận chuyển quyền.");
-      return;
-    }
-
-    if (!soDonChuyenQuyen.trim()) {
-      message.error("Vui lòng nhập Số đơn chuyển nhượng.");
-      return;
-    }
-
-    try {
-      const payload = {
-        maHoSo,
-        maDonDangKyCu: maDonDangKy,
-        maKhachHangMoi: customerId, // hoặc idKhachHangMoi tùy backend
-        soDonChuyenQuyen: soDonChuyenQuyen.trim(),
-        ngayYeuCauChuyenQuyen: ngayYeuCau
-          ? ngayYeuCau.format("YYYY-MM-DD")
-          : null,
-        ngayGhiNhanChuyenQuyen: ngayGhiNhan
-          ? ngayGhiNhan.format("YYYY-MM-DD")
-          : null,
-        ghiChu,
-      };
-
-      await callAPI({
-        method: "post",
-        endpoint: isKH
-          ? "/application_cq_nh_kh/add" // 🔧 đổi theo API backend của bạn
-          : "/application_cq_nh_vn/add",
-        data: payload,
-      });
-
-      message.success("Tạo đơn chuyển quyền thành công!");
-      setIsTransferModalOpen(false);
-    } catch (error) {
-      console.error("Lỗi chuyển quyền:", error);
-      message.error("Thao tác chuyển quyền thất bại!");
-    }
-  };
-
-  const handleTransferModalCancel = () => {
-    setIsTransferModalOpen(false);
-  };
 
   return (
     <>
@@ -378,21 +267,7 @@ function AddVuViecModal({
           </div>
         )}
 
-        {/* Các shortcut thao tác nhanh */}
-        {!isGeneralAdvice && (
-          <div className="mb-4">
-            <Button
-              onClick={() =>
-                isKH
-                  ? handleSelectLoaiDonKH("chuyen_quyen")
-                  : handleSelectLoaiDon("chuyen_quyen")
-              }
-              className="justify-start text-left text-blue-600"
-            >
-              Chuyển quyền sở hữu đơn đăng ký
-            </Button>
-          </div>
-        )}
+
 
         {/* Form chính */}
         <div className="grid grid-cols-2 gap-6">
@@ -552,92 +427,6 @@ function AddVuViecModal({
               Bắt buộc nhập Mô tả.
             </div>
           )}
-        </div>
-      </Modal>
-
-
-      {/* 🔹 MODAL CHUYỂN QUYỀN */}
-      <Modal
-        open={isTransferModalOpen}
-        title="CHUYỂN QUYỀN SỞ HỮU ĐƠN ĐĂNG KÝ"
-        onOk={handleTransferModalOk}
-        onCancel={handleTransferModalCancel}
-        width={700}
-        okText="Xác nhận chuyển quyền"
-        cancelText="Hủy"
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-gray-700 text-sm font-medium">
-              Khách hàng nhận chuyển quyền <span className="text-red-500">*</span>
-            </label>
-            <Select
-              className="mt-1 w-full"
-              placeholder="Chọn khách hàng"
-              value={transferForm.customerId}
-              onChange={(val) => handleChangeTransferField("customerId", val)}
-              showSearch
-              optionFilterProp="label"
-              options={customers.map((c) => ({
-                value: c.maKhachHang,      // hoặc c.id tùy DB
-                label: c.tenKhachHang,
-              }))}
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 text-sm font-medium">
-              Số đơn chuyển nhượng <span className="text-red-500">*</span>
-            </label>
-            <Input
-              className="mt-1"
-              value={transferForm.soDonChuyenQuyen}
-              onChange={(e) =>
-                handleChangeTransferField("soDonChuyenQuyen", e.target.value)
-              }
-              placeholder="Nhập số đơn chuyển quyền / hợp đồng chuyển nhượng"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-700 text-sm font-medium">
-                Ngày yêu cầu chuyển quyền
-              </label>
-              <DatePicker
-                className="mt-1 w-full"
-                format="DD/MM/YYYY"
-                value={transferForm.ngayYeuCau}
-                onChange={(d) => handleChangeTransferField("ngayYeuCau", d)}
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 text-sm font-medium">
-                Ngày ghi nhận chuyển quyền
-              </label>
-              <DatePicker
-                className="mt-1 w-full"
-                format="DD/MM/YYYY"
-                value={transferForm.ngayGhiNhan}
-                onChange={(d) => handleChangeTransferField("ngayGhiNhan", d)}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-gray-700 text-sm font-medium">
-              Ghi chú
-            </label>
-            <Input.TextArea
-              className="mt-1"
-              rows={3}
-              value={transferForm.ghiChu}
-              onChange={(e) =>
-                handleChangeTransferField("ghiChu", e.target.value)
-              }
-              placeholder="Nhập ghi chú thêm (nếu có)..."
-            />
-          </div>
         </div>
       </Modal>
     </>
