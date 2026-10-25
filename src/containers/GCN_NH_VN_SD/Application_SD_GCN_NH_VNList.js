@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from "react-i18next";
 import { Modal, Pagination, Spin } from "antd";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+import { showInfo } from "../../components/commom/Notification";
 
 const FILTER_STORAGE_KEY_SD_GCN = "applicationSdGcnNhVnListFilters";
 const STATE_STORAGE_KEY_SD_GCN = "applicationSdGcnNhVnListState";
@@ -277,6 +278,13 @@ function Application_SD_GCN_NH_VNList() {
                             className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
                         >
                             Tìm kiếm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => showInfo("Thông báo", "Vui lòng thêm đơn sửa đổi trong danh sách Giấy chứng nhận.")}
+                            className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
+                        >
+                            Thêm mới
                         </button>
                         <button
                             onClick={handleClearFilters}

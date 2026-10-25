@@ -423,7 +423,7 @@ export default function TeamManagement() {
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {teams.map((team) => {
               const members = team.members || [];
-              const groupTitle = members[0]?.tenNhom || `Team ${team.managerName || team.managerCode}`;
+              const groupName = team.tenNhom || members[0]?.tenNhom;
 
               return (
                 <div
@@ -434,26 +434,39 @@ export default function TeamManagement() {
                   <div className="p-4 bg-gradient-to-r from-teal-50/60 to-white border-b border-gray-100 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11 rounded-xl bg-[#009999] text-white flex items-center justify-center font-bold text-base shadow-sm">
-                        {(team.managerName || "?").charAt(0).toUpperCase()}
+                        {(groupName || team.managerName || "?").charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-gray-800 text-base">
-                            {team.managerName || "Chưa có tên"}
-                          </h3>
-                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            Trưởng nhóm
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Mã: <span className="font-mono font-medium text-gray-700">{team.managerCode}</span>
-                          {members[0]?.tenNhom && (
-                            <>
-                              {" · "}
-                              <span className="text-[#009999] font-medium">{members[0].tenNhom}</span>
-                            </>
-                          )}
-                        </p>
+                        {groupName ? (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-gray-800 text-base">
+                                {groupName}
+                              </h3>
+                              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#009999]/10 text-[#009999] border border-[#009999]/20">
+                                Team
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+                              <span>Trưởng nhóm: <strong className="text-gray-700">{team.managerName}</strong></span>
+                              <span className="font-mono text-gray-400">({team.managerCode})</span>
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-gray-800 text-base">
+                                {team.managerName || "Chưa có tên"}
+                              </h3>
+                              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                Trưởng nhóm
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Mã: <span className="font-mono font-medium text-gray-700">{team.managerCode}</span>
+                            </p>
+                          </>
+                        )}
                       </div>
                     </div>
 

@@ -4,7 +4,7 @@ import {
   PieChart, Users, Briefcase, Handshake, Globe, UserCheck,
   FileText, Settings, Tag, ShoppingCart, LayoutDashboard,
   Key, User, ChevronDown, ChevronUp, DollarSign, Search, FileSignature, BarChart3, Stamp, Timer, Calendar,
-  FolderKanban
+  FolderKanban, Shield
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -25,6 +25,39 @@ function MenuLeft() {
     ${isActive
       ? "border border-[#009999] text-[#009999] fill-[#009999]"
       : "hover:border hover:border-[#009999] hover:text-[#009999] hover:fill-[#009999]"}`;
+
+  // Trạng thái mở menu con cấp 2 theo URL (tham khảo mô hình Timesheet)
+  const isDonDangKyVNOpen =
+    !location.pathname.includes("_kh") &&
+    !location.pathname.includes("report") &&
+    (location.pathname.startsWith("/applicationlist") ||
+      location.pathname.startsWith("/applicationadd") ||
+      location.pathname.startsWith("/applicationedit") ||
+      location.pathname.startsWith("/applicationdetail") ||
+      location.pathname.startsWith("/application_sd_nh_vn") ||
+      location.pathname.startsWith("/application_td_nh_vn"));
+
+  const isGcnVNOpen =
+    !location.pathname.includes("_cam") &&
+    !location.pathname.includes("_kh") &&
+    (location.pathname.startsWith("/gcn_nh") ||
+      location.pathname.startsWith("/application_gh_nh_vn") ||
+      location.pathname.startsWith("/application_sd_gcn_nh_vn"));
+
+  const isDonDangKyKHOpen =
+    !location.pathname.includes("report") &&
+    (location.pathname.startsWith("/applicationlist_kh") ||
+      location.pathname.startsWith("/applicationadd_kh") ||
+      location.pathname.startsWith("/applicationedit_kh") ||
+      location.pathname.startsWith("/applicationdetail_kh") ||
+      location.pathname.startsWith("/application_sd_nh_kh") ||
+      location.pathname.startsWith("/application_td_nh_kh"));
+
+  const isGcnKHOpen =
+    location.pathname.startsWith("/gcn_nh_cam") ||
+    location.pathname.startsWith("/application_gh_nh_kh") ||
+    location.pathname.startsWith("/application_sd_gcn_nh_kh") ||
+    location.pathname.startsWith("/affidavit");
 
   // ✅ Duy nhất 1 renderMenuGroup dùng Redux openMenu + setOpenAtLevel
   const renderMenuGroup = (parentKey, key, title, iconRenderer, children) => {
@@ -172,54 +205,61 @@ function MenuLeft() {
                 "Nhãn hiệu",
                 (open) => <Tag size={16} color={open ? "#009999" : undefined} />,
                 <>
+                  {/* 1. Đơn đăng ký */}
                   <li>
                     <NavLink to="/applicationlist" className={navLinkClass}>
                       <FileText size={14} />
                       <span className="text-left w-full">Đơn đăng ký</span>
                     </NavLink>
+                    {isDonDangKyVNOpen && (
+                      <ul className="ml-5 mt-1 space-y-1">
+                        <li>
+                          <NavLink to="/application_sd_nh_vnlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Tờ khai sửa đổi đơn đăng ký</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/application_td_nh_vnlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Tờ khai tách đơn đăng ký</span>
+                          </NavLink>
+                        </li>
+                      </ul>
+                    )}
                   </li>
+
+                  {/* 2. Giấy chứng nhận */}
                   <li>
                     <NavLink to="/gcn_nhlist" className={navLinkClass}>
                       <FileText size={14} />
                       <span className="text-left w-full">Giấy chứng nhận(văn bằng)</span>
                     </NavLink>
+                    {isGcnVNOpen && (
+                      <ul className="ml-5 mt-1 space-y-1">
+                        <li>
+                          <NavLink to="/application_gh_nh_vn_list" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Đơn gia hạn GCN</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/application_sd_gcn_nh_vnlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Đơn sửa đổi GCN</span>
+                          </NavLink>
+                        </li>
+                      </ul>
+                    )}
                   </li>
+
+                  {/* 3. Tra cứu nhãn hiệu */}
                   <li>
-                    <NavLink to="/application_sd_nh_vnlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Tờ khai sửa đổi đơn đăng ký</span>
+                    <NavLink to="/brandlist" className={navLinkClass}>
+                      <Search size={14} />
+                      <span className="text-left w-full">Tra cứu nhãn hiệu</span>
                     </NavLink>
                   </li>
-                  <li>
-                    <NavLink to="/application_td_nh_vnlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Tờ khai tách đơn đăng ký</span>
-                    </NavLink>
-                  </li>
-                  {/* <li>
-                    <NavLink to="/gcn_nh_sdlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Giấy chứng nhận(văn bằng) đã sửa đổi</span>
-                    </NavLink>
-                  </li> */}
-                  <li>
-                    <NavLink to="/application_gh_nh_vn_list" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Đơn gia hạn GCN</span>
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/application_sd_gcn_nh_vnlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Đơn sửa đổi GCN</span>
-                    </NavLink>
-                  </li>
-                  {/* <li>
-                    <NavLink to="/application_cn_gcn_nh_vn_list" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Đơn chuyển nhượng GCN</span>
-                    </NavLink>
-                  </li> */}
                 </>
               )}
 
@@ -244,14 +284,6 @@ function MenuLeft() {
                 "banquyen",
                 "Bản quyền",
                 (open) => <FileText size={16} color={open ? "#009999" : undefined} />,
-                <></>
-              )}
-
-              {renderMenuGroup(
-                "vietnam",
-                "tracuu",
-                "Tra cứu nhãn hiệu",
-                (open) => <Search size={16} color={open ? "#009999" : undefined} />,
                 <></>
               )}
 
@@ -334,60 +366,67 @@ function MenuLeft() {
                 "Nhãn hiệu",
                 (open) => <Tag size={16} color={open ? "#009999" : undefined} />,
                 <>
+                  {/* 1. Đơn đăng ký */}
                   <li>
                     <NavLink to="/applicationlist_kh" className={navLinkClass}>
                       <FileText size={14} />
                       <span className="text-left w-full">Đơn đăng ký</span>
                     </NavLink>
+                    {isDonDangKyKHOpen && (
+                      <ul className="ml-5 mt-1 space-y-1">
+                        <li>
+                          <NavLink to="/application_sd_nh_khlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Tờ khai sửa đổi đơn đăng ký</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/application_td_nh_khlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Tờ khai tách đơn đăng ký</span>
+                          </NavLink>
+                        </li>
+                      </ul>
+                    )}
                   </li>
+
+                  {/* 2. Giấy chứng nhận */}
                   <li>
                     <NavLink to="/gcn_nh_camlist" className={navLinkClass}>
                       <FileText size={14} />
                       <span className="text-left w-full">Giấy chứng nhận(văn bằng)</span>
                     </NavLink>
+                    {isGcnKHOpen && (
+                      <ul className="ml-5 mt-1 space-y-1">
+                        <li>
+                          <NavLink to="/application_gh_nh_kh_list" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Đơn gia hạn GCN</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/application_sd_gcn_nh_khlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Đơn sửa đổi GCN</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/affidavitlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Đơn nộp tuyên thệ sử dụng - Affidavit</span>
+                          </NavLink>
+                        </li>
+                      </ul>
+                    )}
                   </li>
-                  {/* <li>
-                    <NavLink to="/gcn_nh_sd_camlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Giấy chứng nhận(văn bằng) đã sửa đổi</span>
-                    </NavLink>
-                  </li> */}
+
+                  {/* 3. Tra cứu nhãn hiệu */}
                   <li>
-                    <NavLink to="/affidavitlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Đơn nộp tuyên thệ sử dụng - Affidavit</span>
+                    <NavLink to="/brandlist" className={navLinkClass}>
+                      <Search size={14} />
+                      <span className="text-left w-full">Tra cứu nhãn hiệu</span>
                     </NavLink>
                   </li>
-                  <li>
-                    <NavLink to="/application_sd_nh_khlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Tờ khai sửa đổi đơn đăng ký</span>
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/application_td_nh_khlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Tờ khai tách đơn đăng ký</span>
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/application_gh_nh_kh_list" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Đơn gia hạn GCN</span>
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/application_sd_gcn_nh_khlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Đơn sửa đổi GCN</span>
-                    </NavLink>
-                  </li>
-                  {/* <li>
-                    <NavLink to="/application_cn_nh_khlist" className={navLinkClass}>
-                      <FileText size={14} />
-                      <span className="text-left w-full">Đơn chuyển nhượng GCN</span>
-                    </NavLink>
-                  </li> */}
                 </>
               )}
 
@@ -412,14 +451,6 @@ function MenuLeft() {
                 "banquyen",
                 "Bản quyền",
                 (open) => <FileText size={16} color={open ? "#009999" : undefined} />,
-                <></>
-              )}
-
-              {renderMenuGroup(
-                "cambodia",
-                "tracuu",
-                "Tra cứu nhãn hiệu",
-                (open) => <Search size={16} color={open ? "#009999" : undefined} />,
                 <></>
               )}
 
@@ -582,15 +613,21 @@ function MenuLeft() {
               {(role === "admin" || role === "ceo") && (
                 <>
                   <li>
-                    <NavLink to="/stafflist" className={navLinkClass}>
+                    <NavLink to="/employeelist" className={navLinkClass}>
                       <UserCheck size={14} />
-                      <span className="text-left w-full">{t("nhanSu")}</span>
+                      <span className="text-left w-full">Nhân viên</span>
                     </NavLink>
                   </li>
                   <li>
                     <NavLink to="/teamlist" className={navLinkClass}>
                       <Users size={14} />
                       <span className="text-left w-full">Quản lý Team</span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/stafflist" className={navLinkClass}>
+                      <Shield size={14} />
+                      <span className="text-left w-full">Tài khoản</span>
                     </NavLink>
                   </li>
                 </>

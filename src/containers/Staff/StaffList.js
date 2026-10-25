@@ -23,6 +23,27 @@ function StaffList() {
 
   const navigate = useNavigate();
 
+  const sortStaffByDepartment = (list) => {
+    if (!Array.isArray(list)) return [];
+    return [...list].sort((a, b) => {
+      const deptA = (a.phongBan || "").trim();
+      const deptB = (b.phongBan || "").trim();
+      const isCnttA = deptA.toUpperCase() === "CNTT";
+      const isCnttB = deptB.toUpperCase() === "CNTT";
+
+      // Phòng ban CNTT luôn đặt ở cuối danh sách
+      if (isCnttA && !isCnttB) return 1;
+      if (!isCnttA && isCnttB) return -1;
+
+      // Sắp xếp các phòng ban khác theo thứ tự chữ cái (A-Z)
+      const deptCompare = deptA.localeCompare(deptB, "vi", { sensitivity: "base" });
+      if (deptCompare !== 0) return deptCompare;
+
+      // Trong cùng phòng ban sắp xếp theo họ tên
+      return (a.hoTen || "").localeCompare(b.hoTen || "", "vi", { sensitivity: "base" });
+    });
+  };
+
   const fetchStaffs = async (searchValue) => {
     try {
       const response = await callAPI({
@@ -32,9 +53,10 @@ function StaffList() {
           hoTen: searchValue
         },
       });
-      setStaffs(response);
+      const rawList = Array.isArray(response) ? response : response?.data || [];
+      setStaffs(sortStaffByDepartment(rawList));
     } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu nhân viên:", error);
+      console.error("Lỗi khi lấy dữ liệu tài khoản:", error);
     }
   };
 
@@ -94,7 +116,7 @@ function StaffList() {
   return (
     <div className="p-1 bg-gray-100 min-h-screen">
       <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">📌{t("personnelList")}</h2>
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">📌 Danh sách tài khoản</h2>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
           <input
             type="text"
@@ -137,12 +159,9 @@ function StaffList() {
             <th className="p-2 text-white font-semibold">{t("fullName")}</th>
             <th className="p-2 text-white font-semibold">{t("position")}</th>
             <th className="p-2 text-white font-semibold">{t("department")}</th>
-            <th className="p-2 text-white font-semibold">{t("phoneNumber")}</th>
-            <th className="p-2 text-white font-semibold">{t("email")}</th>
-            <th className="p-2 text-white font-semibold">Đơn giá/giờ</th>
             <th className="p-2 text-white font-semibold">{t("username")}</th>
             <th className="p-2 text-white font-semibold">{t("role")}</th>
-            <th className="p-2 text-center"></th>
+            <th className="p-2 text-center">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -155,10 +174,7 @@ function StaffList() {
               }}>{staff.maNhanSu}</td>
               <td className="p-2 text-table">{staff.hoTen}</td>
               <td className="p-2 text-table">{staff.chucVu}</td>
-              <td className="p-2 text-table">{staff.phongBan}</td>
-              <td className="p-2 text-table">{staff.sdt}</td>
-              <td className="p-2 text-table">{staff.email}</td>
-              <td className="p-2 text-table">{Number(staff.hourlyRate || 0).toLocaleString("vi-VN")}</td>
+              <td className="p-2 text-table">{staff.phongBan || "—"}</td>
               <td className="p-2 text-table">
                 {staff.Username ? staff.Username : "Chưa có tài khoản"}
               </td>

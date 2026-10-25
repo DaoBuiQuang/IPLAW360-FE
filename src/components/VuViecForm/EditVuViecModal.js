@@ -170,10 +170,8 @@ function EditVuViecModal({
     };
 
     const handleSelectLoaiDon = (type) => {
-        if (type === "chuyen_quyen" || type === "sua_doi") {
+        if (type === "chuyen_quyen") {
             window.open(`/application_sd_nh_vn_add/${maDonDangKy}`, "_blank");
-        } else if (type === "tach_don") {
-            window.open(`/application_td_nh_vn_add/${maDonDangKy}`, "_blank");
         } else if (type === "nhan_moi") {
             setIsDangKy(false);
             setIsTiepQuan(false);
@@ -322,29 +320,6 @@ function EditVuViecModal({
                 </div>
             )}
 
-            {/* Các shortcut thao tác nhanh */}
-            <div className="mb-4 grid grid-cols-2 gap-6">
-                <Button
-                    onClick={() => handleSelectLoaiDon("chuyen_quyen")}
-                    className="justify-start text-left text-blue-600"
-                >
-                    Chuyển quyền sở hữu đơn đăng ký
-                </Button>
-                <Button
-                    onClick={() => handleSelectLoaiDon("sua_doi")}
-                    className="justify-start text-left text-blue-600"
-                >
-                    Sửa đổi đơn đăng ký
-                </Button>
-            </div>
-            <div className="mb-4 grid grid-cols-2 gap-6">
-                <Button
-                    onClick={() => handleSelectLoaiDon("tach_don")}
-                    className="justify-start text-left text-blue-600"
-                >
-                    Tách đơn đăng ký
-                </Button>
-            </div>
 
             {/* Form chính */}
             <div className="grid grid-cols-2 gap-6">

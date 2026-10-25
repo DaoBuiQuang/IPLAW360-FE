@@ -106,6 +106,14 @@ function Application_TD_NH_VNAdd() {
     const [brands, setBrands] = useState([]);
     const [productAndService, setProductAndService] = useState([]);
 
+    const [soDonTD, setSoDonTD] = useState("");
+    const [ngayYeuCauTD, setNgayYeuCauTD] = useState(dayjs().format("YYYY-MM-DD"));
+    const [lanTachDon, setLanTachDon] = useState(1);
+    const [ngayGhiNhanTD, setNgayGhiNhanTD] = useState(null);
+    const [dsNhomSPDV, setDsNhomSPDV] = useState("");
+    const [ndTachDon, setNdTachDon] = useState("");
+    const [moTa, setMoTa] = useState("");
+
     const [errors, setErrors] = useState({});
     const isFormValid =
         (maHoSoVuViec || "").trim() !== "" &&
@@ -413,81 +421,49 @@ function Application_TD_NH_VNAdd() {
     };
 
     const handleApplication = async () => {
+        if (!soDonTD || !soDonTD.trim()) {
+            showError("Lỗi!", "Vui lòng nhập Số đơn tách.");
+            return;
+        }
+        if (!ngayYeuCauTD) {
+            showError("Lỗi!", "Vui lòng chọn Ngày yêu cầu tách đơn.");
+            return;
+        }
+        if (lanTachDon === "" || lanTachDon === null || lanTachDon === undefined) {
+            showError("Lỗi!", "Vui lòng nhập Lần tách.");
+            return;
+        }
+        if (!dsNhomSPDV || !dsNhomSPDV.trim()) {
+            showError("Lỗi!", "Vui lòng nhập Danh sách nhóm SPDV tách (VD: 01, 05, 35).");
+            return;
+        }
+
         try {
             await callAPI({
-                method: "put",
-                endpoint: "/application/edit",
+                method: "post",
+                endpoint: "/application_td_nh_vn/add",
                 data: {
                     maHoSo: maHoSoVuViec,
-                    loaiDon: loaiDon,
-                    idKhachHang: idKhachHang,
-                    // maKhachHang: maKhachHang,
-
-                    idDoiTac: idDoiTac,
-                    clientsRef: clientsRef,
-                    ngayTiepNhan: ngayTiepNhan,
-                    ngayXuLy: ngayXuLy,
-                    maNguoiXuLy1: nguoiXuLyChinh,
-                    maNguoiXuLy2: nguoiXuLyPhu,
-                    trangThaiVuViec: trangThaiVuViec,
-                    ngayDongHS: ngayDongHS,
-                    ngayRutHS: ngayRutHS,
-
-                    maDonDangKy: maDonDangKy,
-                    maHoSoVuViec: maHoSoVuViec,
-                    soDon: soDon,
-                    maNhanHieu: maNhanHieu,
-                    maSPDVList: maSPDVList,
-                    ghiChu: ghiChu,
-                    trangThaiDon: trangThaiDon,
-                    buocXuLy: buocXuLy,
-
-                    ngayNopDon: ngayNopDon || null,
-                    ngayHoanThanhHoSoTaiLieu_DuKien: ngayHoanThanhHSTL_DuKien || null,
-                    ngayHoanThanhHoSoTaiLieu: ngayHoanThanhHSTL || null,
-                    trangThaiHoanThienHoSoTaiLieu: trangThaiHoanThanhHSTL,
-                    ngayKQThamDinhHinhThuc_DuKien: ngayKQThamDinhHinhThuc_DuKien || null,
-                    ngayKQThamDinhHinhThuc: ngayKQThamDinhHinhThuc || null,
-                    lichSuThamDinhHT: lichSuThamDinhHT,
-                    ngayKQThamDinhHinhThuc_DK_SauKN: ngayKQThamDinhHinhThuc_DK_SauKN,
-                    ngayCongBoDonDuKien: ngayCongBo_DuKien || null,
-                    ngayCongBoDon: ngayCongBo || null,
-                    ngayKQThamDinhND_DuKien: ngayKQThamDinhND_DuKien || null,
-                    ngayKQThamDinhND: ngayKQThamDinhND || null,
-                    lichSuThamDinhND: lichSuThamDinhND,
-                    ngayKQThamDinhND_DK_SauKN: ngayKQThamDinhND_DK_SauKN,
-                    trangThaiTraLoiKQThamDinhND: trangThaiTraLoiKQThamDinhND,
-                    ngayTraLoiKQThamDinhND_DuKien: ngayTraLoiKQThamDinhND_DuKien || null,
-                    ngayTraLoiKQThamDinhND: ngayTraLoiKQThamDinhND || null,
-                    ngayThongBaoCapBang: ngayThongBaoCapBang || null,
-                    trangThaiDYTBCapBang: trangThaiCapBang,
-
-                    hanNopYKien: hanNopYKien || null,
-                    ngayNopYKien: ngayNopYKien || null,
-                    ngayNhanKQYKien: ngayNhanKQYKien || null,
-                    ketQuaYKien: ketQuaYKien || null,
-                    hanNopPhiCapBang: hanNopPhiCapBang || null,
-
-                    ngayNopPhiCapBang: ngayNopPhiCapBang || null,
-                    ngayNhanBang: ngayNhanBang || null,
-                    ngayGuiBangChoKhachHang: ngayGuiBangChoKH || null,
-                    ngayCapBang: ngayCapBang || null,
-                    ngayHetHanBang: ngayHetHanBang || null,
-                    soBang: soBang,
-                    quyetDinhSo: quyetDinhSo || "",
-                    taiLieus: taiLieuList,
-
-                    giayUyQuyenGoc: giayUyQuyenGoc,
-                    maUyQuyen: maUyQuyen || null,
-                    nhanHieu,
-                    vuViecs: vuViecList,
+                    maDonDangKyCu: maDonDangKy,
+                    listDonTach: [
+                        {
+                            soDon: soDonTD.trim(),
+                            nhomSPDV: dsNhomSPDV.trim(),
+                            ngayYeuCau: ngayYeuCauTD,
+                            ngayGhiNhanTachDon: ngayGhiNhanTD || null,
+                            ngayGhiNhanSuaDoi: ngayGhiNhanTD || null,
+                            lanTachDon: Number(lanTachDon) || 1,
+                            ndTachDon: ndTachDon || "",
+                            moTa: moTa || "",
+                        }
+                    ]
                 },
             });
-            await showSuccess("Thành công!", "Cập nhật đơn đăng ký nhãn hiệu thành công!");
+            await showSuccess("Thành công!", "Tách đơn đăng ký nhãn hiệu thành công!");
             navigate(-1);
         } catch (error) {
-            showError("Thất bại!", "Đã xảy ra lỗi.", error);
-            console.error("Lỗi khi thêm hồ sơ vụ việc!", error);
+            showError("Thất bại!", "Đã xảy ra lỗi khi tách đơn đăng ký nhãn hiệu.", error);
+            console.error("Lỗi khi tách đơn đăng ký nhãn hiệu!", error);
         }
     };
     const handleSubmit = () => {
@@ -510,7 +486,7 @@ function Application_TD_NH_VNAdd() {
             <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-4xl">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-semibold text-gray-700 uppercase">
-                        📌 TẠO ĐƠN TÁCH NHÃN HIỆU
+                        📌 TÁCH ĐƠN ĐĂNG KÝ NHÃN HIỆU
                     </h2>
                     <img
                         src="https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg"
@@ -835,6 +811,25 @@ function Application_TD_NH_VNAdd() {
                             </div>
 
                         </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-lg shadow border border-gray-200 mt-6">
+                        <FormTachDon
+                            soDonTD={soDonTD}
+                            setSoDonTD={setSoDonTD}
+                            dsNhomSPDV={dsNhomSPDV}
+                            setDsNhomSPDV={setDsNhomSPDV}
+                            ndTachDon={ndTachDon}
+                            setNdTachDon={setNdTachDon}
+                            moTa={moTa}
+                            setMoTa={setMoTa}
+                            ngayYeuCauTD={ngayYeuCauTD}
+                            setNgayYeuCauTD={setNgayYeuCauTD}
+                            ngayGhiNhanTD={ngayGhiNhanTD}
+                            setNgayGhiNhanTD={setNgayGhiNhanTD}
+                            lanTachDon={lanTachDon}
+                            setLanTachDon={setLanTachDon}
+                        />
                     </div>
                 </Spin>
                 <div className="flex justify-center gap-4 mt-4">
