@@ -18,6 +18,7 @@ import { showSuccess, showError } from "../../components/commom/Notification";
 import BrandBasicForm from "../../components/BrandBasicForm";
 import FormHoSo from "../../components/commom/FormHoSo.js";
 import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
+import useVietnamTrademarkDeadlines from "../../utils/useVietnamTrademarkDeadlines";
 function ApplicationAdd() {
     const navigate = useNavigate();
 
@@ -66,6 +67,13 @@ function ApplicationAdd() {
     const [ngayCongBo, setNgayCongBo] = useState(null);
 
     const [ngayKQThamDinhND_DuKien, setNgayKQThamDinhND_DuKien] = useState(null);
+    const isNewProcess = useVietnamTrademarkDeadlines({
+        filingDate: ngayNopDon,
+        formalAcceptanceDate: ngayKQThamDinhHinhThuc,
+        publicationDate: ngayCongBo,
+        setPublicationDeadline: setNgayCongBo_DuKien,
+        setContentReviewDeadline: setNgayKQThamDinhND_DuKien,
+    });
     const [ngayKQThamDinhND, setNgayKQThamDinhND] = useState(null);
     const [lichSuThamDinhND, setLichSuThamDinhND] = useState([])
     const [ngayKQThamDinhND_DK_SauKN, setNgayKQThamDinhND_DK_SauKN] = useState(null)
@@ -130,7 +138,6 @@ function ApplicationAdd() {
     };
     const [daChonNgayNopDon, setDaChonNgayNopDon] = useState(false);
     const [daChonNgayHoanThanhHSTL, setDaChonNgayHoanThanhHSTL] = useState(false);
-    const [daChonNgayThamDinhHinhThuc, setDaChonNgayThamDinhHinhThuc] = useState(false);
     const [daChonNgayCongBoDon, setDaChonNgayCongBoDon] = useState(false);
     const [daChonNgayThamDinhNoiDung, setDaChonNgayThamDinhNoiDung] = useState(false);
     const [daChonNgayTraLoiThamDinhNoiDung, setDaChonNgayTraLoiThamDinhNoiDung] = useState(false)
@@ -211,24 +218,11 @@ function ApplicationAdd() {
         // }
 
         if (ngayKQThamDinhHinhThuc) {
-            // if (!ngayCongBo_DuKien) {
-            const duKien = dayjs(ngayKQThamDinhHinhThuc).add(2, 'month').format('YYYY-MM-DD');
-            setNgayCongBo_DuKien(duKien);
-            // }
-            setDaChonNgayThamDinhHinhThuc(true);
             updateTrangThaiDon("Công bố đơn");
-        } else {
-            setNgayCongBo_DuKien(null);
         }
         if (ngayCongBo) {
-            // if (!ngayKQThamDinhND_DuKien) {
-            const duKien = dayjs(ngayCongBo).add(9, 'month').format('YYYY-MM-DD');
-            setNgayKQThamDinhND_DuKien(duKien);
-            // }
             setDaChonNgayCongBoDon(true);
             updateTrangThaiDon("Thẩm định nội dung");
-        } else {
-            setNgayKQThamDinhND_DuKien(null);
         }
 
         if (ngayKQThamDinhND) {
@@ -597,7 +591,7 @@ function ApplicationAdd() {
                             />
                         </div>
                     )}
-                    {daChonNgayThamDinhHinhThuc && (
+                    {(ngayKQThamDinhHinhThuc || (isNewProcess && ngayNopDon)) && (
                         <div className="col-span-2">
                             <AnnouncementOfApplication
                                 ngayCongBo_DuKien={ngayCongBo_DuKien}
