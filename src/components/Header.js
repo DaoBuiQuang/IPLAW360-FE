@@ -1,8 +1,9 @@
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { clearAuth } from "../../src/features/authSlice";
+import { isTimesheetOnlyRole } from "../features/accountRoles";
 import callAPI from "../utils/api";
 import { Menu, Bell } from "lucide-react";
 import i18n from "../components/MultiLang/i18n.js";
@@ -17,6 +18,7 @@ function Header({ toggleMenu, isMenuOpen }) {
   const [showLangModal, setShowLangModal] = useState(false);
   const [currentLang, setCurrentLang] = useState(i18n.language || "vi");
   const authId = useSelector((state) => state.auth.authId);
+  const timesheetOnly = isTimesheetOnlyRole(useSelector((state) => state.auth.role));
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -84,14 +86,21 @@ function Header({ toggleMenu, isMenuOpen }) {
           <div className="flex items-center gap-4 ">
             {/* Hiển thị cờ hiện tại */}
             <LanguageSelector />
-            <span className="text-gray-700 font-medium">{username}</span>
+            {timesheetOnly ? (
+              <>
+                <Link to="/profile" className="text-gray-700 font-medium hover:underline">{username}</Link>
+                <Link to="/changepassword" className="text-gray-700 hover:underline">{t("doiMatKhau")}</Link>
+              </>
+            ) : (
+              <span className="text-gray-700 font-medium">{username}</span>
+            )}
 
-            <div className="relative cursor-pointer">
+            {!timesheetOnly && <div className="relative cursor-pointer">
               <NotificationDropdown />
 
               {/* <Bell size={22} className="text-gray-600 hover:text-blue-600" />
               <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span> */}
-            </div>
+            </div>}
 
             <button
               onClick={() => setShowLogoutModal(true)}

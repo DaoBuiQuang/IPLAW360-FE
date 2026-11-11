@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { isTimesheetOnlyRole } from "../../features/accountRoles";
 import Select from "react-select";
 import { DatePicker, Modal, Pagination, Spin } from "antd";
 import { toast } from "react-toastify";
@@ -23,7 +24,7 @@ export default function TimesheetList() {
   // ── Phân quyền ──
   const role = useSelector((state) => state.auth.role);
   const currentMaNhanSu = localStorage.getItem("maNhanSu") || "";
-  const isStaff = role === "staff" || role === "trainee";
+  const isStaff = role === "staff" || role === "trainee" || isTimesheetOnlyRole(role);
   const isManager = role === "manager";
   const isAdmin = role === "admin" || role === "ceo";
 

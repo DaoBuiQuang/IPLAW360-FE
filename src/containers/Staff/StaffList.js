@@ -6,6 +6,7 @@ import { Modal, Select } from "antd";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { Shield } from "lucide-react";
+import { TIMESHEET_STAFF_ROLE, TIMESHEET_STAFF_LABEL } from "../../features/accountRoles";
 
 function StaffList() {
   const { t } = useTranslation();
@@ -202,6 +203,8 @@ function StaffList() {
                         ? "Quản trị viên"
                         : staff.Role === "trainee"
                         ? "Thực tập sinh"
+                        : staff.Role === TIMESHEET_STAFF_ROLE
+                        ? TIMESHEET_STAFF_LABEL
                         : "Nhân viên"}
                     </span>
                   </button>
@@ -301,6 +304,7 @@ function StaffList() {
               onChange={(val) => setNewRole(val)}
               options={[
                 { value: "staff", label: "Nhân viên (staff) — Xem & Báo cáo time cá nhân" },
+                { value: TIMESHEET_STAFF_ROLE, label: TIMESHEET_STAFF_LABEL },
                 { value: "manager", label: "Trưởng nhóm (manager) — Quản lý team & xem KPI team" },
                 { value: "admin", label: "Quản trị viên (admin) — Toàn quyền hệ thống & Office Summary" },
                 { value: "trainee", label: "Thực tập sinh (trainee) — Báo cáo thử việc" },

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { TIMESHEET_STAFF_ROLE, TIMESHEET_STAFF_LABEL } from "../../features/accountRoles";
 import { useNavigate, useParams } from "react-router-dom";
 import callAPI from "../../utils/api";
 import { showSuccess, showError } from "../../components/commom/Notification";
@@ -70,6 +71,7 @@ function RegisterStaff() {
             className="w-full p-2 mt-1 border rounded-lg text-input"
           >
             <option value="staff">Nhân viên</option>
+            <option value={TIMESHEET_STAFF_ROLE}>{TIMESHEET_STAFF_LABEL}</option>
             <option value="manager">Trưởng nhóm (Manager)</option>
             <option value="admin">Quản trị viên</option>
             <option value="trainee">Thực tập sinh - học việc</option>

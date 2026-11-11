@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
+import { useSelector } from "react-redux";
+import { isTimesheetOnlyRole } from "../../features/accountRoles";
 import { DatePicker, Spin } from "antd";
 import CaseCodeSelect from "./CaseCodeSelect";
 import ActivitySelect from "./ActivitySelect";
@@ -24,6 +26,7 @@ const emptyValues = {
 
 export default function TimesheetForm({ mode = "add", initialValues = emptyValues, lockedCaseCode = false, onSaved, embedded = false }) {
   const navigate = useNavigate();
+  const timesheetOnly = isTimesheetOnlyRole(useSelector((state) => state.auth.role));
   const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
   const isEditingOtherStaff = mode === "edit" && Boolean(initialValues.employeeCode && initialValues.employeeCode !== currentEmployeeCode);
   const [values, setValues] = useState({
@@ -274,7 +277,7 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
               value={selectedStaff ? { value: selectedStaff.maNhanSu, label: `${selectedStaff.maNhanSu} - ${selectedStaff.hoTen}` } : null}
               onChange={(option) => setField("employeeCode", option?.value || "")}
               placeholder="Nhân sự của tôi"
-              isDisabled={mode === "add"}
+              isDisabled={mode === "add" || timesheetOnly}
             />
             {selectedStaff && (
               <div className="text-sm text-gray-500 mt-1">

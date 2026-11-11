@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import EmailTest from "../containers/Mail/EmailTest";
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate, matchPath, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { isTimesheetOnlyRole, TIMESHEET_HOME } from "../features/accountRoles";
 import Header from "../components/Header";
 import MenuLeft from "../components/MenuLeft";
 import Login from "../containers/Auth/Login";
@@ -157,7 +159,17 @@ import DsCongViecAdd from "../containers/DsCongViec/DsCongViecAdd";
 import DsCongViecEdit from "../containers/DsCongViec/DsCongViecEdit";
 import DsCongViecDetail from "../containers/DsCongViec/DsCongViecDetail";
 import TeamManagement from "../containers/Team/TeamManagement";
+
+const timesheetAccountRoutes = [
+  TIMESHEET_HOME, "/timesheet/matter",
+  "/timesheetlist", "/timesheetcalendar", "/timesheetadd", "/timesheetedit/:id", "/timesheetdetail/:id",
+  "/dscongviec_list", "/dscongviec_add", "/dscongviec_edit/:id", "/dscongviec_detail/:id",
+  "/profile", "/changepassword",
+];
+
 const MainLayout = ({ notification, setNotification }) => {
+  const { pathname } = useLocation();
+  const timesheetOnly = isTimesheetOnlyRole(useSelector((state) => state.auth.role));
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   useEffect(() => {
     const handleResize = () => {
@@ -173,6 +185,10 @@ const MainLayout = ({ notification, setNotification }) => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  if (timesheetOnly && !timesheetAccountRoutes.some((route) => matchPath(route, pathname))) {
+    return <Navigate to={TIMESHEET_HOME} replace />;
+  }
 
   return (
     <div className="flex h-screen overflow-x-hidden">
@@ -198,7 +214,7 @@ const MainLayout = ({ notification, setNotification }) => {
         >
           <Outlet />
         </main>
-        {notification && (
+        {!timesheetOnly && notification && (
           <NotificationPopup
             title={notification.title}
             body={notification.body}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   PieChart, Users, Briefcase, Handshake, Globe, UserCheck,
@@ -8,17 +8,22 @@ import {
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { setOpenAtLevel } from "../features/uiSlice";
+import { openPath, setOpenAtLevel } from "../features/uiSlice";
+import { isTimesheetOnlyRole, TIMESHEET_HOME } from "../features/accountRoles";
 import logoweb from "../assets/image/logo-web-big.jpg";
 
 function MenuLeft() {
   const location = useLocation();
   const role = useSelector((state) => state.auth.role);
+  const timesheetOnly = isTimesheetOnlyRole(role);
   const { t } = useTranslation();
 
   // ✅ Dùng Redux thay cho useState
   const dispatch = useDispatch();
   const openMenu = useSelector((s) => s.ui.openMenu);
+  useEffect(() => {
+    if (timesheetOnly) dispatch(openPath({ path: [{ parent: "root", key: "timesheet" }] }));
+  }, [dispatch, timesheetOnly]);
 
   const navLinkClass = ({ isActive }) =>
     `flex items-center space-x-2 p-2 rounded-lg w-full transition 
@@ -61,6 +66,7 @@ function MenuLeft() {
 
   // ✅ Duy nhất 1 renderMenuGroup dùng Redux openMenu + setOpenAtLevel
   const renderMenuGroup = (parentKey, key, title, iconRenderer, children) => {
+    if (timesheetOnly && parentKey === "root" && key !== "timesheet") return null;
     const isOpen = openMenu[parentKey] === key;
     return (
       <li>
@@ -85,7 +91,7 @@ function MenuLeft() {
     <aside className="bg-white w-[280px] h-screen shadow-md flex flex-col overflow-y-auto">
       {/* Logo */}
       <NavLink
-        to="/"
+        to={timesheetOnly ? TIMESHEET_HOME : "/"}
         className="p-2 flex justify-center hover:opacity-80 transition-opacity"
       >
         <img src="https://ipac.vn/image/catalog/brands/LOGO-chuan-mau-2.png" alt="Logo" className="w-32" />

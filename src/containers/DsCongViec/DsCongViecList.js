@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Modal, Pagination, Spin } from "antd";
 import { toast } from "react-toastify";
 import callAPI from "../../utils/api";
+import { TIMESHEET_STAFF_ROLE } from "../../features/accountRoles";
 
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
 
@@ -12,7 +13,7 @@ const FILTER_STORAGE_KEY = "dsCongViecListFilters";
 function DsCongViecList() {
   const navigate = useNavigate();
   const role = useSelector((state) => state.auth.role);
-  const staffRoles = ["admin", "staff", "manager", "ceo"];
+  const staffRoles = ["admin", "staff", "manager", "ceo", TIMESHEET_STAFF_ROLE];
   const currentEmployeeCode = localStorage.getItem("maNhanSu") || "";
 
   const canModifyItem = (item) => {
