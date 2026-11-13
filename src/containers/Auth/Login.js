@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { setAuth } from "../../features/authSlice";
+import { isTimesheetOnlyRole, TIMESHEET_HOME } from "../../features/accountRoles";
 import { showSuccess, showError } from "../../components/commom/Notification";
 // import { messaging, getToken, onMessage } from '../../firebase';
 import { messaging } from '../../firebase';
@@ -38,9 +39,10 @@ const Login = () => {
                 localStorage.setItem("token", data.token);
                 const decoded = jwtDecode(data.token);
                 localStorage.setItem("maNhanSu", decoded.maNhanSu);
-                dispatch(setAuth({ authId: decoded.id, role: decoded.role }));
+                dispatch(setAuth({ authId: decoded.id, role: decoded.role, maNhanSu: decoded.maNhanSu }));
+                const timesheetOnly = isTimesheetOnlyRole(decoded.role);
 
-                const permission = await Notification.requestPermission();
+                const permission = timesheetOnly ? "denied" : await Notification.requestPermission();
                 if (permission === "granted") {
                     if (messaging) {
                         // Chỉ gọi getToken khi messaging không undefined/null
@@ -61,7 +63,7 @@ const Login = () => {
                 }
 
                 await showSuccess("Thành công!", "Đăng nhập thành công!");
-                navigate("/");
+                navigate(timesheetOnly ? TIMESHEET_HOME : "/", { replace: true });
             } else {
                 throw new Error("Đăng nhập thất bại. Không nhận được token.");
             }

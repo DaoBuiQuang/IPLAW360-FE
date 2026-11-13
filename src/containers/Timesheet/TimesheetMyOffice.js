@@ -117,76 +117,99 @@ export default function TimesheetMyOffice() {
   // 1. Ưu tiên officeSummary.allStaff trả về từ BE
   // 2. Nếu BE chưa có allStaff, trích xuất từ teams hoặc fallbackStaff
   const allStaffList = useMemo(() => {
-    if (officeSummary.allStaff && Array.isArray(officeSummary.allStaff) && officeSummary.allStaff.length > 0) {
-      return officeSummary.allStaff;
-    }
-
-    const staffMap = {};
-
-    // Nạp từ fallbackStaff nếu có
+    // Map tra cứu phòng ban từ fallbackStaff nếu có
+    const deptMap = {};
     (fallbackStaff || []).forEach((s) => {
       const code = s.maNhanSu || s.employeeCode;
-      if (code) {
-        staffMap[code] = {
-          employeeCode: code,
-          hoTen: s.hoTen,
-          chucVu: s.chucVu,
-          phongBan: s.phongBan,
-          Role: s.Role || "staff",
-          isManager: s.Role === "manager",
-          totalHours: 0,
-          targetHours: (officeSummary.workingDays || 22) * 8,
-          completionRate: 0,
-          totalAmount: 0,
-          recordCount: 0,
-        };
-      }
+      if (code && s.phongBan) deptMap[code] = s.phongBan;
     });
 
-    // Bổ sung dữ liệu từ teams nếu có
-    teams.forEach((t) => {
-      if (t.managerCode) {
-        if (!staffMap[t.managerCode]) {
-          staffMap[t.managerCode] = {
-            employeeCode: t.managerCode,
-            hoTen: t.managerName,
-            isManager: true,
-            Role: "manager",
+    let rawList = [];
+    if (officeSummary.allStaff && Array.isArray(officeSummary.allStaff) && officeSummary.allStaff.length > 0) {
+      rawList = officeSummary.allStaff.map((s) => ({
+        ...s,
+        phongBan: s.phongBan || deptMap[s.employeeCode || s.maNhanSu] || "",
+      }));
+    } else {
+      const staffMap = {};
+
+      // Nạp từ fallbackStaff nếu có
+      (fallbackStaff || []).forEach((s) => {
+        const code = s.maNhanSu || s.employeeCode;
+        if (code) {
+          staffMap[code] = {
+            employeeCode: code,
+            hoTen: s.hoTen,
+            chucVu: s.chucVu,
+            phongBan: s.phongBan,
+            Role: s.Role || "staff",
+            isManager: s.Role === "manager",
             totalHours: 0,
+            targetHours: (officeSummary.workingDays || 22) * 8,
             completionRate: 0,
             totalAmount: 0,
             recordCount: 0,
           };
-        } else {
-          staffMap[t.managerCode].isManager = true;
-        }
-      }
-
-      (t.members || []).forEach((m) => {
-        const code = m.employeeCode || m.maNhanSu;
-        if (code) {
-          if (!staffMap[code]) {
-            staffMap[code] = {
-              employeeCode: code,
-              hoTen: m.hoTen,
-              isManager: false,
-              Role: "staff",
-              totalHours: Number(m.totalHours || 0),
-              completionRate: Number(m.completionRate || 0),
-              totalAmount: Number(m.totalAmount || 0),
-              recordCount: Number(m.recordCount || 0),
-            };
-          } else {
-            staffMap[code].totalHours = Number(m.totalHours || staffMap[code].totalHours || 0);
-            staffMap[code].completionRate = Number(m.completionRate || staffMap[code].completionRate || 0);
-            staffMap[code].totalAmount = Number(m.totalAmount || staffMap[code].totalAmount || 0);
-            staffMap[code].recordCount = Number(m.recordCount || staffMap[code].recordCount || 0);
-          }
         }
       });
-    });
 
-    return Object.values(staffMap);
+      // Bổ sung dữ liệu từ teams nếu có
+      teams.forEach((t) => {
+        if (t.managerCode) {
+          if (!staffMap[t.managerCode]) {
+            staffMap[t.managerCode] = {
+              employeeCode: t.managerCode,
+              hoTen: t.managerName,
+              phongBan: deptMap[t.managerCode] || "",
+              isManager: true,
+              Role: "manager",
+              totalHours: 0,
+              completionRate: 0,
+              totalAmount: 0,
+              recordCount: 0,
+            };
+          } else {
+            staffMap[t.managerCode].isManager = true;
+          }
+        }
+
+        (t.members || []).forEach((m) => {
+          const code = m.employeeCode || m.maNhanSu;
+          if (code) {
+            if (!staffMap[code]) {
+              staffMap[code] = {
+                employeeCode: code,
+                hoTen: m.hoTen,
+                phongBan: m.phongBan || deptMap[code] || "",
+                isManager: false,
+                Role: "staff",
+                totalHours: Number(m.totalHours || 0),
+                completionRate: Number(m.completionRate || 0),
+                totalAmount: Number(m.totalAmount || 0),
+                recordCount: Number(m.recordCount || 0),
+              };
+            } else {
+              staffMap[code].totalHours = Number(m.totalHours || staffMap[code].totalHours || 0);
+              staffMap[code].completionRate = Number(m.completionRate || staffMap[code].completionRate || 0);
+              staffMap[code].totalAmount = Number(m.totalAmount || staffMap[code].totalAmount || 0);
+              staffMap[code].recordCount = Number(m.recordCount || staffMap[code].recordCount || 0);
+              if (!staffMap[code].phongBan && deptMap[code]) {
+                staffMap[code].phongBan = deptMap[code];
+              }
+            }
+          }
+        });
+      });
+
+      rawList = Object.values(staffMap);
+    }
+
+    // YÊU CẦU: Trong mục Toàn bộ NV của MYOFFICE, chỉ hiển thị các nhân sự KHÔNG thuộc phòng ban CNTT
+    return rawList.filter((s) => {
+      const code = s.employeeCode || s.maNhanSu;
+      const dept = (s.phongBan || deptMap[code] || "").trim().toUpperCase();
+      return dept !== "CNTT";
+    });
   }, [officeSummary, fallbackStaff, teams]);
 
   // Lọc và sắp xếp danh sách nhân viên
@@ -214,12 +237,13 @@ export default function TimesheetMyOffice() {
     return list;
   }, [allStaffList, tableSearch, sortBy]);
 
-  // Lọc teams theo sidebar search
+  // Lọc teams theo sidebar search (hỗ trợ tìm cả tên nhóm)
   const filteredTeams = useMemo(() => {
     if (!sidebarSearch.trim()) return teams;
     const q = sidebarSearch.toLowerCase().trim();
     return teams.filter(
       (t) =>
+        (t.tenNhom || t.members?.[0]?.tenNhom || "").toLowerCase().includes(q) ||
         (t.managerName || "").toLowerCase().includes(q) ||
         (t.managerCode || "").toLowerCase().includes(q) ||
         (t.members || []).some(
@@ -247,13 +271,16 @@ export default function TimesheetMyOffice() {
     const isTeamMode = currentMode === "team" && hasTeams;
 
     const breakdown = isTeamMode
-      ? teams.map((t) => ({
-          employeeCode: t.managerCode,
-          hoTen: `[Team] ${t.managerName}`,
-          totalHours: t.teamTotalHours,
-          completionRate: t.teamCompletionRate,
-          totalAmount: t.teamTotalAmount,
-        }))
+      ? teams.map((t) => {
+          const groupName = t.tenNhom || t.members?.[0]?.tenNhom;
+          return {
+            employeeCode: t.managerCode,
+            hoTen: groupName ? `${groupName} (${t.managerName})` : `[Team] ${t.managerName}`,
+            totalHours: t.teamTotalHours,
+            completionRate: t.teamCompletionRate,
+            totalAmount: t.teamTotalAmount,
+          };
+        })
       : allStaffList.map((s) => ({
           employeeCode: s.employeeCode || s.maNhanSu,
           hoTen: s.hoTen,
@@ -262,14 +289,22 @@ export default function TimesheetMyOffice() {
           totalAmount: s.totalAmount,
         }));
 
+    // YÊU CẦU: Không tính tổng số giờ làm việc, số time record, tổng doanh thu, tỷ lệ hoàn thành KPI của nhân sự thuộc phòng ban CNTT vào KPI tổng hợp
+    const totalHoursNonIT = allStaffList.reduce((acc, item) => acc + (Number(item.totalHours) || 0), 0);
+    const recordCountNonIT = allStaffList.reduce((acc, item) => acc + (Number(item.recordCount) || 0), 0);
+    const totalAmountNonIT = allStaffList.reduce((acc, item) => acc + (Number(item.totalAmount) || 0), 0);
+    const targetHoursNonIT = allStaffList.reduce(
+      (acc, item) => acc + (Number(item.targetHours) || (officeSummary.workingDays || 22) * 8),
+      0
+    );
+    const completionRateNonIT = targetHoursNonIT > 0 ? (totalHoursNonIT / targetHoursNonIT) * 100 : 0;
+
     return {
-      totalHours: officeSummary.totalHours,
-      targetHours: officeSummary.targetHours,
-      completionRate: officeSummary.completionRate,
-      totalAmount: officeSummary.totalAmount,
-      recordCount:
-        officeSummary.recordCount ??
-        allStaffList.reduce((acc, item) => acc + (Number(item.recordCount) || 0), 0),
+      totalHours: totalHoursNonIT,
+      targetHours: targetHoursNonIT,
+      completionRate: completionRateNonIT,
+      totalAmount: totalAmountNonIT,
+      recordCount: recordCountNonIT,
       breakdown,
     };
   }, [officeSummary, teams, allStaffList, currentMode, hasTeams]);
@@ -401,11 +436,27 @@ export default function TimesheetMyOffice() {
                         }`}
                       >
                         <div className="flex items-center gap-1.5 truncate">
-                          <span className="text-sm">👔</span>
-                          <span className="truncate">{team.managerName}</span>
-                          <span className="text-[10px] text-gray-400 font-mono">({team.managerCode})</span>
+                          <span className="text-sm">🏢</span>
+                          <div className="text-left truncate">
+                            {team.tenNhom || team.members?.[0]?.tenNhom ? (
+                              <>
+                                <p className="font-bold text-gray-800 truncate">
+                                  {team.tenNhom || team.members?.[0]?.tenNhom}
+                                </p>
+                                <p className="text-[10px] text-gray-500 truncate">
+                                  Trưởng nhóm: <strong className="text-gray-700">{team.managerName}</strong>{" "}
+                                  <span className="font-mono text-gray-400">({team.managerCode})</span>
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="truncate font-semibold text-gray-800">{team.managerName}</p>
+                                <p className="text-[10px] text-gray-400 font-mono">({team.managerCode})</p>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-gray-400 text-[10px] flex-shrink-0">
+                        <span className="text-gray-400 text-[10px] flex-shrink-0 ml-1">
                           {expandedManager === team.managerCode ? "▲" : "▼"}
                         </span>
                       </button>
@@ -711,8 +762,22 @@ export default function TimesheetMyOffice() {
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs text-gray-400">{isExpanded ? "▼" : "▶"}</span>
                                     <div>
-                                      <p className="font-semibold text-gray-800">{t.managerName}</p>
-                                      <p className="text-xs text-gray-400 font-mono">{t.managerCode}</p>
+                                      {t.tenNhom || t.members?.[0]?.tenNhom ? (
+                                        <>
+                                          <p className="font-bold text-gray-800 text-sm">
+                                            {t.tenNhom || t.members?.[0]?.tenNhom}
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            Trưởng nhóm: <strong className="text-gray-700">{t.managerName}</strong>{" "}
+                                            <span className="font-mono text-gray-400">({t.managerCode})</span>
+                                          </p>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <p className="font-semibold text-gray-800">{t.managerName}</p>
+                                          <p className="text-xs text-gray-400 font-mono">{t.managerCode}</p>
+                                        </>
+                                      )}
                                     </div>
                                   </div>
                                 </td>

@@ -264,16 +264,30 @@ export default function TimesheetMatter() {
     localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters));
   }, [filters]);
 
-  // ── Hàm trigger tìm kiếm ngay lập tức khi thay đổi giá trị một trường ──
+  // ── Debounce timer ref để tránh gọi API liên tiếp khi đổi bộ lọc ──
+  const searchTimeoutRef = useRef(null);
+
+  // ── Hàm trigger tìm kiếm khi thay đổi giá trị một trường (có debounce 300ms) ──
   const handleFieldSearch = (fieldKey, value) => {
     const nextFilters = { ...filtersRef.current, [fieldKey]: value };
     setFilters(nextFilters);
     filtersRef.current = nextFilters;
-    fetchMatters(nextFilters, 1, pagination.pageSize);
+    // Khi đổi điều kiện lọc ngày/nhân sự thì cần làm mới cache activities
+    setMatterActivities({});
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      fetchMatters(nextFilters, 1, pagination.pageSize);
+    }, 300);
   };
 
   // ── Nút Xóa lọc: Reset toàn bộ và tự động gọi API ──
   const handleClearFilters = () => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
     const emptyFilters = {
       caseCode: "",
       customerCode: "",
@@ -288,12 +302,17 @@ export default function TimesheetMatter() {
     localStorage.removeItem(FILTER_STORAGE_KEY);
     localStorage.removeItem(STATE_STORAGE_KEY);
     setExpandedRows({});
+    setMatterActivities({});
     fetchMatters(emptyFilters, 1, pagination.pageSize);
   };
 
-  // ── Fetch Activities cho 1 Matter khi toggle ──
-  const fetchActivities = async (caseCode) => {
+  // ── Fetch Activities cho 1 Matter khi toggle (kèm client caching) ──
+  const fetchActivities = async (caseCode, force = false) => {
     if (!caseCode) return;
+    // Nếu đã có cache và không yêu cầu reload bắt buộc -> tận dụng cache
+    if (!force && matterActivities[caseCode] && matterActivities[caseCode].length > 0) {
+      return;
+    }
     setLoadingActivities((prev) => ({ ...prev, [caseCode]: true }));
     try {
       const res = await callAPI({
@@ -301,8 +320,8 @@ export default function TimesheetMatter() {
         endpoint: "/timesheet/matter/activities",
         data: {
           caseCode,
-          fromDate: filters.fromDate || undefined,
-          toDate: filters.toDate || undefined,
+          fromDate: filtersRef.current.fromDate || undefined,
+          toDate: filtersRef.current.toDate || undefined,
         },
       });
       setMatterActivities((prev) => ({
@@ -320,7 +339,7 @@ export default function TimesheetMatter() {
     const isOpening = !expandedRows[caseCode];
     setExpandedRows((prev) => ({ ...prev, [caseCode]: isOpening }));
     if (isOpening) {
-      fetchActivities(caseCode);
+      fetchActivities(caseCode, false);
     }
   };
 
@@ -385,7 +404,7 @@ export default function TimesheetMatter() {
       setEditModal(false);
       // Tự động reload lại activities của Matter và reload danh sách Matter
       if (editForm.caseCode) {
-        fetchActivities(editForm.caseCode);
+        fetchActivities(editForm.caseCode, true);
       }
       fetchMatters(filtersRef.current, pagination.pageIndex, pagination.pageSize);
     } catch (err) {
@@ -419,7 +438,7 @@ export default function TimesheetMatter() {
       const targetCase = deleteConfirm.caseCode;
       setDeleteConfirm(null);
       if (targetCase) {
-        fetchActivities(targetCase);
+        fetchActivities(targetCase, true);
       }
       fetchMatters(filtersRef.current, pagination.pageIndex, pagination.pageSize);
     } catch (err) {
@@ -450,8 +469,10 @@ export default function TimesheetMatter() {
 
         <button
           onClick={() => {
-            fetchMatters(filtersRef.current, 1, pagination.pageSize);
+            if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+            setMatterActivities({});
             setExpandedRows({});
+            fetchMatters(filtersRef.current, 1, pagination.pageSize);
           }}
           className="flex items-center gap-1.5 px-3.5 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition font-medium self-start md:self-auto cursor-pointer"
         >
@@ -465,6 +486,7 @@ export default function TimesheetMatter() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
             fetchMatters(filtersRef.current, 1, pagination.pageSize);
           }}
         >

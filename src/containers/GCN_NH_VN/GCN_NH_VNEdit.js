@@ -619,6 +619,31 @@ function GCN_NH_VNEdit() {
                         setMaUyQuyen={setMaUyQuyen}
                     />
                 </div>
+                <div className="col-span-2 pt-4 border-t border-gray-200">
+                    <div className="flex flex-wrap gap-4 items-center justify-center">
+                        <button
+                            type="button"
+                            onClick={() => window.open(`/gcn_cq_nh_vn_add/${id}`, "_blank")}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                        >
+                            <span>Chuyển quyền sở hữu</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => window.open(`/gcn_gh_nh_vn_add/${id}`, "_blank")}
+                            className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                        >
+                            <span>Thêm mới đơn gia hạn</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => window.open(`/gcn_sd_nh_vn_add/${id}`, "_blank")}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                        >
+                            <span>Thêm mới đơn sửa đổi</span>
+                        </button>
+                    </div>
+                </div>
                 <div className="flex justify-center gap-4 mt-4">
                     <button
                         className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg"
@@ -634,7 +659,7 @@ function GCN_NH_VNEdit() {
                             : "bg-blue-300 cursor-not-allowed"
                             }`}
                     >
-                        Lưu thông tin giấy chứng nhận
+                        Lưu thông tin
                     </button>
                 </div>
             </div>

@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { DatePicker, Modal, Spin, Pagination } from 'antd';
 import { useTranslation } from "react-i18next";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+import { showInfo } from "../../components/commom/Notification";
 
 const FILTER_STORAGE_KEY_TD = "applicationTdNhVnListFilters";
 const STATE_STORAGE_KEY_TD = "applicationTdNhVnListState";
@@ -94,9 +95,9 @@ function Application_TD_NH_VNList() {
   const allFieldOptions = [
     { label: "Số Đơn", labelEn: "App No", key: "soDon" },
     { label: "Mã HSVV", labelEn: "Matter code", key: "maHoSoVuViec" },
-    { label: "Ngày yêu cầu sửa đổi", key: "ngayYeuCau" },
-    { label: "Ngày ghi nhận sửa đổi", key: "ngayGhiNhanSuaDoi" },
-    { label: "Lần sửa đổi", key: "lanSuaDoi" },
+    { label: "Ngày yêu cầu tách đơn", key: "ngayYeuCau" },
+    { label: "Ngày ghi nhận tách đơn", key: "ngayGhiNhanTachDon" },
+    { label: "Lần tách đơn", key: "lanTachDon" },
     { label: "Tên khách hàng", labelEn: "Client Name", key: "tenKhachHang" },
     { label: "Tên đối tác", labelEn: "Partner Name", key: "tenDoiTac" },
     { label: "Tên nhãn hiệu", labelEn: "Trademark", key: "tenNhanHieu" },
@@ -168,7 +169,17 @@ function Application_TD_NH_VNList() {
         brandName: overrides.brandName !== undefined ? overrides.brandName : brandName,
         maSPDVList: overrides.selectedProductAndService !== undefined ? overrides.selectedProductAndService : selectedProductAndService,
         trangThaiDon: overrides.selectedTrangThaiDon !== undefined ? overrides.selectedTrangThaiDon : selectedTrangThaiDon,
-        fields: overrides.selectedFields !== undefined ? overrides.selectedFields : selectedFields,
+        fields: (() => {
+          const rawFields = overrides.selectedFields !== undefined ? overrides.selectedFields : selectedFields;
+          const fieldsToSend = [...rawFields];
+          if (fieldsToSend.includes("ngayGhiNhanTachDon") && !fieldsToSend.includes("ngayGhiNhanSuaDoi")) {
+            fieldsToSend.push("ngayGhiNhanSuaDoi");
+          }
+          if (fieldsToSend.includes("lanTachDon") && !fieldsToSend.includes("lanSuaDoi")) {
+            fieldsToSend.push("lanSuaDoi");
+          }
+          return fieldsToSend;
+        })(),
         filterCondition: customFilterCondition || filterCondition,
         pageIndex: page,
         pageSize: size,
@@ -406,6 +417,8 @@ function Application_TD_NH_VNList() {
 
   const fieldOptions = [
     { value: "ngayNopDon", label: "Ngày nộp đơn" },
+    { value: "ngayYeuCau", label: "Ngày yêu cầu tách đơn" },
+    { value: "ngayGhiNhanTachDon", label: "Ngày ghi nhận tách đơn" },
     { value: "ngayHoanThanhHoSoTaiLieu", label: "Ngày Hoàn thành tài liệu" },
     { value: "ngayKQThamDinhHinhThuc", label: "Ngày chấp nhận đơn hợp lệ" },
     { value: "ngayCongBoDon", label: "Ngày công bố đơn" },
@@ -434,14 +447,20 @@ function Application_TD_NH_VNList() {
   };
 
   const handleDeleteApplication = async () => {
-    await callAPI({
-      method: "post",
-      endpoint: "/application/delete",
-      data: { maDonDangKy: applicationToDelete },
-    });
-    setShowDeleteModal(false);
-    setApplicationToDelete(null);
-    fetchApplications(searchTerm, pageIndex, pageSize);
+    try {
+      await callAPI({
+        method: "post",
+        endpoint: "/application/delete",
+        data: { maDonDangKy: applicationToDelete },
+      });
+      setShowDeleteModal(false);
+      setApplicationToDelete(null);
+      fetchApplications(searchTerm, pageIndex, pageSize);
+    } catch (error) {
+      console.error("Lỗi khi xóa đơn đăng ký:", error);
+      setShowDeleteModal(false);
+      setApplicationToDelete(null);
+    }
   };
 
   const handleClearFilters = () => {
@@ -501,6 +520,13 @@ function Application_TD_NH_VNList() {
               className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
             >
               Tìm kiếm
+            </button>
+            <button
+              type="button"
+              onClick={() => showInfo("Thông báo", "Vui lòng tách đơn trong danh sách Đơn đăng ký.")}
+              className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
+            >
+              Thêm mới
             </button>
             <button
               onClick={() => exportToExcel(applications, allFieldOptions, "DanhSachDonDK_TachDon")}
@@ -725,11 +751,19 @@ function Application_TD_NH_VNList() {
                     const commonClass = `p-2 text-table ${colIndex < columns.length - 1 ? "" : ""}`;
                     let content = app[col.key];
 
+                    if (col.key === "ngayGhiNhanTachDon" || col.key === "ngayGhiNhanSuaDoi") {
+                      content = app.ngayGhiNhanTachDon || app.ngayGhiNhanSuaDoi;
+                    }
+                    if (col.key === "lanTachDon" || col.key === "lanSuaDoi") {
+                      content = app.lanTachDon ?? app.lanSuaDoi;
+                    }
+
                     const isDateField = [
                       "ngayNopDon", "ngayHoanThanhHoSoTaiLieu", "ngayKQThamDinhHinhThuc",
                       "ngayCongBoDon", "ngayKQThamDinhND", "ngayTraLoiKQThamDinhND",
                       "ngayThongBaoCapBang", "ngayNopPhiCapBang", "ngayNhanBang",
-                      "ngayCapBang", "ngayHetHanBang", "ngayGuiBangChoKhachHang", "hanNopPhiCapBang"
+                      "ngayCapBang", "ngayHetHanBang", "ngayGuiBangChoKhachHang", "hanNopPhiCapBang",
+                      "ngayYeuCau", "ngayGhiNhanTachDon", "ngayGhiNhanSuaDoi"
                     ];
 
                     if (isDateField.includes(col.key)) {
@@ -977,7 +1011,7 @@ function Application_TD_NH_VNList() {
                     );
                   })}
                   <td className="p-2 text-table">
-                    {(role === "admin" || role === "staff") && app.donGoc !== 1 && (
+                    {(role === "admin" || role === "staff") && (
                       <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
                         <button
                           className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"

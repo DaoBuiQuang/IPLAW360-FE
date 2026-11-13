@@ -3,7 +3,8 @@ import { toast } from "react-toastify";
 import AppRoutes from "./routes/AppRoutes";
 // import { AuthProvider } from "./components/AuthContext/AuthContext.js";
 import { setAuth } from "./features/authSlice";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { isTimesheetOnlyRole } from "./features/accountRoles";
 import "./App.css";
 import { ToastContainer } from "react-toastify";
 import { jwtDecode } from 'jwt-decode';
@@ -13,6 +14,9 @@ import { getToken, onMessage } from "firebase/messaging";
 import { triggerNotificationRefresh } from "./features/notificationSlice";
 export default function App() {
   const dispatch = useDispatch();
+  const role = useSelector((state) => state.auth.role);
+  const timesheetOnly = isTimesheetOnlyRole(role);
+  const [authReady, setAuthReady] = useState(false);
   const [notification, setNotification] = useState(null);
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -26,8 +30,10 @@ export default function App() {
         console.error("Token không hợp lệ:", error);
       }
     }
+    setAuthReady(true);
   }, [dispatch]);
   useEffect(() => {
+    if (!authReady || timesheetOnly) return;
     if (!messaging) {
       console.warn("Firebase Messaging không khả dụng trong môi trường này.");
       return; // thoát luôn, không chạy tiếp nếu messaging không có
@@ -75,14 +81,16 @@ export default function App() {
       }
     });
 
-    onMessage(messaging, (payload) => {
+    return onMessage(messaging, (payload) => {
       console.log("📨 Nhận foreground:", payload);
       const { title, body } = payload.notification;
       const { id } = payload.data;
       dispatch(triggerNotificationRefresh());
       setNotification({ title, body, id });
     });
-  }, []);
+  }, [authReady, timesheetOnly, dispatch]);
+
+  if (!authReady) return null;
 
   return (
     <div className="App">

@@ -115,10 +115,15 @@ export default function TimesheetTeamwork() {
       callAPI({ method: "post", endpoint: "/team/list", data: { pageSize: 100 } })
         .then((res) => {
           const tList = res?.teams || [];
-          const mgrs = tList.map((t) => ({
-            value: t.managerCode,
-            label: `${t.managerCode} - ${t.managerName} (${(t.members || []).length} TV)`,
-          }));
+          const mgrs = tList.map((t) => {
+            const groupName = t.tenNhom || t.members?.[0]?.tenNhom;
+            return {
+              value: t.managerCode,
+              label: groupName
+                ? `${groupName} — ${t.managerName} (${(t.members || []).length} TV)`
+                : `${t.managerCode} - ${t.managerName} (${(t.members || []).length} TV)`,
+            };
+          });
           setManagersList(mgrs);
           if (!selectedManagerCode && mgrs.length > 0) {
             setSelectedManagerCode(mgrs[0].value);
@@ -295,11 +300,24 @@ export default function TimesheetTeamwork() {
               <h1 className="text-2xl font-bold text-gray-800">
                 TEAMWORK — Nhật ký công việc nhóm
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {teamInfo.manager
-                  ? `Nhóm phụ trách bởi: ${teamInfo.manager.hoTen} (${teamInfo.manager.maNhanSu}) — ${teamMembersList.length} thành viên`
-                  : "Bảng tổng hợp chi tiết time record của tất cả thành viên trong nhóm"}
-              </p>
+              <div className="text-xs text-gray-500 mt-0.5">
+                {teamInfo.manager ? (
+                  teamInfo.manager.tenNhom || teamMembersList[0]?.tenNhom ? (
+                    <>
+                      <span className="font-bold text-gray-800 text-sm block mb-0.5">
+                        {teamInfo.manager.tenNhom || teamMembersList[0]?.tenNhom}
+                      </span>
+                      <span>
+                        Trưởng nhóm: <strong className="text-gray-700">{teamInfo.manager.hoTen}</strong> ({teamInfo.manager.maNhanSu}) — {teamMembersList.length} thành viên
+                      </span>
+                    </>
+                  ) : (
+                    `Nhóm phụ trách bởi: ${teamInfo.manager.hoTen} (${teamInfo.manager.maNhanSu}) — ${teamMembersList.length} thành viên`
+                  )
+                ) : (
+                  "Bảng tổng hợp chi tiết time record của tất cả thành viên trong nhóm"
+                )}
+              </div>
             </div>
           </div>
         </div>

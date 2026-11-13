@@ -30,3 +30,13 @@ export const showWarning = (title = "Cảnh báo!", text = "") => {
     confirmButtonText: "OK",
   });
 };
+
+export const showInfo = (title = "Thông báo", text = "") => {
+  return Swal.fire({
+    icon: "info",
+    title,
+    text,
+    confirmButtonText: "Đã hiểu",
+    confirmButtonColor: "#009999",
+  });
+};

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import EmailTest from "../containers/Mail/EmailTest";
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate, matchPath, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { isTimesheetOnlyRole, TIMESHEET_HOME } from "../features/accountRoles";
 import Header from "../components/Header";
 import MenuLeft from "../components/MenuLeft";
 import Login from "../containers/Auth/Login";
 import StaffList from "../containers/Staff/StaffList";
+import EmployeeList from "../containers/Staff/EmployeeList";
 import StaffAdd from "../containers/Staff/StaffAdd";
 import CountryList from "../containers/Country/CountryList";
 import CountryAdd from "../containers/Country/CountryAdd";
@@ -79,6 +82,10 @@ import DebitNoteAdd from "../containers/DebitNote/debitNoteAdd.js";
 import HomePage from "../containers/Home/HomePage.js";
 import Application_SD_NH_VNAdd from "../containers/Application_SD_NH_VN/Application_SD_NH_VNAdd.js";
 import Application_TD_NH_VNAdd from "../containers/Application_TD_NH/Application_TD_NH_VNAdd.js";
+import Application_CQ_NH_VNAdd from "../containers/Application_CQ_NH/Application_CQ_NH_VNAdd.js";
+import GCN_GH_NH_VNAdd from "../containers/GCN_NH_VN/GCN_GH_NH_VNAdd.js";
+import GCN_SD_NH_VNAdd from "../containers/GCN_NH_VN/GCN_SD_NH_VNAdd.js";
+import GCN_CQ_NH_VNAdd from "../containers/GCN_NH_VN/GCN_CQ_NH_VNAdd.js";
 import DebitNoteList from "../containers/DebitNote/debitNoteList.js";
 import DebitNoteDetail from "../containers/DebitNote/debitNoteDetail.js";
 import Case_KHList from "../containers/Case/Case_KHList.js";
@@ -152,7 +159,17 @@ import DsCongViecAdd from "../containers/DsCongViec/DsCongViecAdd";
 import DsCongViecEdit from "../containers/DsCongViec/DsCongViecEdit";
 import DsCongViecDetail from "../containers/DsCongViec/DsCongViecDetail";
 import TeamManagement from "../containers/Team/TeamManagement";
+
+const timesheetAccountRoutes = [
+  TIMESHEET_HOME, "/timesheet/matter",
+  "/timesheetlist", "/timesheetcalendar", "/timesheetadd", "/timesheetedit/:id", "/timesheetdetail/:id",
+  "/dscongviec_list", "/dscongviec_add", "/dscongviec_edit/:id", "/dscongviec_detail/:id",
+  "/profile", "/changepassword",
+];
+
 const MainLayout = ({ notification, setNotification }) => {
+  const { pathname } = useLocation();
+  const timesheetOnly = isTimesheetOnlyRole(useSelector((state) => state.auth.role));
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   useEffect(() => {
     const handleResize = () => {
@@ -168,6 +185,10 @@ const MainLayout = ({ notification, setNotification }) => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  if (timesheetOnly && !timesheetAccountRoutes.some((route) => matchPath(route, pathname))) {
+    return <Navigate to={TIMESHEET_HOME} replace />;
+  }
 
   return (
     <div className="flex h-screen overflow-x-hidden">
@@ -193,7 +214,7 @@ const MainLayout = ({ notification, setNotification }) => {
         >
           <Outlet />
         </main>
-        {notification && (
+        {!timesheetOnly && notification && (
           <NotificationPopup
             title={notification.title}
             body={notification.body}
@@ -218,6 +239,7 @@ const AppRoutes = ({ notification, setNotification }) => {
           <Route path="/customeredit/:id" element={<CustomerEdit></CustomerEdit>} />
           <Route path="/customerdetail/:id" element={<CustomerDetail></CustomerDetail>} />
 
+          <Route path="/employeelist" element={<EmployeeList />} />
           <Route path="/stafflist" element={<StaffList />} />
           <Route path="/staffadd" element={<StaffAdd></StaffAdd>} />
           <Route path="/staffedit/:maNhanSu" element={<StaffEdit></StaffEdit>} />
@@ -320,6 +342,7 @@ const AppRoutes = ({ notification, setNotification }) => {
           <Route path="/application_sd_nh_vn_list" element={<Application_GH_VNList></Application_GH_VNList>} />
           <Route path="/application_sd_nh_vn_add/:maDonDangKy" element={<Application_SD_NH_VNAdd></Application_SD_NH_VNAdd>} />
           <Route path="/application_td_nh_vn_add/:maDonDangKy" element={<Application_TD_NH_VNAdd></Application_TD_NH_VNAdd>} />
+          <Route path="/application_cq_nh_vn_add/:maDonDangKy" element={<Application_CQ_NH_VNAdd></Application_CQ_NH_VNAdd>} />
 
           <Route path="/application_sd_nh_kh_add/:maDonDangKy" element={<Application_SD_NH_KHAdd></Application_SD_NH_KHAdd>} />
 
@@ -345,6 +368,9 @@ const AppRoutes = ({ notification, setNotification }) => {
           <Route path="/gcn_nhdetail/:id" element={<GCN_NH_VNDetail></GCN_NH_VNDetail>} />
           <Route path="/gcn_nhadd" element={<GCN_NH_VNAdd></GCN_NH_VNAdd>} />
           <Route path="/gcn_nh_vnedit/:id" element={<GCN_NH_VNEdit></GCN_NH_VNEdit>} />
+          <Route path="/gcn_gh_nh_vn_add/:id" element={<GCN_GH_NH_VNAdd></GCN_GH_NH_VNAdd>} />
+          <Route path="/gcn_sd_nh_vn_add/:id" element={<GCN_SD_NH_VNAdd></GCN_SD_NH_VNAdd>} />
+          <Route path="/gcn_cq_nh_vn_add/:id" element={<GCN_CQ_NH_VNAdd></GCN_CQ_NH_VNAdd>} />
           <Route path="/gcn_nh_camlist" element={<GCN_NH_CAMList></GCN_NH_CAMList>} />
           <Route path="/gcn_nh_sd_camlist" element={<GCN_NH_CAM_SDList></GCN_NH_CAM_SDList>} />
           <Route path="/gcn_nh_camadd" element={<GCN_NH_CAMAdd></GCN_NH_CAMAdd>} />
