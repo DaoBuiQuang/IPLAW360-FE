@@ -937,31 +937,6 @@ function ApplicationEdit() {
                                 />
                             )}
                         </div>
-                        <div className="col-span-2 pt-4 border-t border-gray-200">
-                            <div className="flex flex-wrap gap-4 items-center justify-center">
-                                <button
-                                    type="button"
-                                    onClick={() => window.open(`/application_sd_nh_vn_add/${maDonDangKy}`, "_blank")}
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
-                                >
-                                    <span>Sửa đổi đơn đăng ký</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => window.open(`/application_td_nh_vn_add/${maDonDangKy}`, "_blank")}
-                                    className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
-                                >
-                                    <span>Tách đơn đăng ký</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => window.open(`/application_cq_nh_vn_add/${maDonDangKy}`, "_blank")}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
-                                >
-                                    <span>Chuyển quyền sở hữu</span>
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </Spin>
                 <div className="flex justify-center gap-4 mt-4">

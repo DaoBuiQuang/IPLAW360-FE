@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import callAPI from "../../utils/api";
 import { useSelector } from 'react-redux';
 import { useTranslation } from "react-i18next";
-import { Modal, Pagination, Spin } from "antd";
+import { Modal, Pagination, Spin, DatePicker, Radio, Input } from "antd";
+import dayjs from "dayjs";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
-import { showInfo } from "../../components/commom/Notification";
+import { showInfo, showSuccess, showError } from "../../components/commom/Notification";
 
 const FILTER_STORAGE_KEY_SD_GCN = "applicationSdGcnNhVnListFilters";
 const STATE_STORAGE_KEY_SD_GCN = "applicationSdGcnNhVnListState";
@@ -29,6 +30,14 @@ function Application_SD_GCN_NH_VNList() {
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [partnerToDelete, setPartnerToDelete] = useState(null);
+    const [approvalModalOpen, setApprovalModalOpen] = useState(false);
+    const [approvalRecord, setApprovalRecord] = useState(null);
+    const [approvalStatus, setApprovalStatus] = useState(0);
+    const [approvalDate, setApprovalDate] = useState(dayjs().format("YYYY-MM-DD"));
+    const [rejectDate, setRejectDate] = useState(dayjs().format("YYYY-MM-DD"));
+    const [rejectReason, setRejectReason] = useState("");
+    const [approvalNote, setApprovalNote] = useState("");
+    const [submittingApproval, setSubmittingApproval] = useState(false);
     const [pageIndex, setPageIndex] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
@@ -228,14 +237,65 @@ function Application_SD_GCN_NH_VNList() {
         try {
             await callAPI({
                 method: "post",
-                endpoint: "/partner/delete",
+                endpoint: "/application_sd_gcn_nh_vn/delete",
                 data: { id: partnerToDelete },
             });
             setShowDeleteModal(false);
             setPartnerToDelete(null);
             fetchGCNs(searchTerm, pageIndex, pageSize);
         } catch (error) {
-            console.error("Lỗi khi xóa đối tác:", error);
+            console.error("Lỗi khi xóa đơn sửa đổi GCN:", error);
+        }
+    };
+
+    const openApprovalModal = (record) => {
+        setApprovalRecord(record);
+        setApprovalStatus(Number(record.trangThaiDuyet ?? 0));
+        setApprovalDate(
+            record.ngayChapThuan || record.ngayGhiNhanSuaDoi
+                ? dayjs(record.ngayChapThuan || record.ngayGhiNhanSuaDoi).format("YYYY-MM-DD")
+                : dayjs().format("YYYY-MM-DD")
+        );
+        setRejectDate(
+            record.ngayTuChoi
+                ? dayjs(record.ngayTuChoi).format("YYYY-MM-DD")
+                : dayjs().format("YYYY-MM-DD")
+        );
+        setRejectReason(record.lyDoTuChoi || "");
+        setApprovalNote(record.moTa || "");
+        setApprovalModalOpen(true);
+    };
+
+    const handleConfirmApproval = async () => {
+        if (!approvalRecord?.id) {
+            showError("Lỗi", "Không tìm thấy ID tờ khai sửa đổi văn bằng.");
+            return;
+        }
+        setSubmittingApproval(true);
+        try {
+            await callAPI({
+                method: "post",
+                endpoint: "/application_sd_gcn_nh_vn/update",
+                data: {
+                    id: approvalRecord.id,
+                    trangThaiDuyet: Number(approvalStatus),
+                    duocGhiNhanSuaDoi: Number(approvalStatus) === 1,
+                    ngayChapThuan: Number(approvalStatus) === 1 ? approvalDate : null,
+                    ngayGhiNhanSuaDoi: Number(approvalStatus) === 1 ? approvalDate : null,
+                    ngayTuChoi: Number(approvalStatus) === 2 ? rejectDate : null,
+                    lyDoTuChoi: Number(approvalStatus) === 2 ? rejectReason : null,
+                    moTa: approvalNote,
+                },
+            });
+            await showSuccess("Thành công", "Đã cập nhật trạng thái xét duyệt tờ khai sửa đổi văn bằng!");
+            setApprovalModalOpen(false);
+            setApprovalRecord(null);
+            fetchGCNs(searchTerm, pageIndex, pageSize);
+        } catch (err) {
+            console.error("Lỗi cập nhật xét duyệt GCN:", err);
+            showError("Thất bại", "Không thể cập nhật trạng thái xét duyệt.", err);
+        } finally {
+            setSubmittingApproval(false);
         }
     };
 
@@ -348,7 +408,8 @@ function Application_SD_GCN_NH_VNList() {
                         <thead>
                             <tr className=" text-[#667085] text-center font-normal">
                                 <th className="p-2 text-table">STT</th>
-                                <th className="p-2 text-table">Số bằng</th>
+                                <th className="p-2 text-table">Số đơn sửa đổi</th>
+                                <th className="p-2 text-table">Trạng thái xét duyệt</th>
                                 <th className="p-2 text-table">Ngày yêu cầu sửa đổi</th>
                                 <th className="p-2 text-table">Ngày ghi nhận sửa đổi</th>
                                 <th className="p-2 text-table">Mô tả</th>
@@ -367,11 +428,44 @@ function Application_SD_GCN_NH_VNList() {
                         </thead>
                         <tbody>
                             {donGiaHans.length > 0 ? (
-                                donGiaHans.map((donGiaHan, index) => (
+                                donGiaHans.map((donGiaHan, index) => {
+                                    const st = Number(donGiaHan.trangThaiDuyet ?? 0);
+                                    const gcnRef = donGiaHan.gcn || donGiaHan.gcnGoc || donGiaHan.gcnMoi;
+                                    const targetIdGcn = donGiaHan.idGCN_NH || donGiaHan.gcnMoi?.id || donGiaHan.idGCN_NH_Goc || donGiaHan.gcnGoc?.id;
+                                    return (
                                     <tr key={donGiaHan.id || index} className="group hover:bg-gray-100 text-center border-b relative">
                                         <td className="p-2 text-table">{index + 1}</td>
-                                        <td className="p-2 text-table font-medium text-blue-600">
-                                            {donGiaHan.gcn?.soBang || "—"}
+                                        <td
+                                            className={`p-2 text-table font-semibold ${
+                                                targetIdGcn ? "text-blue-500 cursor-pointer hover:underline" : "text-gray-800"
+                                            }`}
+                                            onClick={() => targetIdGcn && navigate(`/gcn_nhdetail/${targetIdGcn}`)}
+                                        >
+                                            {donGiaHan.soDon || gcnRef?.soBang || "—"}
+                                        </td>
+                                        <td className="p-2 text-table">
+                                            <div className="flex flex-col items-center gap-1">
+                                                {st === 0 && (
+                                                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                                                        ⏳ Chưa chấp thuận
+                                                    </span>
+                                                )}
+                                                {st === 1 && (
+                                                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                                        ✅ Được chấp thuận
+                                                    </span>
+                                                )}
+                                                {st === 2 && (
+                                                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700 border border-red-300">
+                                                        ❌ Từ chối
+                                                    </span>
+                                                )}
+                                                {st === 2 && donGiaHan.lyDoTuChoi && (
+                                                    <span className="text-[11px] text-red-600 italic">
+                                                        Lý do: {donGiaHan.lyDoTuChoi}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="p-2 text-table">
                                             {donGiaHan.ngayYeuCau ? new Date(donGiaHan.ngayYeuCau).toLocaleDateString("vi-VN") : ""}
@@ -381,35 +475,35 @@ function Application_SD_GCN_NH_VNList() {
                                         </td>
                                         <td className="p-2 text-table">{donGiaHan.moTa || ""}</td>
                                         <td className="p-2 text-table">{donGiaHan.lanSuaDoi || 1}</td>
-                                        <td className="p-2 text-table">{donGiaHan.gcn?.soDon || ""}</td>
-                                        <td className="p-2 text-table">{donGiaHan.gcn?.maHoSo || ""}</td>
-                                        <td className="p-2 text-table">{donGiaHan.gcn?.KhachHangCuoi?.tenKhachHang || ""}</td>
-                                        <td className="p-2 text-table">{donGiaHan.gcn?.DoiTac?.tenDoiTac || ""}</td>
-                                        <td className="p-2 text-table">{donGiaHan.gcn?.NhanHieu?.tenNhanHieu || ""}</td>
-                                        <td className="p-2 text-table">{donGiaHan.gcn?.dsNhomSPDV || ""}</td>
+                                        <td className="p-2 text-table">{gcnRef?.soDon || ""}</td>
+                                        <td className="p-2 text-table">{gcnRef?.maHoSo || ""}</td>
+                                        <td className="p-2 text-table">{gcnRef?.KhachHangCuoi?.tenKhachHang || ""}</td>
+                                        <td className="p-2 text-table">{gcnRef?.DoiTac?.tenDoiTac || ""}</td>
+                                        <td className="p-2 text-table">{gcnRef?.NhanHieu?.tenNhanHieu || ""}</td>
+                                        <td className="p-2 text-table">{gcnRef?.dsNhomSPDV || ""}</td>
                                         <td className="p-2 text-table">
-                                            {donGiaHan.gcn?.ngayNopDon ? new Date(donGiaHan.gcn.ngayNopDon).toLocaleDateString("vi-VN") : ""}
+                                            {gcnRef?.ngayNopDon ? new Date(gcnRef.ngayNopDon).toLocaleDateString("vi-VN") : ""}
                                         </td>
                                         <td className="p-2 text-table">
-                                            {donGiaHan.gcn?.ngayCapBang ? new Date(donGiaHan.gcn.ngayCapBang).toLocaleDateString("vi-VN") : ""}
+                                            {gcnRef?.ngayCapBang ? new Date(gcnRef.ngayCapBang).toLocaleDateString("vi-VN") : ""}
                                         </td>
                                         <td className="p-2 text-table">
-                                            {donGiaHan.gcn?.hanGiaHan ? new Date(donGiaHan.gcn.hanGiaHan).toLocaleDateString("vi-VN") : ""}
+                                            {gcnRef?.hanGiaHan ? new Date(gcnRef.hanGiaHan).toLocaleDateString("vi-VN") : ""}
                                         </td>
                                         <td className="p-2 relative">
                                             {(role === "admin" || role === "staff") && (
                                                 <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
                                                     <button
-                                                        className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                                                        onClick={() => navigate(`/application_gh_nh_vn_edit/${donGiaHan.id}`)}
-                                                        title="Chỉnh sửa"
+                                                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
+                                                        onClick={() => openApprovalModal(donGiaHan)}
+                                                        title="Xét duyệt"
                                                     >
-                                                        📝
+                                                        ⚖️ Duyệt
                                                     </button>
                                                     <button
                                                         className="px-3 py-1 bg-red-200 text-red-600 rounded-md hover:bg-red-300"
                                                         onClick={() => {
-                                                            setPartnerToDelete(donGiaHan.gcn?.id || donGiaHan.id);
+                                                            setPartnerToDelete(donGiaHan.id);
                                                             setShowDeleteModal(true);
                                                         }}
                                                         title="Xóa"
@@ -420,10 +514,11 @@ function Application_SD_GCN_NH_VNList() {
                                             )}
                                         </td>
                                     </tr>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <tr>
-                                    <td colSpan={16} className="p-4 text-center text-gray-500">
+                                    <td colSpan={19} className="p-4 text-center text-gray-500">
                                         Không tìm thấy bản ghi nào
                                     </td>
                                 </tr>
@@ -457,6 +552,99 @@ function Application_SD_GCN_NH_VNList() {
                     locale={{ items_per_page: t("bản ghi") }}
                 />
             </div>
+
+            <Modal
+                title="⚖️ Cập nhật kết quả xét duyệt Tờ khai sửa đổi GCN"
+                open={approvalModalOpen}
+                onOk={handleConfirmApproval}
+                onCancel={() => setApprovalModalOpen(false)}
+                confirmLoading={submittingApproval}
+                okText="Lưu kết quả"
+                cancelText="Hủy"
+                width={650}
+            >
+                {approvalRecord && (
+                    <div className="space-y-4">
+                        <div className="bg-gray-50 p-3 rounded border text-sm space-y-1">
+                            <div>
+                                <span className="text-gray-500">Số tờ khai sửa đổi: </span>
+                                <b className="text-gray-800">{approvalRecord.soDon || "—"}</b>
+                            </div>
+                            <div>
+                                <span className="text-gray-500">Số bằng gốc: </span>
+                                <b className="text-indigo-600">{approvalRecord.soBangGoc || approvalRecord.gcn?.soBang || "—"}</b>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block font-medium text-gray-700 mb-2">
+                                Trạng thái xét duyệt của Cục SHTT:
+                            </label>
+                            <Radio.Group
+                                value={Number(approvalStatus)}
+                                onChange={(e) => setApprovalStatus(Number(e.target.value))}
+                                className="flex flex-col gap-2"
+                            >
+                                <Radio value={0}>⏳ Chưa chấp thuận</Radio>
+                                <Radio value={1}>✅ Được chấp thuận</Radio>
+                                <Radio value={2}>❌ Từ chối</Radio>
+                            </Radio.Group>
+                        </div>
+
+                        {Number(approvalStatus) === 1 && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Ngày ghi nhận sửa đổi
+                                </label>
+                                <DatePicker
+                                    value={approvalDate ? dayjs(approvalDate) : null}
+                                    onChange={(d) => setApprovalDate(d ? d.format("YYYY-MM-DD") : null)}
+                                    format="DD/MM/YYYY"
+                                    className="w-full"
+                                />
+                            </div>
+                        )}
+
+                        {Number(approvalStatus) === 2 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Ngày từ chối
+                                    </label>
+                                    <DatePicker
+                                        value={rejectDate ? dayjs(rejectDate) : null}
+                                        onChange={(d) => setRejectDate(d ? d.format("YYYY-MM-DD") : null)}
+                                        format="DD/MM/YYYY"
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Lý do từ chối
+                                    </label>
+                                    <Input
+                                        value={rejectReason}
+                                        onChange={(e) => setRejectReason(e.target.value)}
+                                        placeholder="Nhập lý do Cục từ chối"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Ghi chú / Mô tả
+                            </label>
+                            <Input.TextArea
+                                rows={3}
+                                value={approvalNote}
+                                onChange={(e) => setApprovalNote(e.target.value)}
+                                placeholder="Nhập ghi chú..."
+                            />
+                        </div>
+                    </div>
+                )}
+            </Modal>
 
             <Modal
                 title="Xác nhận xóa"

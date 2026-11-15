@@ -5,6 +5,8 @@ import { DatePicker } from "antd";
 const FormTachDon = ({
   soDonTD,
   setSoDonTD,
+  ngayNopDonTD,
+  setNgayNopDonTD,
   dsNhomSPDV,
   setDsNhomSPDV,
   ndTachDon,
@@ -38,14 +40,34 @@ const FormTachDon = ({
           />
         </div>
 
-        {/* Ngày nộp đơn tách — GIỮ DatePicker */}
+        {/* Ngày nộp đơn tách (khác ngày nộp đơn gốc) */}
+        {typeof setNgayNopDonTD === "function" && (
+          <div className="flex-1">
+            <label className="block text-gray-700 text-left">Ngày nộp đơn tách (mới) *</label>
+            <DatePicker
+              value={ngayNopDonTD ? dayjs(ngayNopDonTD) : null}
+              onChange={(date) =>
+                setNgayNopDonTD(date ? date.format("YYYY-MM-DD") : null)
+              }
+              format="DD/MM/YYYY"
+              className="mt-1 w-full"
+              placeholder="Chọn ngày nộp đơn mới cho đơn tách"
+            />
+          </div>
+        )}
+
+        {/* Ngày yêu cầu tách đơn — GIỮ DatePicker */}
         <div className="flex-1">
           <label className="block text-gray-700 text-left">Ngày yêu cầu tách đơn *</label>
           <DatePicker
             value={ngayYeuCauTD ? dayjs(ngayYeuCauTD) : null}
-            onChange={(date) =>
-              setNgayYeuCauTD(date ? date.format("YYYY-MM-DD") : null)
-            }
+            onChange={(date) => {
+              const formatted = date ? date.format("YYYY-MM-DD") : null;
+              setNgayYeuCauTD(formatted);
+              if (typeof setNgayNopDonTD === "function" && !ngayNopDonTD && formatted) {
+                setNgayNopDonTD(formatted);
+              }
+            }}
             format="DD/MM/YYYY"
             className="mt-1 w-full"
           />

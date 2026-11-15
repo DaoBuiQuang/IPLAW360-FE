@@ -93,7 +93,10 @@ function Application_TD_NH_VNList() {
   ];
 
   const allFieldOptions = [
-    { label: "Số Đơn", labelEn: "App No", key: "soDon" },
+    { label: "Số Đơn tách", labelEn: "Divisional App No", key: "soDon" },
+    { label: "Số Đơn gốc", labelEn: "Parent App No", key: "soDonGoc" },
+    { label: "Ngày nộp đơn gốc", labelEn: "Parent Filing Date", key: "ngayNopDonGoc" },
+    { label: "Ngày nộp đơn tách", labelEn: "Filing Date", key: "ngayNopDon" },
     { label: "Mã HSVV", labelEn: "Matter code", key: "maHoSoVuViec" },
     { label: "Ngày yêu cầu tách đơn", key: "ngayYeuCau" },
     { label: "Ngày ghi nhận tách đơn", key: "ngayGhiNhanTachDon" },
@@ -108,7 +111,6 @@ function Application_TD_NH_VNList() {
     { label: "Hạn trả lời Cục", labelEn: "Official Deadline", key: "hanTraLoi" },
     { label: "Hạn Cục xử lý", labelEn: "Soft Deadline", key: "hanXuLy" },
     { label: "Trạng thái hoàn thành TL", labelEn: "Outstanding Documents", key: "trangThaiHoanThienHoSoTaiLieu" },
-    { label: "Ngày nộp đơn", labelEn: "Filing Date", key: "ngayNopDon" },
     { label: "Ngày hoàn thành TL", labelEn: "Doc Completion", key: "ngayHoanThanhHoSoTaiLieu" },
     { label: "Ngày có KQ thẩm định hình thức", labelEn: "Formality Exam Result", key: "ngayKQThamDinhHinhThuc" },
     { label: "Ngày công bố đơn", labelEn: "Publication", key: "ngayCongBoDon" },
@@ -141,7 +143,6 @@ function Application_TD_NH_VNList() {
     "dsSPDV",
     "ngayThongBaoCapBang",
     "hanNopPhiCapBang",
-    "ngayNopDon",
   ];
 
   const [showFieldModal, setShowFieldModal] = useState(false);
@@ -498,7 +499,7 @@ function Application_TD_NH_VNList() {
     <div className="p-1 bg-gray-100 min-h-screen">
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-          📌 Danh sách tờ khai tách đơn đăng ký nhãn hiệu Việt Nam
+          📌 Danh sách đơn tách nhãn hiệu Việt Nam
         </h2>
 
         {/* Hàng Search chính */}
@@ -757,9 +758,35 @@ function Application_TD_NH_VNList() {
                     if (col.key === "lanTachDon" || col.key === "lanSuaDoi") {
                       content = app.lanTachDon ?? app.lanSuaDoi;
                     }
+                    if (col.key === "soDonGoc") {
+                      const maDonGoc = app.maDonDangKyGoc || app.donCha?.maDonDangKy;
+                      const soDonGocVal = app.soDonGoc || app.donCha?.soDon || maDonGoc;
+                      return (
+                        <td
+                          key={col.key}
+                          className={`p-2 text-table ${maDonGoc ? "text-indigo-600 cursor-pointer hover:underline font-medium" : "text-gray-500"}`}
+                          onClick={(e) => {
+                            if (maDonGoc) {
+                              e.stopPropagation();
+                              navigate(`/applicationdetail/${maDonGoc}`);
+                            }
+                          }}
+                        >
+                          {soDonGocVal || "—"}
+                        </td>
+                      );
+                    }
+                    if (col.key === "ngayNopDonGoc") {
+                      const rawDate = app.ngayNopDonGoc || app.donCha?.ngayNopDon;
+                      return (
+                        <td key={col.key} className={commonClass}>
+                          {rawDate ? new Date(rawDate).toLocaleDateString("vi-VN") : "—"}
+                        </td>
+                      );
+                    }
 
                     const isDateField = [
-                      "ngayNopDon", "ngayHoanThanhHoSoTaiLieu", "ngayKQThamDinhHinhThuc",
+                      "ngayNopDon", "ngayNopDonGoc", "ngayHoanThanhHoSoTaiLieu", "ngayKQThamDinhHinhThuc",
                       "ngayCongBoDon", "ngayKQThamDinhND", "ngayTraLoiKQThamDinhND",
                       "ngayThongBaoCapBang", "ngayNopPhiCapBang", "ngayNhanBang",
                       "ngayCapBang", "ngayHetHanBang", "ngayGuiBangChoKhachHang", "hanNopPhiCapBang",

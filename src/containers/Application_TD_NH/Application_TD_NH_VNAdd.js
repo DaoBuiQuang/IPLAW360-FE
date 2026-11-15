@@ -107,6 +107,7 @@ function Application_TD_NH_VNAdd() {
     const [productAndService, setProductAndService] = useState([]);
 
     const [soDonTD, setSoDonTD] = useState("");
+    const [ngayNopDonTD, setNgayNopDonTD] = useState(dayjs().format("YYYY-MM-DD"));
     const [ngayYeuCauTD, setNgayYeuCauTD] = useState(dayjs().format("YYYY-MM-DD"));
     const [lanTachDon, setLanTachDon] = useState(1);
     const [ngayGhiNhanTD, setNgayGhiNhanTD] = useState(null);
@@ -425,8 +426,8 @@ function Application_TD_NH_VNAdd() {
             showError("Lỗi!", "Vui lòng nhập Số đơn tách.");
             return;
         }
-        if (!ngayYeuCauTD) {
-            showError("Lỗi!", "Vui lòng chọn Ngày yêu cầu tách đơn.");
+        if (!ngayNopDonTD && !ngayYeuCauTD) {
+            showError("Lỗi!", "Vui lòng chọn Ngày nộp đơn tách / Ngày yêu cầu tách đơn.");
             return;
         }
         if (lanTachDon === "" || lanTachDon === null || lanTachDon === undefined) {
@@ -445,11 +446,13 @@ function Application_TD_NH_VNAdd() {
                 data: {
                     maHoSo: maHoSoVuViec,
                     maDonDangKyCu: maDonDangKy,
+                    maDonDangKyGoc: maDonDangKy,
                     listDonTach: [
                         {
                             soDon: soDonTD.trim(),
                             nhomSPDV: dsNhomSPDV.trim(),
-                            ngayYeuCau: ngayYeuCauTD,
+                            ngayNopDon: ngayNopDonTD || ngayYeuCauTD,
+                            ngayYeuCau: ngayYeuCauTD || ngayNopDonTD,
                             ngayGhiNhanTachDon: ngayGhiNhanTD || null,
                             ngayGhiNhanSuaDoi: ngayGhiNhanTD || null,
                             lanTachDon: Number(lanTachDon) || 1,
@@ -817,6 +820,8 @@ function Application_TD_NH_VNAdd() {
                         <FormTachDon
                             soDonTD={soDonTD}
                             setSoDonTD={setSoDonTD}
+                            ngayNopDonTD={ngayNopDonTD}
+                            setNgayNopDonTD={setNgayNopDonTD}
                             dsNhomSPDV={dsNhomSPDV}
                             setDsNhomSPDV={setDsNhomSPDV}
                             ndTachDon={ndTachDon}

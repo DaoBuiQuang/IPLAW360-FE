@@ -466,7 +466,7 @@ function GCN_NH_VNAdd() {
                             type="text"
                             value={mauSac}
                             onChange={(e) => setMauSac(e.target.value)}
-                            placeholder="Nhập quyết định số"
+                            placeholder="Nhập màu sắc nhãn hiệu"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                         />
                     </div>
