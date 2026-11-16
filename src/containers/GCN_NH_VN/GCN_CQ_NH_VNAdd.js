@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { DatePicker, Input, Select, Spin, message } from "antd";
+import { DatePicker, Input, Select, Spin, message, Radio } from "antd";
 import "dayjs/locale/vi";
 import callAPI from "../../utils/api.js";
 import { showSuccess, showError } from "../../components/commom/Notification.js";
@@ -20,6 +20,9 @@ function GCN_CQ_NH_VNAdd() {
     const [soDonChuyenQuyen, setSoDonChuyenQuyen] = useState("");
     const [ngayYeuCau, setNgayYeuCau] = useState(null);
     const [ngayGhiNhan, setNgayGhiNhan] = useState(null);
+    const [trangThaiDuyet, setTrangThaiDuyet] = useState(0);
+    const [ngayTuChoi, setNgayTuChoi] = useState(null);
+    const [lyDoTuChoi, setLyDoTuChoi] = useState("");
     const [ghiChu, setGhiChu] = useState("");
 
     // Danh sách khách hàng
@@ -87,6 +90,10 @@ function GCN_CQ_NH_VNAdd() {
                 soDonChuyenQuyen: soDonChuyenQuyen.trim(),
                 ngayYeuCauChuyenQuyen: ngayYeuCau ? ngayYeuCau.format("YYYY-MM-DD") : null,
                 ngayGhiNhanChuyenQuyen: ngayGhiNhan ? ngayGhiNhan.format("YYYY-MM-DD") : null,
+                ngayChapThuan: ngayGhiNhan ? ngayGhiNhan.format("YYYY-MM-DD") : null,
+                trangThaiDuyet: Number(trangThaiDuyet),
+                ngayTuChoi: ngayTuChoi ? ngayTuChoi.format("YYYY-MM-DD") : null,
+                lyDoTuChoi: lyDoTuChoi.trim() || null,
                 ghiChu: ghiChu.trim(),
             };
 
@@ -210,18 +217,64 @@ function GCN_CQ_NH_VNAdd() {
                                     placeholder="Chọn ngày yêu cầu"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-gray-700 font-medium text-sm mb-1">
-                                    Ngày ghi nhận chuyển quyền
-                                </label>
-                                <DatePicker
-                                    className="w-full"
-                                    format="DD/MM/YYYY"
-                                    value={ngayGhiNhan}
-                                    onChange={(d) => setNgayGhiNhan(d)}
-                                    placeholder="Chọn ngày ghi nhận"
-                                />
-                            </div>
+                        </div>
+
+                        {/* Trạng thái xét duyệt của Cục SHTT */}
+                        <div className="p-4 rounded-lg border border-blue-200 bg-blue-50/40 space-y-3">
+                            <label className="block font-semibold text-gray-800 text-left text-sm">
+                                Trạng thái xét duyệt tờ khai chuyển nhượng văn bằng của Cục SHTT
+                            </label>
+                            <Radio.Group
+                                value={Number(trangThaiDuyet)}
+                                onChange={(e) => setTrangThaiDuyet(Number(e.target.value))}
+                                className="flex flex-wrap gap-4"
+                            >
+                                <Radio value={0}>⏳ Chưa chấp thuận</Radio>
+                                <Radio value={1}>✅ Được chấp thuận</Radio>
+                                <Radio value={2}>❌ Từ chối</Radio>
+                            </Radio.Group>
+
+                            {Number(trangThaiDuyet) === 1 && (
+                                <div className="pt-2 max-w-md">
+                                    <label className="block text-gray-700 font-medium text-sm mb-1">
+                                        Ngày ghi nhận chuyển nhượng
+                                    </label>
+                                    <DatePicker
+                                        className="w-full"
+                                        format="DD/MM/YYYY"
+                                        value={ngayGhiNhan}
+                                        onChange={(d) => setNgayGhiNhan(d)}
+                                        placeholder="Chọn ngày ghi nhận"
+                                    />
+                                </div>
+                            )}
+
+                            {Number(trangThaiDuyet) === 2 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                    <div>
+                                        <label className="block text-gray-700 font-medium text-sm mb-1">
+                                            Ngày Cục từ chối
+                                        </label>
+                                        <DatePicker
+                                            className="w-full"
+                                            format="DD/MM/YYYY"
+                                            value={ngayTuChoi}
+                                            onChange={(d) => setNgayTuChoi(d)}
+                                            placeholder="Chọn ngày từ chối"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 font-medium text-sm mb-1">
+                                            Lý do từ chối
+                                        </label>
+                                        <Input
+                                            value={lyDoTuChoi}
+                                            onChange={(e) => setLyDoTuChoi(e.target.value)}
+                                            placeholder="Nhập lý do từ chối"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div>

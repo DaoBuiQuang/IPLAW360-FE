@@ -8,6 +8,8 @@ import dayjs from 'dayjs';
 import { useSelector } from 'react-redux';
 import { DatePicker, Modal, Spin, Pagination } from 'antd';
 import { useTranslation } from "react-i18next";
+import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+import { fetchSharedFilterOptions } from "../../utils/filterOptionsHelper";
 function Application_TD_NH_KHList() {
   const role = useSelector((state) => state.auth.role);
   const { t } = useTranslation();
@@ -38,6 +40,31 @@ function Application_TD_NH_KHList() {
   const [customerName, setCustomerName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [brandName, setBrandName] = useState("");
+  const [customerOptions, setCustomerOptions] = useState([]);
+  const [partnerOptions, setPartnerOptions] = useState([]);
+  const [brandOptions, setBrandOptions] = useState([]);
+
+  const applicationSearchOptions = React.useMemo(() => {
+    const list = [];
+    const seen = new Set();
+    (applications || []).forEach((app) => {
+      if (app.soDon && !seen.has(`soDon_${app.soDon}`)) {
+        seen.add(`soDon_${app.soDon}`);
+        list.push({
+          value: app.soDon,
+          label: `Số đơn: ${app.soDon}${app.tenNhanHieu ? ` - ${app.tenNhanHieu}` : ""}`,
+        });
+      }
+      if (app.maHoSoVuViec && !seen.has(`maHSVV_${app.maHoSoVuViec}`)) {
+        seen.add(`maHSVV_${app.maHoSoVuViec}`);
+        list.push({
+          value: app.maHoSoVuViec,
+          label: `Mã HSVV: ${app.maHoSoVuViec}${app.tenNhanHieu ? ` - ${app.tenNhanHieu}` : ""}`,
+        });
+      }
+    });
+    return list;
+  }, [applications]);
   const filterCondition = {
     selectedField: selectedField?.value || "",
     fromDate,
@@ -106,7 +133,7 @@ function Application_TD_NH_KHList() {
       .filter(field => !hiddenFieldKeys.includes(field.key))
       .map(field => field.key)
   );
-  const fetchApplications = async (searchValue, page = 1, size = 10) => {
+  const fetchApplications = async (searchValue, page = 1, size = 10, overrides = {}) => {
     setLoading(true);
     try {
       localStorage.setItem("applicationListPage", page);
@@ -115,11 +142,11 @@ function Application_TD_NH_KHList() {
         endpoint: "/application_td_nh_kh/list",
         data: {
           searchText: searchValue,
-          customerName,
-          partnerName,
-          brandName,
-          maSPDVList: selectedProductAndService,
-          trangThaiDon: selectedTrangThaiDon,
+          customerName: overrides.customerName !== undefined ? overrides.customerName : customerName,
+          partnerName: overrides.partnerName !== undefined ? overrides.partnerName : partnerName,
+          brandName: overrides.brandName !== undefined ? overrides.brandName : brandName,
+          maSPDVList: overrides.maSPDVList !== undefined ? overrides.maSPDVList : selectedProductAndService,
+          trangThaiDon: overrides.trangThaiDon !== undefined ? overrides.trangThaiDon : selectedTrangThaiDon,
           fields: (() => {
             const fieldsToSend = [...selectedFields];
             if (fieldsToSend.includes("ngayGhiNhanTachDon") && !fieldsToSend.includes("ngayGhiNhanSuaDoi")) {
@@ -130,7 +157,7 @@ function Application_TD_NH_KHList() {
             }
             return fieldsToSend;
           })(),
-          filterCondition,
+          filterCondition: overrides.filterCondition || filterCondition,
           pageIndex: page,
           pageSize: size,
         },
@@ -165,12 +192,16 @@ function Application_TD_NH_KHList() {
     }));
   };
   useEffect(() => {
-    const savedPage = parseInt(localStorage.getItem("applicationListPage") || "1", 10);
-    fetchApplications();
+    fetchApplications("", 1, pageSize);
     if (!localStorage.getItem("applicationListPage")) {
       localStorage.setItem("applicationListPage", "1");
     }
     fetchItems();
+    fetchSharedFilterOptions().then((opts) => {
+      setCustomerOptions(opts.customerOptions);
+      setPartnerOptions(opts.partnerOptions);
+      setBrandOptions(opts.brandOptions);
+    });
   }, []);
   const columns = allFieldOptions
     .filter(field => selectedFields.includes(field.key))
@@ -221,14 +252,37 @@ function Application_TD_NH_KHList() {
     }
   };
   const handleClearFilters = () => {
+    setSearchTerm("");
+    setCustomerName("");
+    setPartnerName("");
+    setBrandName("");
     setSelectedBrand(null);
     setSelectedProductAndService([]);
     setSelectedTrangThaiDon(null);
     setSelectedField(null);
-    setFromDate(null);
-    setToDate(null);
+    setFromDate("");
+    setToDate("");
     setSelectedHanXuLy(null);
     setSortByHanXuLy(false);
+    setSelectedHanTraLoi(null);
+    setSortByHanTraLoi(true);
+    setPageIndex(1);
+    fetchApplications("", 1, pageSize, {
+      customerName: "",
+      partnerName: "",
+      brandName: "",
+      maSPDVList: [],
+      trangThaiDon: null,
+      filterCondition: {
+        selectedField: "",
+        fromDate: "",
+        toDate: "",
+        hanXuLyFilter: "",
+        hanTraLoiFilter: "",
+        sortByHanXuLy: false,
+        sortByHanTraLoi: true,
+      },
+    });
   };
 
   return (
@@ -236,27 +290,19 @@ function Application_TD_NH_KHList() {
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">📌 Danh sách tờ khai tách đơn đăng ký nhãn hiệu Campuchia</h2>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                fetchApplications(searchTerm, 1, pageSize);
+          <div className="w-full md:w-1/3">
+            <SearchCreatableSelect
+              value={searchTerm}
+              onChange={(val) => setSearchTerm(val)}
+              onSearch={(keyword) =>
+                fetchApplications(keyword !== undefined ? keyword : searchTerm, 1, pageSize)
               }
-            }}
-            placeholder="🔍 Nhập mã đơn hoặc mã hồ sơ"
-            className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
-          />
+              options={applicationSearchOptions}
+              placeholder="🔍 Nhập mã đơn hoặc mã hồ sơ"
+            />
+          </div>
 
-          {/* <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="🔍 Nhập mã đơn hoặc mã hồ sơ"
-            className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
-          /> */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <button
               onClick={() => fetchApplications(searchTerm, 1, pageSize)}
               className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
@@ -281,6 +327,12 @@ function Application_TD_NH_KHList() {
             >
               Chọn cột hiển thị
             </button>
+            <button
+              onClick={handleClearFilters}
+              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-3 rounded-lg shadow-md transition"
+            >
+              Xóa lọc
+            </button>
           </div>
 
 
@@ -297,51 +349,48 @@ function Application_TD_NH_KHList() {
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Khách hàng
               </label>
-              <input
-                type="text"
-                value={customerName || ""}
-                onChange={e => setCustomerName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    fetchApplications(searchTerm, 1, pageSize);
-                  }
-                }}
+              <SearchCreatableSelect
+                value={customerName}
+                onChange={(val) => setCustomerName(val)}
+                onSearch={(keyword) =>
+                  fetchApplications(searchTerm, 1, pageSize, {
+                    customerName: keyword !== undefined ? keyword : customerName,
+                  })
+                }
+                options={customerOptions}
                 placeholder="Nhập tên khách hàng"
-                className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
             <div className="w-full md:w-1/6">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Đối tác
               </label>
-              <input
-                type="text"
-                value={partnerName || ""}
-                onChange={e => setPartnerName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    fetchApplications(searchTerm, 1, pageSize);
-                  }
-                }}
+              <SearchCreatableSelect
+                value={partnerName}
+                onChange={(val) => setPartnerName(val)}
+                onSearch={(keyword) =>
+                  fetchApplications(searchTerm, 1, pageSize, {
+                    partnerName: keyword !== undefined ? keyword : partnerName,
+                  })
+                }
+                options={partnerOptions}
                 placeholder="Nhập tên đối tác"
-                className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
             <div className="w-full md:w-1/6">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Nhãn hiệu
               </label>
-              <input
-                type="text"
-                value={brandName || ""}
-                onChange={e => setBrandName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    fetchApplications(searchTerm, 1, pageSize);
-                  }
-                }}
+              <SearchCreatableSelect
+                value={brandName}
+                onChange={(val) => setBrandName(val)}
+                onSearch={(keyword) =>
+                  fetchApplications(searchTerm, 1, pageSize, {
+                    brandName: keyword !== undefined ? keyword : brandName,
+                  })
+                }
+                options={brandOptions}
                 placeholder="Nhập tên nhãn hiệu"
-                className="border w-full focus:outline-none focus:ring-2 search-input rounded-lg p-2 text-sm"
               />
             </div>
             {/* Sản phẩm dịch vụ */}

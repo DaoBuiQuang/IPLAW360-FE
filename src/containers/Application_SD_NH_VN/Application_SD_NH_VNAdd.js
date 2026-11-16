@@ -116,6 +116,9 @@ function Application_SD_NH_VNAdd() {
     const [lanSuaDoi, setLanSuaDoi] = useState(1);
     const [ngayGhiNhanSuaDoi, setNgayGhiNhanSuaDoi] = useState(null);
     const [duocGhiNhanSuaDoi, setDuocGhiNhanSuaDoi] = useState(false);
+    const [trangThaiDuyet, setTrangThaiDuyet] = useState(0);
+    const [ngayTuChoi, setNgayTuChoi] = useState(null);
+    const [lyDoTuChoi, setLyDoTuChoi] = useState("");
     const [moTaSuaDoi, setMoTaSuaDoi] = useState("");
     const [suaDoiDaiDien, setSuaDoiDaiDien] = useState(false);
     const [ndSuaDoiDaiDien, setNdSuaDoiDaiDien] = useState("");
@@ -433,7 +436,11 @@ function Application_SD_NH_VNAdd() {
                     ngayYeuCau,
                     lanSuaDoi,
                     ngayGhiNhanSuaDoi,
-                    duocGhiNhanSuaDoi,
+                    ngayChapThuan: ngayGhiNhanSuaDoi,
+                    duocGhiNhanSuaDoi: Number(trangThaiDuyet) === 1,
+                    trangThaiDuyet: Number(trangThaiDuyet),
+                    ngayTuChoi,
+                    lyDoTuChoi,
                     moTaSuaDoi,
                     suaDoiDaiDien,
                     ndSuaDoiDaiDien,
@@ -544,6 +551,12 @@ function Application_SD_NH_VNAdd() {
                     setNgayGhiNhanSuaDoi={setNgayGhiNhanSuaDoi}
                     duocGhiNhanSuaDoi={duocGhiNhanSuaDoi}
                     setDuocGhiNhanSuaDoi={setDuocGhiNhanSuaDoi}
+                    trangThaiDuyet={trangThaiDuyet}
+                    setTrangThaiDuyet={setTrangThaiDuyet}
+                    ngayTuChoi={ngayTuChoi}
+                    setNgayTuChoi={setNgayTuChoi}
+                    lyDoTuChoi={lyDoTuChoi}
+                    setLyDoTuChoi={setLyDoTuChoi}
                     moTaSuaDoi={moTaSuaDoi}
                     setMoTaSuaDoi={setMoTaSuaDoi}
                     suaDoiDaiDien={suaDoiDaiDien}

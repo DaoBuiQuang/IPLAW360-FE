@@ -18,6 +18,7 @@ function AffdavitEdit() {
     const [lanNop, setLanNop] = useState(1);
     const [ngayNop, setNgayNop] = useState(null);
     const [ngayGhiNhan, setNgayGhiNhan] = useState(null);
+    const [loaiTuyenThe, setLoaiTuyenThe] = useState(null);
     const [ghiChu, setGhiChu] = useState("");
     const [isAutoImport, setIsAutoImport] = useState(false);
     const [taiLieuList, setTaiLieuList] = useState([]);
@@ -40,6 +41,7 @@ function AffdavitEdit() {
             setLanNop(detail?.lanNop || 1);
             setNgayNop(detail?.ngayNop || null);
             setNgayGhiNhan(detail?.ngayGhiNhan || null);
+            setLoaiTuyenThe(detail?.loaiTuyenThe || null);
             setGhiChu(detail?.ghiChu || "");
             setIsAutoImport(detail?.isAutoImport || false);
             setTaiLieuList(detail?.taiLieu || []);
@@ -64,6 +66,7 @@ function AffdavitEdit() {
             lanNop,
             ngayNop,
             ngayGhiNhan,
+            loaiTuyenThe,
             ghiChu,
             isAutoImport,
             taiLieus: taiLieuList,
@@ -122,6 +125,8 @@ function AffdavitEdit() {
                         setNgayNop={setNgayNop}
                         ngayGhiNhan={ngayGhiNhan}
                         setNgayGhiNhan={setNgayGhiNhan}
+                        loaiTuyenThe={loaiTuyenThe}
+                        setLoaiTuyenThe={setLoaiTuyenThe}
                         ghiChu={ghiChu}
                         setGhiChu={setGhiChu}
                         isAutoImport={isAutoImport}

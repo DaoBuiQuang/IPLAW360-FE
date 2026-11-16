@@ -530,21 +530,6 @@ function ApplicationDetail_KH() {
                 </tbody>
               </table>
 
-              {/* ✅ Thêm danh sách vụ việc giống trang Việt Nam */}
-              <div className="col-span-2 mt-4">
-                <DSVuViec
-                  maHoSo={maHoSoVuViec}
-                  onVuViecChange={(list) => setVuViecList(list)}
-                  initialVuViecs={vuViecList}
-                  maHoSoVuViec={maHoSoVuViec}
-                  giayUyQuyenGoc={giayUyQuyenGoc}
-                  setGiayUyQuyenGoc={setGiayUyQuyenGoc}
-                  maUyQuyen={maUyQuyen}
-                  setMaUyQuyen={setMaUyQuyen}
-                  isViewOnly={isViewOnly}
-                />
-              </div>
-
               {/* GIỮ NGUYÊN: 1 nút mở modal lịch sử thẩm định */}
               <div className="flex gap-3 mb-4">
                 <Button

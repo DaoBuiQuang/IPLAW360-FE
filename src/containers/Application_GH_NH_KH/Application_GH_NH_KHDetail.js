@@ -158,7 +158,7 @@ function Application_GH_NH_KHDetail() {
                 setNgayCapBang(formatDate(response.ngayCapBang));
                 setNgayHetHanBang(formatDate(response.ngayHetHanBang));
                 setTrangThaiDon(response.trangThaiDon);
-                setTaiLieuList(response.TaiLieuGH_NH_VN)
+                setTaiLieuList(response.TaiLieuGH_NH_KH || response.TaiLieuGH_NH_VN || []);
                 setMaUyQuyen(response.maUyQuyen || null);
                 setGiayUyQuyenGoc(response.giayUyQuyenGoc);
             }
@@ -191,7 +191,7 @@ function Application_GH_NH_KHDetail() {
 
     const handleApplicationEdit = () => {
         if (maDonGiaHan) {
-            navigate(`/application_gh_nh_vn_edit/${maDonGiaHan}`);
+            navigate(`/application_gh_nh_kh_edit/${maDonGiaHan}`);
         }
     };
     return (

@@ -466,7 +466,7 @@ function GCN_NH_VNAdd() {
                             type="text"
                             value={mauSac}
                             onChange={(e) => setMauSac(e.target.value)}
-                            placeholder="Nhập quyết định số"
+                            placeholder="Nhập màu sắc nhãn hiệu"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                         />
                     </div>
@@ -546,17 +546,6 @@ function GCN_NH_VNAdd() {
                             rows="3"
                         ></textarea>
                     </div>
-                </div>
-                <div className="col-span-2">
-                    <DSVuViec
-                        maHoSo={maHoSoVuViec}
-
-                        maDonDangKy={maDonDangKy}
-                        onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                        maHoSoVuViec={maHoSoVuViec}
-                        maUyQuyen={maUyQuyen}
-                        setMaUyQuyen={setMaUyQuyen}
-                    />
                 </div>
                 <div className="flex justify-center gap-4 mt-4">
                     <button

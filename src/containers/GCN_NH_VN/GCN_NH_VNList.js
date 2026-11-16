@@ -5,6 +5,7 @@ import Select from "react-select";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { Modal, Pagination } from "antd";
+import dayjs from "dayjs";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
 
 const FILTER_STORAGE_KEY_GCN_VN = "gcnNhVnListFilters";
@@ -462,6 +463,7 @@ function GCN_NH_VNList() {
             <tr className=" text-[#667085] text-center font-normal">
               <th className="p-2 text-table">STT</th>
               <th className="p-2 text-table">Số bằng</th>
+              <th className="p-2 text-table">Loại bằng</th>
               <th className="p-2 text-table">Số đơn</th>
               <th className="p-2 text-table">Mã hồ sơ</th>
               <th className="p-2 text-table">Tên chủ bằng</th>
@@ -480,10 +482,33 @@ function GCN_NH_VNList() {
             </tr>
           </thead>
           <tbody>
-            {gcn_nhs.map((gcn_nh, index) => (
+            {gcn_nhs.map((gcn_nh, index) => {
+              const isFrozenOriginal = Number(gcn_nh.bangGoc) === 1;
+              const idGcnGoc = gcn_nh.idGCN_NH_Goc || gcn_nh.gcnCha?.id;
+              const soBangGoc = gcn_nh.soBangGoc || gcn_nh.gcnCha?.soBang;
+              const ngayCapGoc = gcn_nh.ngayCapBangGoc || gcn_nh.gcnCha?.ngayCapBang;
+
+              let baseText = "Bằng gốc";
+              let baseBadgeClass = isFrozenOriginal
+                ? "bg-gray-200 text-gray-700 border-gray-300"
+                : "bg-emerald-50 text-emerald-700 border-emerald-200";
+
+              if (Number(gcn_nh.loaiBang) === 2) {
+                baseText = "Đã sửa đổi";
+                baseBadgeClass = "bg-blue-50 text-blue-700 border-blue-200";
+              } else if (Number(gcn_nh.loaiBang) === 3 || Number(gcn_nh.loaiBang) === 4) {
+                baseText = "Đã chuyển nhượng";
+                baseBadgeClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
+              }
+
+              return (
               <tr
                 key={gcn_nh.id || index}
-                className="group hover:bg-gray-100 text-center border-b relative cursor-pointer"
+                className={`group text-center border-b relative cursor-pointer transition ${
+                  isFrozenOriginal
+                    ? "opacity-40 bg-gray-300 text-gray-700 hover:bg-gray-300"
+                    : "hover:bg-gray-100"
+                }`}
                 onClick={() => {
                   if (gcn_nh.id) {
                     navigate(`/gcn_nhdetail/${gcn_nh.id}`);
@@ -494,7 +519,26 @@ function GCN_NH_VNList() {
                 <td
                   className="p-2 text-table text-blue-500 hover:underline font-medium"
                 >
-                  {gcn_nh.soBang}
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span>{gcn_nh.soBang}</span>
+                  </div>
+                </td>
+                <td className="p-2 text-table">
+                  <div className="flex flex-col items-center justify-center gap-1">
+                    {gcn_nh.dangSuaDoi && (
+                      <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full border bg-amber-100 text-amber-800 border-amber-300 shadow-sm">
+                        ⏳ Đang sửa đổi
+                      </span>
+                    )}
+                    {gcn_nh.dangChuyenQuyen && (
+                      <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full border bg-orange-100 text-orange-800 border-orange-300 shadow-sm">
+                        ⏳ Đang chuyển quyền
+                      </span>
+                    )}
+                    <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full border ${baseBadgeClass}`}>
+                      {baseText}
+                    </span>
+                  </div>
                 </td>
                 <td className="p-2 text-table">{gcn_nh.soDon}</td>
                 <td className="p-2 text-table">{gcn_nh.maHoSo}</td>
@@ -576,36 +620,32 @@ function GCN_NH_VNList() {
 
                 {/* Ngày hết hạn bằng */}
                 <td className="p-2 text-table">
-                  {gcn_nh.ngayHetHanBang ? (
-                    <>
-                      {new Date(gcn_nh.ngayHetHanBang).toLocaleDateString(
-                        "vi-VN"
-                      )}
-                      <div
-                        className={`text-xs font-semibold ${
-                          (() => {
-                            const diff = Math.ceil(
-                              (new Date(gcn_nh.ngayHetHanBang) - new Date()) /
-                                (1000 * 60 * 60 * 24)
-                            );
-                            return diff < 0 ? "text-red-600" : "text-sky-600";
-                          })()
-                        }`}
-                      >
-                        {(() => {
-                          const diff = Math.ceil(
-                            (new Date(gcn_nh.ngayHetHanBang) - new Date()) /
-                              (1000 * 60 * 60 * 24)
-                          );
-                          return diff < 0
+                  {(() => {
+                    const effectiveNgayHetHan =
+                      gcn_nh.ngayHetHanBang ||
+                      (gcn_nh.ngayNopDon && dayjs(gcn_nh.ngayNopDon).isValid()
+                        ? dayjs(gcn_nh.ngayNopDon).add(10, "year").format("YYYY-MM-DD")
+                        : null);
+                    if (!effectiveNgayHetHan) return "";
+                    const diff = Math.ceil(
+                      (new Date(effectiveNgayHetHan) - new Date()) /
+                        (1000 * 60 * 60 * 24)
+                    );
+                    return (
+                      <>
+                        {new Date(effectiveNgayHetHan).toLocaleDateString("vi-VN")}
+                        <div
+                          className={`text-xs font-semibold ${
+                            diff < 0 ? "text-red-600" : "text-sky-600"
+                          }`}
+                        >
+                          {diff < 0
                             ? `Quá ${Math.abs(diff)} ngày`
-                            : `Còn ${diff} ngày`;
-                        })()}
-                      </div>
-                    </>
-                  ) : (
-                    ""
-                  )}
+                            : `Còn ${diff} ngày`}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </td>
 
                 <td className="p-2 relative">
@@ -639,7 +679,8 @@ function GCN_NH_VNList() {
                   )}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

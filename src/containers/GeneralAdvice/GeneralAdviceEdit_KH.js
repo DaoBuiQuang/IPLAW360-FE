@@ -158,14 +158,6 @@ function GeneralAdviceEdit_KH() {
 
         </div>
 
-        <DSVuViec
-          maHoSo={maHoSo}
-          onVuViecChange={handleVuViecChange}
-          initialVuViecs={vuViecList}
-          isGeneralAdvice={isGeneralAdvice}
-          maHoSoVuViec={maHoSo}
-        />
-
         <div className="flex justify-center gap-4 mt-4">
           <button className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg" onClick={() => navigate(-1)}>Quay lại</button>
           <button onClick={handleEdit} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">

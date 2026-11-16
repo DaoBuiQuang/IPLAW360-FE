@@ -6,10 +6,10 @@ import { exportToExcel } from "../../components/ExportFile/ExportExcel";
 import FieldSelector from "../../components/FieldSelector";
 import dayjs from 'dayjs';
 import { useSelector } from 'react-redux';
-import { DatePicker, Modal, Spin, Pagination } from 'antd';
+import { DatePicker, Modal, Spin, Pagination, Radio, Input } from 'antd';
 import { useTranslation } from "react-i18next";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
-import { showInfo } from "../../components/commom/Notification";
+import { showInfo, showSuccess, showError } from "../../components/commom/Notification";
 
 const FILTER_STORAGE_KEY_SD = "applicationSdNhVnListFilters";
 const STATE_STORAGE_KEY_SD = "applicationSdNhVnListState";
@@ -25,6 +25,15 @@ function Application_SD_NH_VNList() {
   const [applications, setApplications] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [applicationToDelete, setApplicationToDelete] = useState(null);
+  const [selectedTrangThaiDuyetFilter, setSelectedTrangThaiDuyetFilter] = useState(null);
+  const [approvalModalOpen, setApprovalModalOpen] = useState(false);
+  const [approvalRecord, setApprovalRecord] = useState(null);
+  const [approvalStatus, setApprovalStatus] = useState(0);
+  const [approvalDate, setApprovalDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [rejectDate, setRejectDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [rejectReason, setRejectReason] = useState("");
+  const [approvalNote, setApprovalNote] = useState("");
+  const [submittingApproval, setSubmittingApproval] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [productAndService, setProductAndService] = useState([]);
   const [selectedProductAndService, setSelectedProductAndService] = useState([]);
@@ -93,7 +102,8 @@ function Application_SD_NH_VNList() {
   ];
 
   const allFieldOptions = [
-    { label: "Số Đơn", labelEn: "App No", key: "soDon" },
+    { label: "Số Đơn sửa đổi", labelEn: "Amendment No", key: "soDonSD" },
+    { label: "Trạng thái xét duyệt", labelEn: "Approval Status", key: "trangThaiDuyet" },
     { label: "Mã HSVV", labelEn: "Matter code", key: "maHoSoVuViec" },
     { label: "Ngày yêu cầu sửa đổi", key: "ngayYeuCau" },
     { label: "Ngày ghi nhận sửa đổi", key: "ngayGhiNhanSuaDoi" },
@@ -169,6 +179,7 @@ function Application_SD_NH_VNList() {
         brandName: overrides.brandName !== undefined ? overrides.brandName : brandName,
         maSPDVList: overrides.selectedProductAndService !== undefined ? overrides.selectedProductAndService : selectedProductAndService,
         trangThaiDon: overrides.selectedTrangThaiDon !== undefined ? overrides.selectedTrangThaiDon : selectedTrangThaiDon,
+        trangThaiDuyet: overrides.selectedTrangThaiDuyetFilter !== undefined ? overrides.selectedTrangThaiDuyetFilter : selectedTrangThaiDuyetFilter,
         fields: overrides.selectedFields !== undefined ? overrides.selectedFields : selectedFields,
         filterCondition: customFilterCondition || filterCondition,
         pageIndex: page,
@@ -436,18 +447,77 @@ function Application_SD_NH_VNList() {
 
   const handleDeleteApplication = async () => {
     try {
-      await callAPI({
-        method: "post",
-        endpoint: "/application/delete",
-        data: { maDonDangKy: applicationToDelete },
-      });
+      if (applicationToDelete?.idDonSuaDoi) {
+        await callAPI({
+          method: "post",
+          endpoint: "/application_sd_nh_vn/delete",
+          data: { id: applicationToDelete.idDonSuaDoi },
+        });
+      } else {
+        await callAPI({
+          method: "post",
+          endpoint: "/application/delete",
+          data: { maDonDangKy: applicationToDelete?.maDonDangKy || applicationToDelete },
+        });
+      }
       setShowDeleteModal(false);
       setApplicationToDelete(null);
       fetchApplications(searchTerm, pageIndex, pageSize);
     } catch (error) {
-      console.error("Lỗi khi xóa đơn đăng ký:", error);
+      console.error("Lỗi khi xóa đơn sửa đổi:", error);
       setShowDeleteModal(false);
       setApplicationToDelete(null);
+    }
+  };
+
+  const openApprovalModal = (app) => {
+    setApprovalRecord(app);
+    setApprovalStatus(Number(app.trangThaiDuyet ?? 0));
+    setApprovalDate(
+      app.ngayChapThuan || app.ngayGhiNhanSuaDoi
+        ? dayjs(app.ngayChapThuan || app.ngayGhiNhanSuaDoi).format("YYYY-MM-DD")
+        : dayjs().format("YYYY-MM-DD")
+    );
+    setRejectDate(
+      app.ngayTuChoi
+        ? dayjs(app.ngayTuChoi).format("YYYY-MM-DD")
+        : dayjs().format("YYYY-MM-DD")
+    );
+    setRejectReason(app.lyDoTuChoi || "");
+    setApprovalNote(app.moTaSuaDoi || app.moTa || "");
+    setApprovalModalOpen(true);
+  };
+
+  const handleConfirmApproval = async () => {
+    if (!approvalRecord?.idDonSuaDoi && !approvalRecord?.id) {
+      showError("Lỗi", "Không tìm thấy ID tờ khai sửa đổi.");
+      return;
+    }
+    setSubmittingApproval(true);
+    try {
+      await callAPI({
+        method: "post",
+        endpoint: "/application_sd_nh_vn/update",
+        data: {
+          id: approvalRecord.idDonSuaDoi || approvalRecord.id,
+          trangThaiDuyet: Number(approvalStatus),
+          duocGhiNhanSuaDoi: Number(approvalStatus) === 1,
+          ngayChapThuan: Number(approvalStatus) === 1 ? approvalDate : null,
+          ngayGhiNhanSuaDoi: Number(approvalStatus) === 1 ? approvalDate : null,
+          ngayTuChoi: Number(approvalStatus) === 2 ? rejectDate : null,
+          lyDoTuChoi: Number(approvalStatus) === 2 ? rejectReason : null,
+          moTa: approvalNote,
+        },
+      });
+      await showSuccess("Thành công", "Đã cập nhật trạng thái xét duyệt tờ khai sửa đổi!");
+      setApprovalModalOpen(false);
+      setApprovalRecord(null);
+      fetchApplications(searchTerm, pageIndex, pageSize);
+    } catch (err) {
+      console.error("Lỗi cập nhật xét duyệt:", err);
+      showError("Thất bại", "Không thể cập nhật trạng thái xét duyệt.", err);
+    } finally {
+      setSubmittingApproval(false);
     }
   };
 
@@ -486,7 +556,7 @@ function Application_SD_NH_VNList() {
     <div className="p-1 bg-gray-100 min-h-screen">
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-          📌 Danh sách đơn đăng ký đã sửa đổi nhãn hiệu Việt Nam
+          📌 Danh sách đơn sửa đổi nhãn hiệu Việt Nam
         </h2>
 
         {/* Hàng Search chính */}
@@ -596,6 +666,31 @@ function Application_SD_NH_VNList() {
                 className="text-left"
                 isClearable
                 isMulti
+              />
+            </div>
+
+            {/* Trạng thái xét duyệt tờ khai */}
+            <div className="w-full md:w-1/6">
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Trạng thái xét duyệt
+              </label>
+              <Select
+                options={[
+                  { value: 0, label: "⏳ Chưa chấp thuận" },
+                  { value: 1, label: "✅ Được chấp thuận" },
+                  { value: 2, label: "❌ Từ chối" },
+                ]}
+                value={[
+                  { value: 0, label: "⏳ Chưa chấp thuận" },
+                  { value: 1, label: "✅ Được chấp thuận" },
+                  { value: 2, label: "❌ Từ chối" },
+                ].find((opt) => opt.value === selectedTrangThaiDuyetFilter) || null}
+                onChange={(selectedOption) =>
+                  setSelectedTrangThaiDuyetFilter(selectedOption ? selectedOption.value : null)
+                }
+                placeholder="Tất cả trạng thái"
+                className="text-left"
+                isClearable
               />
             </div>
 
@@ -733,7 +828,7 @@ function Application_SD_NH_VNList() {
             </thead>
             <tbody>
               {applications.length > 0 ? (applications.map((app, index) => (
-                <tr key={app.maDonDangKy} className="group hover:bg-gray-100 text-center border-b relative">
+                <tr key={app.idDonSuaDoi || app.maDonDangKy || index} className="group hover:bg-gray-100 text-center border-b relative">
                   <td className="p-2 text-table ">{index + 1}</td>
                   {columns.map((col, colIndex) => {
                     const commonClass = `p-2 text-table ${colIndex < columns.length - 1 ? "" : ""}`;
@@ -743,13 +838,62 @@ function Application_SD_NH_VNList() {
                       "ngayNopDon", "ngayHoanThanhHoSoTaiLieu", "ngayKQThamDinhHinhThuc",
                       "ngayCongBoDon", "ngayKQThamDinhND", "ngayTraLoiKQThamDinhND",
                       "ngayThongBaoCapBang", "ngayNopPhiCapBang", "ngayNhanBang",
-                      "ngayCapBang", "ngayHetHanBang", "ngayGuiBangChoKhachHang", "hanNopPhiCapBang"
+                      "ngayCapBang", "ngayHetHanBang", "ngayGuiBangChoKhachHang", "hanNopPhiCapBang",
+                      "ngayYeuCau", "ngayGhiNhanSuaDoi"
                     ];
 
                     if (isDateField.includes(col.key)) {
                       return (
                         <td key={col.key} className={commonClass}>
                           {content ? new Date(content).toLocaleDateString("vi-VN") : ""}
+                        </td>
+                      );
+                    }
+                    if (col.key === "soDonSD") {
+                      const targetMaDon = app.maDonDangKy || app.maDonDangKyGoc;
+                      return (
+                        <td
+                          key={col.key}
+                          className={`p-2 text-table font-semibold ${
+                            targetMaDon ? "text-blue-500 cursor-pointer hover:underline" : "text-gray-800"
+                          }`}
+                          onClick={(e) => {
+                            if (targetMaDon) {
+                              e.stopPropagation();
+                              navigate(`/applicationdetail/${targetMaDon}`);
+                            }
+                          }}
+                        >
+                          {app.soDonSD || app.soDon || app.soDonGoc || "—"}
+                        </td>
+                      );
+                    }
+                    if (col.key === "trangThaiDuyet") {
+                      const st = Number(app.trangThaiDuyet ?? 0);
+                      return (
+                        <td key={col.key} className="p-2 text-table">
+                          <div className="flex flex-col items-center gap-1">
+                            {st === 0 && (
+                              <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                                ⏳ Chưa chấp thuận
+                              </span>
+                            )}
+                            {st === 1 && (
+                              <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                ✅ Được chấp thuận
+                              </span>
+                            )}
+                            {st === 2 && (
+                              <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700 border border-red-300">
+                                ❌ Từ chối
+                              </span>
+                            )}
+                            {st === 2 && app.lyDoTuChoi && (
+                              <span className="text-[11px] text-red-600 italic">
+                                Lý do: {app.lyDoTuChoi}
+                              </span>
+                            )}
+                          </div>
                         </td>
                       );
                     }
@@ -761,7 +905,7 @@ function Application_SD_NH_VNList() {
                       return (
                         <td
                           key={col.key}
-                          className={`p-2 text-table ${hasDon ? "text-blue-500 cursor-pointer hover:underline" : "text-gray-500"
+                          className={`p-2 text-table ${hasDon ? "text-blue-500 cursor-pointer hover:underline font-medium" : "text-gray-400 italic"
                             }`}
                           onClick={(e) => {
                             if (hasDon) {
@@ -773,8 +917,10 @@ function Application_SD_NH_VNList() {
                           {hasDon
                             ? hasSoDon
                               ? content
-                              : "Chưa có số đơn"
-                            : "Không có đơn đăng ký"}
+                              : "Xem đơn mới"
+                            : Number(app.trangThaiDuyet) === 0
+                            ? "Đang chờ duyệt"
+                            : "Không sinh đơn mới"}
                         </td>
                       );
                     }
@@ -994,15 +1140,24 @@ function Application_SD_NH_VNList() {
                     {(role === "admin" || role === "staff") && (
                       <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
                         <button
-                          className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                          onClick={() => navigate(`/applicationedit/${app.maDonDangKy}`)}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
+                          onClick={() => openApprovalModal(app)}
+                          title="Cập nhật kết quả xét duyệt của Cục"
                         >
-                          📝
+                          ⚖️ Duyệt
                         </button>
+                        {(app.maDonDangKy || app.maDonDangKyGoc) && (
+                          <button
+                            className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                            onClick={() => navigate(`/applicationedit/${app.maDonDangKy || app.maDonDangKyGoc}`)}
+                          >
+                            📝
+                          </button>
+                        )}
                         <button
                           className="px-3 py-1 bg-red-200 text-red-600 rounded-md hover:bg-red-300"
                           onClick={() => {
-                            setApplicationToDelete(app.maDonDangKy);
+                            setApplicationToDelete(app);
                             setShowDeleteModal(true);
                           }}
                         >
@@ -1058,6 +1213,99 @@ function Application_SD_NH_VNList() {
         onClose={() => setShowFieldModal(false)}
         onConfirm={() => setShowFieldModal(false)}
       />
+
+      <Modal
+        title="⚖️ Cập nhật kết quả xét duyệt Tờ khai sửa đổi đơn đăng ký"
+        open={approvalModalOpen}
+        onOk={handleConfirmApproval}
+        onCancel={() => setApprovalModalOpen(false)}
+        confirmLoading={submittingApproval}
+        okText="Lưu kết quả"
+        cancelText="Hủy"
+        width={650}
+      >
+        {approvalRecord && (
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-3 rounded border text-sm space-y-1">
+              <div>
+                <span className="text-gray-500">Số tờ khai sửa đổi: </span>
+                <b className="text-gray-800">{approvalRecord.soDonSD || approvalRecord.soDon || "—"}</b>
+              </div>
+              <div>
+                <span className="text-gray-500">Đơn gốc: </span>
+                <b className="text-indigo-600">{approvalRecord.soDonGoc || approvalRecord.maDonDangKyGoc || "—"}</b>
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">
+                Trạng thái xét duyệt của Cục SHTT:
+              </label>
+              <Radio.Group
+                value={Number(approvalStatus)}
+                onChange={(e) => setApprovalStatus(Number(e.target.value))}
+                className="flex flex-col gap-2"
+              >
+                <Radio value={0}>⏳ Chưa chấp thuận</Radio>
+                <Radio value={1}>✅ Được chấp thuận</Radio>
+                <Radio value={2}>❌ Từ chối</Radio>
+              </Radio.Group>
+            </div>
+
+            {Number(approvalStatus) === 1 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ngày ghi nhận sửa đổi
+                </label>
+                <DatePicker
+                  value={approvalDate ? dayjs(approvalDate) : null}
+                  onChange={(d) => setApprovalDate(d ? d.format("YYYY-MM-DD") : null)}
+                  format="DD/MM/YYYY"
+                  className="w-full"
+                />
+              </div>
+            )}
+
+            {Number(approvalStatus) === 2 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ngày từ chối
+                  </label>
+                  <DatePicker
+                    value={rejectDate ? dayjs(rejectDate) : null}
+                    onChange={(d) => setRejectDate(d ? d.format("YYYY-MM-DD") : null)}
+                    format="DD/MM/YYYY"
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Lý do từ chối
+                  </label>
+                  <Input
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Nhập lý do Cục từ chối"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ghi chú / Mô tả
+              </label>
+              <Input.TextArea
+                rows={3}
+                value={approvalNote}
+                onChange={(e) => setApprovalNote(e.target.value)}
+                placeholder="Nhập ghi chú..."
+              />
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal
         title="Xác nhận xóa"

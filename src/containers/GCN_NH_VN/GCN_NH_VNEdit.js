@@ -507,7 +507,7 @@ function GCN_NH_VNEdit() {
                             type="text"
                             value={mauSac}
                             onChange={(e) => setMauSac(e.target.value)}
-                            placeholder="Nhập quyết định số"
+                            placeholder="Nhập màu sắc nhãn hiệu"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                         />
                     </div>
@@ -606,42 +606,6 @@ function GCN_NH_VNEdit() {
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                             rows="3"
                         ></textarea>
-                    </div>
-                </div>
-                <div className="col-span-2">
-                    <DSVuViec
-                        maHoSo={maHoSoVuViec}
-
-                        maDonDangKy={maDonDangKy}
-                        onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                        maHoSoVuViec={maHoSoVuViec}
-                        maUyQuyen={maUyQuyen}
-                        setMaUyQuyen={setMaUyQuyen}
-                    />
-                </div>
-                <div className="col-span-2 pt-4 border-t border-gray-200">
-                    <div className="flex flex-wrap gap-4 items-center justify-center">
-                        <button
-                            type="button"
-                            onClick={() => window.open(`/gcn_cq_nh_vn_add/${id}`, "_blank")}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
-                        >
-                            <span>Chuyển quyền sở hữu</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => window.open(`/gcn_gh_nh_vn_add/${id}`, "_blank")}
-                            className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
-                        >
-                            <span>Thêm mới đơn gia hạn</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => window.open(`/gcn_sd_nh_vn_add/${id}`, "_blank")}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
-                        >
-                            <span>Thêm mới đơn sửa đổi</span>
-                        </button>
                     </div>
                 </div>
                 <div className="flex justify-center gap-4 mt-4">

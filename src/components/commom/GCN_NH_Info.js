@@ -1,6 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+import { getGcnCamStatusLabel, getAffidavitTypeLabel } from "../../constants/gcnCamConstants";
 
 function GCN_NH_Info({ data }) {
+  const navigate = useNavigate();
   if (!data) return <div>Không có dữ liệu</div>;
 
   const renderRow = (label, value) => (
@@ -9,6 +13,22 @@ function GCN_NH_Info({ data }) {
       <span className="text-gray-900">{value || "—"}</span>
     </div>
   );
+
+  const idGcnGoc = data.idGCN_NH_Goc || data.gcnCha?.id;
+  const soBangGoc = data.soBangGoc || data.gcnCha?.soBang;
+  const ngayCapGoc = data.ngayCapBangGoc || data.gcnCha?.ngayCapBang;
+  const displayNgayHetHan =
+    data.ngayHetHanBang ||
+    (data.ngayNopDon && dayjs(data.ngayNopDon).isValid()
+      ? dayjs(data.ngayNopDon).add(10, "year").format("YYYY-MM-DD")
+      : null);
+
+  const loaiBangText =
+    Number(data.loaiBang) === 2
+      ? "Đã sửa đổi"
+      : Number(data.loaiBang) === 3 || Number(data.loaiBang) === 4
+      ? "Đã chuyển nhượng"
+      : "Bằng gốc";
 
   return (
     <div>
@@ -51,6 +71,46 @@ function GCN_NH_Info({ data }) {
       {/* Thông tin chi tiết */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
         {renderRow("Số bằng", data.soBang)}
+        <div className="flex mb-3 items-center">
+          <span className="w-56 font-semibold text-gray-700 text-left">Loại bằng:</span>
+          <div className="flex flex-wrap items-center gap-2">
+            {data.dangSuaDoi && (
+              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                ⏳ Đang sửa đổi
+              </span>
+            )}
+            {data.dangChuyenQuyen && (
+              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 border border-orange-300">
+                ⏳ Đang chuyển quyền
+              </span>
+            )}
+            <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+              {loaiBangText}
+            </span>
+          </div>
+        </div>
+        {(idGcnGoc || soBangGoc) && (
+          <>
+            <div className="flex mb-3">
+              <span className="w-56 font-semibold text-gray-700 text-left">Số bằng gốc:</span>
+              <span
+                className="text-indigo-600 font-semibold cursor-pointer hover:underline"
+                onClick={() => {
+                  if (idGcnGoc) {
+                    const detailPath = data.maQuocGia === "KH"
+                      ? `/gcn_nh_camdetail/${idGcnGoc}`
+                      : `/gcn_nhdetail/${idGcnGoc}`;
+                    navigate(detailPath);
+                    window.location.reload();
+                  }
+                }}
+              >
+                {soBangGoc || `#${idGcnGoc}`}
+              </span>
+            </div>
+            {renderRow("Ngày cấp bằng gốc", ngayCapGoc)}
+          </>
+        )}
         {renderRow("Số đơn", data.soDon)}
         {renderRow("Mã hồ sơ", data.maHoSo)}
         {renderRow("Chủ đơn / Chủ bằng", data.tenKhachHang)}
@@ -63,9 +123,13 @@ function GCN_NH_Info({ data }) {
         {renderRow("Ngày nộp đơn", data.ngayNopDon)}
         {renderRow("Ngày cấp bằng", data.ngayCapBang)}
         {renderRow("Ghi chú", data.ghiChu)}
+        {renderRow("Trạng thái xử lý bằng", getGcnCamStatusLabel(data.trangThaiBang))}
+        {renderRow("Ngày nộp YC tuyên thệ", data.ngayNopYCTuyenThe)}
+        {renderRow("Loại tuyên thệ", getAffidavitTypeLabel(data.loaiTuyenThe))}
+        {renderRow("Ngày ghi nhận tuyên thệ", data.ngayGhiNhanTuyenThe)}
         {renderRow("Ngày yêu cầu Affidavit", data?.hanNopTuyenThe)}
          {renderRow("Ngày yêu cầu gia hạn", data.hanGiaHan)}
-        {renderRow("Ngày hết hạn", data.ngayHetHanBang)}
+        {renderRow("Ngày hết hạn", displayNgayHetHan)}
       </div>
     </div>
   );

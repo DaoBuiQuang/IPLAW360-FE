@@ -496,18 +496,6 @@ function ApplicationAdd_KH() {
                             setNgayGuiBangChoKH={setNgayGuiBangChoKH}
                         />
                     </div>
-                    <div className="col-span-2">
-                        <DSVuViec
-                            maHoSo={maHoSoVuViec}
-                            onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                            maHoSoVuViec={maHoSoVuViec}
-                            giayUyQuyenGoc={giayUyQuyenGoc}
-                            setGiayUyQuyenGoc={setGiayUyQuyenGoc}
-                            maUyQuyen={maUyQuyen}
-                            setMaUyQuyen={setMaUyQuyen}
-                            isKH={isKH}
-                        />
-                    </div>
                     {/* )} */}
                 </div>
 

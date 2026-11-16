@@ -40,12 +40,16 @@ function MenuLeft() {
       location.pathname.startsWith("/applicationedit") ||
       location.pathname.startsWith("/applicationdetail") ||
       location.pathname.startsWith("/application_sd_nh_vn") ||
-      location.pathname.startsWith("/application_td_nh_vn"));
+      location.pathname.startsWith("/application_td_nh_vn") ||
+      location.pathname.startsWith("/application_cq_nh_vn"));
 
   const isGcnVNOpen =
     !location.pathname.includes("_cam") &&
     !location.pathname.includes("_kh") &&
     (location.pathname.startsWith("/gcn_nh") ||
+      location.pathname.startsWith("/gcn_sd_nh_vn") ||
+      location.pathname.startsWith("/gcn_cq_nh_vn") ||
+      location.pathname.startsWith("/gcn_gh_nh_vn") ||
       location.pathname.startsWith("/application_gh_nh_vn") ||
       location.pathname.startsWith("/application_sd_gcn_nh_vn"));
 
@@ -222,13 +226,19 @@ function MenuLeft() {
                         <li>
                           <NavLink to="/application_sd_nh_vnlist" className={navLinkClass}>
                             <FileText size={14} />
-                            <span className="text-left w-full">Tờ khai sửa đổi đơn đăng ký</span>
+                            <span className="text-left w-full">Đơn sửa đổi</span>
                           </NavLink>
                         </li>
                         <li>
                           <NavLink to="/application_td_nh_vnlist" className={navLinkClass}>
                             <FileText size={14} />
-                            <span className="text-left w-full">Tờ khai tách đơn đăng ký</span>
+                            <span className="text-left w-full">Đơn tách</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/application_cq_nh_vnlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Đơn chuyển nhượng</span>
                           </NavLink>
                         </li>
                       </ul>
@@ -253,6 +263,12 @@ function MenuLeft() {
                           <NavLink to="/application_sd_gcn_nh_vnlist" className={navLinkClass}>
                             <FileText size={14} />
                             <span className="text-left w-full">Đơn sửa đổi GCN</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/gcn_cq_nh_vnlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Đơn chuyển nhượng GCN</span>
                           </NavLink>
                         </li>
                       </ul>
@@ -383,13 +399,13 @@ function MenuLeft() {
                         <li>
                           <NavLink to="/application_sd_nh_khlist" className={navLinkClass}>
                             <FileText size={14} />
-                            <span className="text-left w-full">Tờ khai sửa đổi đơn đăng ký</span>
+                            <span className="text-left w-full">Đơn sửa đổi</span>
                           </NavLink>
                         </li>
                         <li>
                           <NavLink to="/application_td_nh_khlist" className={navLinkClass}>
                             <FileText size={14} />
-                            <span className="text-left w-full">Tờ khai tách đơn đăng ký</span>
+                            <span className="text-left w-full">Đơn tách</span>
                           </NavLink>
                         </li>
                       </ul>

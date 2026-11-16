@@ -5,6 +5,8 @@ import Select from "react-select";
 import { useSelector } from 'react-redux';
 import { useTranslation } from "react-i18next";
 import { Modal, Pagination } from "antd";
+import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+import { fetchSharedFilterOptions } from "../../utils/filterOptionsHelper";
 
 function Application_SD_GCN_NH_KHList() {
     const { t } = useTranslation();
@@ -13,6 +15,12 @@ function Application_SD_GCN_NH_KHList() {
     const [countries, setCountries] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCountry, setSelectedCountry] = useState("");
+    const [customerName, setCustomerName] = useState("");
+    const [partnerName, setPartnerName] = useState("");
+    const [brandName, setBrandName] = useState("");
+    const [customerOptions, setCustomerOptions] = useState([]);
+    const [partnerOptions, setPartnerOptions] = useState([]);
+    const [brandOptions, setBrandOptions] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [partnerToDelete, setPartnerToDelete] = useState(null);
     const [pageIndex, setPageIndex] = useState(1);
@@ -20,24 +28,67 @@ function Application_SD_GCN_NH_KHList() {
     const [totalItems, setTotalItems] = useState(0);
     const navigate = useNavigate();
 
-    const fetchGCNs = async (searchValue, countryCode, page = 1, size = 10) => {
+    const searchOptions = React.useMemo(() => {
+        const list = [];
+        const seen = new Set();
+        (donGiaHans || []).forEach((item) => {
+            const soDonSD = item.soDon || item.soDonSD;
+            if (soDonSD && !seen.has(`soDonSD_${soDonSD}`)) {
+                seen.add(`soDonSD_${soDonSD}`);
+                list.push({
+                    value: soDonSD,
+                    label: `Số đơn sửa đổi: ${soDonSD}${item.gcn?.NhanHieu?.tenNhanHieu ? ` - ${item.gcn.NhanHieu.tenNhanHieu}` : ""}`,
+                });
+            }
+            if (item.gcn?.soBang && !seen.has(`soBang_${item.gcn.soBang}`)) {
+                seen.add(`soBang_${item.gcn.soBang}`);
+                list.push({
+                    value: item.gcn.soBang,
+                    label: `Số bằng: ${item.gcn.soBang}${item.gcn?.NhanHieu?.tenNhanHieu ? ` - ${item.gcn.NhanHieu.tenNhanHieu}` : ""}`,
+                });
+            }
+            if (item.gcn?.soDon && !seen.has(`soDon_${item.gcn.soDon}`)) {
+                seen.add(`soDon_${item.gcn.soDon}`);
+                list.push({
+                    value: item.gcn.soDon,
+                    label: `Số đơn: ${item.gcn.soDon}`,
+                });
+            }
+            if (item.gcn?.maHoSo && !seen.has(`maHoSo_${item.gcn.maHoSo}`)) {
+                seen.add(`maHoSo_${item.gcn.maHoSo}`);
+                list.push({
+                    value: item.gcn.maHoSo,
+                    label: `Mã hồ sơ: ${item.gcn.maHoSo}`,
+                });
+            }
+        });
+        return list;
+    }, [donGiaHans]);
+
+    const fetchGCNs = async (searchValue, countryCode, page = 1, size = 10, overrides = {}) => {
         try {
             localStorage.setItem("partnerListPage", page);
+            const cn = overrides.customerName !== undefined ? overrides.customerName : customerName;
+            const pn = overrides.partnerName !== undefined ? overrides.partnerName : partnerName;
+            const bn = overrides.brandName !== undefined ? overrides.brandName : brandName;
             const response = await callAPI({
                 method: "post",
                 endpoint: "/application_sd_gcn_nh_kh/list",
                 data: {
                     soBang: searchValue,
+                    customerName: cn,
+                    partnerName: pn,
+                    brandName: bn,
                     pageSize: size,
                     pageIndex: page,
                 },
             });
-            setDonGiaHans(response.data);
+            setDonGiaHans(response.data || []);
             setTotalItems(response.pagination?.totalItems || 0);
             setPageIndex(response.pagination?.pageIndex || 1);
             setPageSize(response.pagination?.pageSize || 10);
         } catch (error) {
-            console.error("Lỗi khi lấy dữ liệu đối tác:", error);
+            console.error("Lỗi khi lấy dữ liệu đơn sửa đổi GCN:", error);
         }
     };
 
@@ -57,10 +108,24 @@ function Application_SD_GCN_NH_KHList() {
     useEffect(() => {
         const savedPage = parseInt(localStorage.getItem("partnerListPage") || "1", 10);
         fetchCountries();
+        fetchSharedFilterOptions().then((opts) => {
+            setCustomerOptions(opts.customerOptions);
+            setPartnerOptions(opts.partnerOptions);
+            setBrandOptions(opts.brandOptions);
+        });
 
         fetchGCNs("", "", savedPage, pageSize);
         localStorage.setItem("partnerListPage", "1");
     }, []);
+
+    const handleClearFilters = () => {
+        setSearchTerm("");
+        setCustomerName("");
+        setPartnerName("");
+        setBrandName("");
+        setPageIndex(1);
+        fetchGCNs("", "", 1, pageSize, { customerName: "", partnerName: "", brandName: "" });
+    };
 
     // Hàm xử lý xóa đối tác
     const handleDeletePartner = async () => {
@@ -88,20 +153,19 @@ function Application_SD_GCN_NH_KHList() {
             <div className="bg-white p-4 rounded-lg shadow-md">
                 <h2 className="text-2xl font-semibold text-gray-700 mb-4">📌 Danh sách đơn sửa đổi văn bằng Campuchia</h2>
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                fetchGCNs(searchTerm, selectedCountry, 1, pageSize);
+                    <div className="w-full md:w-1/3">
+                        <SearchCreatableSelect
+                            value={searchTerm}
+                            onChange={(val) => setSearchTerm(val)}
+                            onSearch={(keyword) =>
+                                fetchGCNs(keyword !== undefined ? keyword : searchTerm, selectedCountry, 1, pageSize)
                             }
-                        }}
-                        placeholder="🔍 Nhập số bằng"
-                        className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
-                    />
+                            options={searchOptions}
+                            placeholder="🔍 Nhập số đơn sửa đổi, số bằng, số đơn hoặc mã hồ sơ"
+                        />
+                    </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 flex-wrap">
                         <button
                             onClick={() => fetchGCNs(searchTerm, selectedCountry, 1, pageSize)}
                             className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
@@ -114,28 +178,57 @@ function Application_SD_GCN_NH_KHList() {
                         >
                             Thêm mới
                         </button>
+                        <button
+                            onClick={handleClearFilters}
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-3 rounded-lg shadow-md transition"
+                        >
+                            Xóa lọc
+                        </button>
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                    {/* <div className="w-full md:w-1/6">
-            <label className="block text-sm font-medium text-gray-700 mb-1  text-left">Quốc gia</label>
-            <Select
-              options={formatOptions(countries, "maQuocGia", "tenQuocGia")}
-              value={selectedCountry ? formatOptions(countries, "maQuocGia", "tenQuocGia").find(opt => opt.value === selectedCountry) : null}
-              onChange={selectedOption => setSelectedCountry(selectedOption?.value)}
-              placeholder="Chọn quốc gia"
-              className="text-left"
-              isClearable
-            />
-          </div> */}
-                    {/* <Select
-            options={formatOptions(countries, "maQuocGia", "tenQuocGia")}
-            value={selectedCountry ? formatOptions(countries, "maQuocGia", "tenQuocGia").find(opt => opt.value === selectedCountry) : null}
-            onChange={selectedOption => setSelectedCountry(selectedOption?.value)}
-            placeholder="Chọn quốc gia"
-            className="w-full md:w-1/6 text-left"
-            isClearable
-          /> */}
+                    <div className="w-full md:w-1/4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Chủ bằng</label>
+                        <SearchCreatableSelect
+                            value={customerName}
+                            onChange={(val) => setCustomerName(val)}
+                            onSearch={(keyword) =>
+                                fetchGCNs(searchTerm, selectedCountry, 1, pageSize, {
+                                    customerName: keyword !== undefined ? keyword : customerName,
+                                })
+                            }
+                            options={customerOptions}
+                            placeholder="Nhập tên chủ bằng"
+                        />
+                    </div>
+                    <div className="w-full md:w-1/4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Đại diện SHCN</label>
+                        <SearchCreatableSelect
+                            value={partnerName}
+                            onChange={(val) => setPartnerName(val)}
+                            onSearch={(keyword) =>
+                                fetchGCNs(searchTerm, selectedCountry, 1, pageSize, {
+                                    partnerName: keyword !== undefined ? keyword : partnerName,
+                                })
+                            }
+                            options={partnerOptions}
+                            placeholder="Nhập tên đại diện SHCN"
+                        />
+                    </div>
+                    <div className="w-full md:w-1/4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Nhãn hiệu</label>
+                        <SearchCreatableSelect
+                            value={brandName}
+                            onChange={(val) => setBrandName(val)}
+                            onSearch={(keyword) =>
+                                fetchGCNs(searchTerm, selectedCountry, 1, pageSize, {
+                                    brandName: keyword !== undefined ? keyword : brandName,
+                                })
+                            }
+                            options={brandOptions}
+                            placeholder="Nhập tên nhãn hiệu"
+                        />
+                    </div>
                 </div>
             </div>
             <div className="mb-2 text-left text-gray-600 text-xl">
@@ -190,7 +283,7 @@ function Application_SD_GCN_NH_KHList() {
                                         <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
                                             <button
                                                 className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                                                onClick={() => navigate(`/application_gh_nh_vn_edit/${donGiaHan.id}`)}
+                                                onClick={() => navigate(`/gcn_nh_camdetail/${donGiaHan.gcn?.id || donGiaHan.id}`)}
                                             >
                                                 📝
                                             </button>

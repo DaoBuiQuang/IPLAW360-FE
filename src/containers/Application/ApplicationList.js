@@ -316,9 +316,11 @@ function ApplicationList() {
   ];
   const loaiDonOptions = [
     { value: 1, label: "Đơn gốc" },
-    { value: 2, label: "Đơn sửa đổi" },
+    { value: "DANG_SUA_DOI", label: "Đang sửa đổi" },
+    { value: 2, label: "Đã sửa đổi" },
+    { value: "DANG_CHUYEN_QUYEN", label: "Đang chuyển nhượng" },
+    { value: 4, label: "Đã chuyển nhượng" },
     { value: 3, label: "Đơn tách" },
-    { value: 4, label: "Đơn chuyển nhượng" }
   ];
   const statusOptions = [
     { value: "1", label: "Đang giải quyết" },
@@ -1142,10 +1144,16 @@ function ApplicationList() {
             </thead>
             <tbody>
               {applications.length > 0 ? (
-                applications.map((app, index) => (
+                applications.map((app, index) => {
+                  const isFrozenOriginal = Number(app.donGoc) === 1;
+                  return (
                   <tr
                     key={app.maDonDangKy || index}
-                    className="group hover:bg-gray-100 text-center border-b relative cursor-pointer"
+                    className={`group text-center border-b relative cursor-pointer transition ${
+                      isFrozenOriginal
+                        ? "opacity-40 bg-gray-300 text-gray-700 hover:bg-gray-300"
+                        : "hover:bg-gray-100"
+                    }`}
                     onClick={() => {
                       if (app.maDonDangKy) {
                         navigate(`/applicationdetail/${app.maDonDangKy}`);
@@ -1205,35 +1213,65 @@ function ApplicationList() {
                               }
                             }}
                           >
-                            {hasDon
-                              ? hasSoDon
-                                ? content
-                                : "Chưa có số đơn"
-                              : "Không có đơn đăng ký"}
+                            <div className="flex flex-col items-center gap-0.5">
+                              <span className="font-semibold">
+                                {hasDon
+                                  ? hasSoDon
+                                    ? content
+                                    : "Chưa có số đơn"
+                                  : "Không có đơn đăng ký"}
+                              </span>
+                            </div>
                           </td>
                         );
                       }
 
                       if (col.key === "loaiDon") {
-                        let text = "";
-                        switch (app.loaiDon) {
+                        let baseText = "";
+                        let baseBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                        switch (Number(app.loaiDon)) {
+                          case 0:
                           case 1:
-                            text = "Đơn gốc";
+                            baseText = "Đơn gốc";
+                            baseBadgeClass = isFrozenOriginal
+                              ? "bg-gray-200 text-gray-700 border-gray-300"
+                              : "bg-emerald-50 text-emerald-700 border-emerald-200";
                             break;
                           case 2:
-                            text = "Đơn sửa đổi";
+                            baseText = "Đã sửa đổi";
+                            baseBadgeClass = "bg-blue-50 text-blue-700 border-blue-200";
                             break;
                           case 3:
-                            text = "Đơn tách";
+                          case 5:
+                            baseText = "Đơn tách";
+                            baseBadgeClass = "bg-purple-50 text-purple-700 border-purple-200";
+                            break;
+                          case 4:
+                            baseText = "Đã chuyển nhượng";
+                            baseBadgeClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
                             break;
                           default:
-                            text = "Không xác định";
+                            baseText = "Đơn gốc";
                             break;
                         }
 
                         return (
                           <td key={col.key} className="p-2 text-table">
-                            {text}
+                            <div className="flex flex-col items-center justify-center gap-1">
+                              {app.dangSuaDoi && (
+                                <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full border bg-amber-100 text-amber-800 border-amber-300 shadow-sm">
+                                  ⏳ Đang sửa đổi
+                                </span>
+                              )}
+                              {app.dangChuyenQuyen && (
+                                <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full border bg-orange-100 text-orange-800 border-orange-300 shadow-sm">
+                                  ⏳ Đang chuyển quyền
+                                </span>
+                              )}
+                              <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full border ${baseBadgeClass}`}>
+                                {baseText}
+                              </span>
+                            </div>
                           </td>
                         );
                       }
@@ -1475,7 +1513,8 @@ function ApplicationList() {
                         )}
                     </td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
                 <tr>
                   <td
