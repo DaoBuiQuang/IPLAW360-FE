@@ -20,6 +20,7 @@ function GCN_NH_CAMDetail() {
   const [lanNop, setLanNop] = useState(1);
   const [ngayNop, setNgayNop] = useState(null);
   const [ngayGhiNhan, setNgayGhiNhan] = useState(null);
+  const [loaiTuyenThe, setLoaiTuyenThe] = useState(null);
   const [ghiChu, setGhiChu] = useState("");
   const [isAutoImport, setIsAutoImport] = useState(false);
   const [taiLieuList, setTaiLieuList] = useState([]);
@@ -77,7 +78,7 @@ function GCN_NH_CAMDetail() {
   if (!data) return <div className="p-4">Đang tải dữ liệu...</div>;
 
   const handleSubmitAffidavit = async () => {
-    const payload = { taiLieuList, soAffidavit, idGCN_NH, lanNop, ngayNop, ngayGhiNhan, ghiChu, isAutoImport };
+    const payload = { taiLieuList, soAffidavit, idGCN_NH, lanNop, ngayNop, ngayGhiNhan, loaiTuyenThe, ghiChu, isAutoImport };
     try {
       const res = await callAPI({
         method: "post",
@@ -86,6 +87,7 @@ function GCN_NH_CAMDetail() {
       });
       await showSuccess("Thành công!", "Thêm affidavit thành công!");
       setShowAffidavitForm(false);
+      fetchDetail();
     } catch (error) {
       showError("Thất bại!", "Đã xảy ra lỗi.", error);
       console.error("Lỗi khi thêm affidavit:", error);
@@ -188,45 +190,38 @@ function GCN_NH_CAMDetail() {
 
           <button
             onClick={() => {
-              const today = new Date();
-              const deadline = new Date(data?.hanNopTuyenThe);
-              const isPastDeadline = deadline < new Date(today.toDateString());
-
-              if (!isPastDeadline) {
-                showWarning("Cảnh báo!", `Chưa đến hạn nộp Affidavit (hạn là ${deadline.toLocaleDateString("vi-VN")})`);
-                return;
+              if (data?.hanNopTuyenThe) {
+                const today = new Date();
+                const deadline = new Date(data.hanNopTuyenThe);
+                if (deadline >= new Date(today.toDateString())) {
+                  showWarning("Lưu ý!", `Chưa đến hạn nộp Affidavit (hạn là ${deadline.toLocaleDateString("vi-VN")})`);
+                }
               }
-
               setShowAffidavitForm(!showAffidavitForm);
             }}
             className="bg-[#009999] hover:bg-[#007a7a] text-white font-medium px-6 py-3 rounded-lg shadow transition"
           >
-            {showAffidavitForm ? "Ẩn form Affidavit" : "Thêm mới Affidavit"}
+            {showAffidavitForm ? "Ẩn form Affidavit" : "Nộp tuyên thệ Affidavit"}
           </button>
 
 
           <button
             onClick={() => {
-              const today = new Date();
-              const hanGiaHan = new Date(data?.hanGiaHan);
-
-              // So sánh ngày (bỏ phần giờ)
-              const isPastDeadline = hanGiaHan < new Date(today.toDateString());
-
-              if (!isPastDeadline) {
-                showWarning(
-                  "Cảnh báo!",
-                  ` Chưa đến hạn nộp đơn gia hạn (hạn là ${hanGiaHan.toLocaleDateString("vi-VN")})`
-                );
-                return;
+              if (data?.hanGiaHan) {
+                const today = new Date();
+                const hanGiaHan = new Date(data.hanGiaHan);
+                if (hanGiaHan >= new Date(today.toDateString())) {
+                  showWarning(
+                    "Lưu ý!",
+                    `Chưa đến hạn nộp đơn gia hạn (hạn là ${hanGiaHan.toLocaleDateString("vi-VN")})`
+                  );
+                }
               }
-
-              // Nếu đã quá hạn -> mở form
               setShowFormGiaHan(true);
             }}
             className="bg-[#009999] hover:bg-[#007a7a] text-white font-medium px-6 py-3 rounded-lg shadow transition"
           >
-            Thêm mới Đơn Gia Hạn
+            Tạo Đơn Gia Hạn
           </button>
 
 
@@ -234,7 +229,7 @@ function GCN_NH_CAMDetail() {
             onClick={() => setShowFormSuaDoi(true)}
             className="bg-[#009999] hover:bg-[#007a7a] text-white font-medium px-6 py-3 rounded-lg shadow transition"
           >
-            Thêm mới Đơn Sửa Đổi
+            Tạo Đơn Sửa Đổi
           </button>
         </div>
 
@@ -257,6 +252,8 @@ function GCN_NH_CAMDetail() {
               setNgayNop={setNgayNop}
               ngayGhiNhan={ngayGhiNhan}
               setNgayGhiNhan={setNgayGhiNhan}
+              loaiTuyenThe={loaiTuyenThe}
+              setLoaiTuyenThe={setLoaiTuyenThe}
               ghiChu={ghiChu}
               setGhiChu={setGhiChu}
               isAutoImport={isAutoImport}

@@ -1,7 +1,9 @@
 import React from "react";
 import dayjs from "dayjs";
-import { DatePicker, Input, InputNumber, Radio } from "antd";
+import { DatePicker, Input } from "antd";
+import Select from "react-select";
 import 'dayjs/locale/vi';
+import { AFFIDAVIT_TYPE_OPTIONS } from "../../constants/gcnCamConstants";
 
 const FormAffidavit = ({
   idGCN_NH,
@@ -12,6 +14,8 @@ const FormAffidavit = ({
   setNgayNop,
   ngayGhiNhan,
   setNgayGhiNhan,
+  loaiTuyenThe,
+  setLoaiTuyenThe,
   ghiChu,
   setGhiChu,
   soAffidavit,
@@ -29,7 +33,7 @@ const FormAffidavit = ({
             
             value={soAffidavit || ""}
             onChange={(e) => setSoAffidavit(e.target.value)}
-            placeholder="Nhập ID GCN_NH"
+            placeholder="Nhập số Affidavit"
             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
           />
         </div>
@@ -85,6 +89,21 @@ const FormAffidavit = ({
             disabledDate={(current) => current && current > dayjs().endOf("day")}
           />
         </div>
+
+        {/* Loại tuyên thệ */}
+        {typeof setLoaiTuyenThe === "function" && (
+          <div>
+            <label className="block text-gray-700 text-left">Loại tuyên thệ</label>
+            <Select
+              options={AFFIDAVIT_TYPE_OPTIONS}
+              value={AFFIDAVIT_TYPE_OPTIONS.find((opt) => opt.value === loaiTuyenThe) || null}
+              onChange={(option) => setLoaiTuyenThe(option ? option.value : null)}
+              placeholder="Chọn loại tuyên thệ"
+              isClearable
+              className="mt-1 w-full text-left"
+            />
+          </div>
+        )}
 
         {/* Ghi chú */}
         <div className="md:col-span-2">

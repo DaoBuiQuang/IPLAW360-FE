@@ -399,13 +399,13 @@ function MenuLeft() {
                         <li>
                           <NavLink to="/application_sd_nh_khlist" className={navLinkClass}>
                             <FileText size={14} />
-                            <span className="text-left w-full">Tờ khai sửa đổi đơn đăng ký</span>
+                            <span className="text-left w-full">Đơn sửa đổi</span>
                           </NavLink>
                         </li>
                         <li>
                           <NavLink to="/application_td_nh_khlist" className={navLinkClass}>
                             <FileText size={14} />
-                            <span className="text-left w-full">Tờ khai tách đơn đăng ký</span>
+                            <span className="text-left w-full">Đơn tách</span>
                           </NavLink>
                         </li>
                       </ul>

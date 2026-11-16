@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { Modal, Pagination } from "antd";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
+import { getGcnCamStatusLabel, getAffidavitTypeLabel } from "../../constants/gcnCamConstants";
 
 const FILTER_STORAGE_KEY_GCN_CAM = "gcnNhCamListFilters";
 const STATE_STORAGE_KEY_GCN_CAM = "gcnNhCamListState";
@@ -474,6 +475,9 @@ function GCN_NH_CAMList() {
                             <th className="p-2 text-table">Ngày nộp đơn</th>
                             <th className="p-2 text-table">Ngày cấp bằng</th>
                             <th className="p-2 text-table">Ghi chú</th>
+                            <th className="p-2 text-table">Trạng thái xử lý bằng</th>
+                            <th className="p-2 text-table">Loại tuyên thệ</th>
+                            <th className="p-2 text-table">Ngày ghi nhận tuyên thệ</th>
                             <th className="p-2 text-table">Ngày yêu cầu Affidavit</th>
                             <th className="p-2 text-table">Ngày yêu cầu gia hạn</th>
                             <th className="p-2 text-table">Ngày hết hạn bằng</th>
@@ -540,6 +544,17 @@ function GCN_NH_CAMList() {
                                         : ""}
                                 </td>
                                 <td className="p-2 text-table">{gcn_nh.ghiChu}</td>
+                                <td className="p-2 text-table">
+                                    {getGcnCamStatusLabel(gcn_nh.trangThaiBang)}
+                                </td>
+                                <td className="p-2 text-table">
+                                    {getAffidavitTypeLabel(gcn_nh.loaiTuyenThe)}
+                                </td>
+                                <td className="p-2 text-table">
+                                    {gcn_nh.ngayGhiNhanTuyenThe
+                                        ? new Date(gcn_nh.ngayGhiNhanTuyenThe).toLocaleDateString("vi-VN")
+                                        : ""}
+                                </td>
 
                                 {/* Hạn Affidavit */}
                                 <td className="p-2 text-table">

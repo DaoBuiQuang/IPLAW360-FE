@@ -7,8 +7,12 @@ import { showSuccess, showError } from "../../components/commom/Notification";
 import Select from "react-select";
 import { Upload, Button, DatePicker } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
 import dayjs from 'dayjs';
+import {
+    GCN_CAM_STATUS_OPTIONS,
+    AFFIDAVIT_TYPE_OPTIONS,
+    calcNextAffidavitDeadline,
+} from "../../constants/gcnCamConstants";
 function GCN_NH_CAMEdit() {
     const { id } = useParams();
     const { t } = useTranslation();
@@ -43,24 +47,13 @@ function GCN_NH_CAMEdit() {
     const [tenNhanHieu, setTenNhanHieu] = useState("");
     const [hanGiaHanBang, setHanGiaHanBang] = useState(null);
     const [hanNopTuyenThe, setHanNopTuyenThe] = useState(null);
-    const [trangThaiBang, setTrangThaiThaiBang] = useState(null);
+    const [ngayNopYCTuyenThe, setNgayNopYCTuyenThe] = useState(null);
+    const [loaiTuyenThe, setLoaiTuyenThe] = useState(null);
+    const [ngayGhiNhanTuyenThe, setNgayGhiNhanTuyenThe] = useState(null);
+    const [trangThaiBang, setTrangThaiThaiBang] = useState("1");
     const [idGUQ, setIdGUQ] = useState(null);
     const [dsGiayUyQuyen, setDsGiayUyQuyen] = useState([]);
-    const statusOptions = [
-        { value: "1", label: "Chưa xử lý" },
-        { value: "2", label: "Đang xử lý gia hạn" },
-        { value: "3", label: "Đang xử lý Affidavit" },
-        { value: "4", label: "Không xử lý gia hạn" },
-        { value: "5", label: "Không xử lý Affidavit" },
-    ];
-    const [vuViecList, setVuViecList] = useState([]);
-    const isFormValid =
-        soBang.trim() &&
-        soDon.trim() &&
-        idKhachHang &&
-        idDoiTac
-    // Array.isArray(maSPDVList) &&
-    // maSPDVList.length > 0;
+    const isFormValid = Boolean(soBang.trim());
     const fetchDetail = async () => {
         try {
             const response = await callAPI({
@@ -88,14 +81,17 @@ function GCN_NH_CAMEdit() {
                 setNgayNopDon(item.ngayNopDon || null);
                 setNgayCapBang(item.ngayCapBang || null);
                 setNgayHetHanBang(item.ngayHetHanBang || null);
-                setHanGiaHanBang(item.hanGiaHanBang || null);
+                setHanGiaHanBang(item.hanGiaHan || item.hanGiaHanBang || null);
                 setHanNopTuyenThe(item.hanNopTuyenThe || null);
+                setNgayNopYCTuyenThe(item.ngayNopYCTuyenThe || null);
+                setLoaiTuyenThe(item.loaiTuyenThe || null);
+                setNgayGhiNhanTuyenThe(item.ngayGhiNhanTuyenThe || null);
+                setTrangThaiThaiBang(item.trangThaiBang ? String(item.trangThaiBang) : "1");
                 setChiTietNhomSPDV(item.chiTietNhomSPDV || "");
                 setMauSac(item.mauSacNH || "");
                 setProductAndService(item.productAndService || []);
                 setDsNhomSPDV(item.dsNhomSPDV || null);
                 setAnhBangBase64(item.anhBang || null);
-                setVuViecList(item.vuViecs || []);
                 setIdGUQ(item.idGUQ || null);
             }
         } catch (error) {
@@ -122,36 +118,13 @@ function GCN_NH_CAMEdit() {
         let error = "";
         if (!value || (typeof value === "string" && !value.trim())) {
             if (field === "soBang") error = "Số bằng không được để trống";
-            if (field === "soDon") error = "Số đơn không được để trống";
-            if (field === "idKhachHang") error = "Khách hàng không được để trống";
-            if (field === "idDoiTac") error = "Đối tác không được để trống";
         }
-        // }
 
         setErrors((prevErrors) => ({
             ...prevErrors,
             [field]: error,
         }));
     };
-    useEffect(() => {
-        if (ngayNopDon) {
-            const baseDate = dayjs(ngayNopDon);
-            setNgayHetHanBang(baseDate.add(10, "year").format("YYYY-MM-DD"));
-            setHanGiaHanBang(baseDate.add(9.5, "year").format("YYYY-MM-DD"));
-        } else {
-            setNgayHetHanBang(null);
-            setHanGiaHanBang(null);
-        }
-    }, [ngayNopDon]);
-
-    useEffect(() => {
-        if (ngayCapBang) {
-            const baseDate = dayjs(ngayCapBang);
-            setHanNopTuyenThe(baseDate.add(5, "year").format("YYYY-MM-DD"));
-        } else {
-            setHanNopTuyenThe(null);
-        }
-    }, [ngayCapBang]);
     useEffect(() => {
         const fetchGiayUyQuyen = async () => {
             if (!idKhachHang) return;
@@ -179,25 +152,31 @@ function GCN_NH_CAMEdit() {
         try {
             const payload = {
                 id,
-                soBang,
-                soDon,
-                idKhachHang,
-                idDoiTac,
-                maHoSo,
-                ghiChu,
-                dsNhomSPDV: dsNhomSPDV,
-                maUyQuyen,
-                ngayNopDon,
-                ngayCapBang,
-                ngayHetHanBang,
-                chiTietNhomSPDV,
-                mauSacNH: mauSac,
-                maNhanHieu,
-                tenNhanHieu,
-                hanGiaHanBang,
-                hanNopTuyenThe,
-                linkAnh: anhBang, // gửi base64 lên server
-                idGUQ,
+                soBang: soBang.trim(),
+                soDon: soDon || null,
+                idKhachHang: idKhachHang || null,
+                idDoiTac: idDoiTac || null,
+                maHoSo: maHoSo || null,
+                quyetDinhSo: quyetDinhSo || null,
+                ghiChu: ghiChu || null,
+                dsNhomSPDV: dsNhomSPDV || null,
+                maUyQuyen: maUyQuyen || null,
+                ngayNopDon: ngayNopDon || null,
+                ngayCapBang: ngayCapBang || null,
+                ngayHetHanBang: ngayHetHanBang || null,
+                chiTietNhomSPDV: chiTietNhomSPDV || null,
+                mauSacNH: mauSac || null,
+                maNhanHieu: maNhanHieu || null,
+                tenNhanHieu: tenNhanHieu || null,
+                hanGiaHan: hanGiaHanBang || null,
+                hanGiaHanBang: hanGiaHanBang || null,
+                hanNopTuyenThe: hanNopTuyenThe || null,
+                ngayNopYCTuyenThe: ngayNopYCTuyenThe || null,
+                loaiTuyenThe: loaiTuyenThe || null,
+                ngayGhiNhanTuyenThe: ngayGhiNhanTuyenThe || null,
+                trangThaiBang: trangThaiBang || "1",
+                linkAnh: anhBangBase64 || null,
+                idGUQ: idGUQ || null,
             };
 
             await callAPI({
@@ -288,9 +267,6 @@ function GCN_NH_CAMEdit() {
             setIdDoiTac(null);
         }
     };
-    const handleVuViecChange = (list) => {
-        setVuViecList(list);
-    }
     return (
         <div className="p-1 bg-gray-100 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-4xl">
@@ -321,23 +297,17 @@ function GCN_NH_CAMEdit() {
 
                     <div>
                         <label className="block text-gray-700 text-left">
-                            Số đơn <span className="text-red-500">*</span>
+                            Số đơn
                         </label>
                         <input
                             type="text"
                             value={soDon}
                             onChange={(e) => {
                                 setSoDon(e.target.value);
-                                validateField("soDon", e.target.value);
                             }}
                             placeholder="Nhập số đơn"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                         />
-                        {errors.soDon && (
-                            <p className="text-red-500 text-xs mt-1 text-left">
-                                {errors.soDon}
-                            </p>
-                        )}
                     </div>
                     <div>
                         <label className="block text-gray-700 text-left">Ngày nộp đơn</label>
@@ -345,7 +315,10 @@ function GCN_NH_CAMEdit() {
                             value={ngayNopDon ? dayjs(ngayNopDon) : null}
                             onChange={(date) => {
                                 if (dayjs.isDayjs(date) && date.isValid()) {
-                                    setNgayNopDon(date.format("YYYY-MM-DD"));
+                                    const formatted = date.format("YYYY-MM-DD");
+                                    setNgayNopDon(formatted);
+                                    setNgayHetHanBang(date.add(10, "year").format("YYYY-MM-DD"));
+                                    setHanGiaHanBang(date.add(9.5, "year").format("YYYY-MM-DD"));
                                 } else {
                                     setNgayNopDon(null);
                                 }
@@ -374,9 +347,11 @@ function GCN_NH_CAMEdit() {
                         <DatePicker
                             value={ngayCapBang ? dayjs(ngayCapBang) : null}
                             onChange={(date) => {
-                                setNgayCapBang(
-                                    date && date.isValid() ? date.format("YYYY-MM-DD") : null
-                                );
+                                const val = date && date.isValid() ? date.format("YYYY-MM-DD") : null;
+                                setNgayCapBang(val);
+                                if (!ngayGhiNhanTuyenThe) {
+                                    setHanNopTuyenThe(calcNextAffidavitDeadline({ ngayGhiNhanTuyenThe, ngayCapBang: val }));
+                                }
                             }}
                             format="DD/MM/YYYY"
                             placeholder="Chọn ngày cấp bằng"
@@ -384,7 +359,7 @@ function GCN_NH_CAMEdit() {
                         />
                     </div>
                     <div className="flex-1">
-                        <label className="block text-gray-700 text-left">Khách hàng <span className="text-red-500">*</span></label>
+                        <label className="block text-gray-700 text-left">Khách hàng</label>
                         <Select
                             options={formatOptions(customers, "id", "maKhachHang", "tenKhachHang")}
                             value={idKhachHang ? formatOptions(customers, "id", "maKhachHang", "tenKhachHang").find(opt => opt.id === idKhachHang) : null}
@@ -393,7 +368,6 @@ function GCN_NH_CAMEdit() {
                             className="w-full mt-1 rounded-lg text-left"
                             isClearable
                         />
-                        {errors.maKhachHang && <p className="text-red-500 text-xs mt-1 text-left">{errors.idKhachHang}</p>}
                     </div>
                     <div>
                         <label className="block text-gray-700 text-left">Đối tác</label>
@@ -408,7 +382,7 @@ function GCN_NH_CAMEdit() {
                     </div>
                     <div className="">
                         <label className="block text-gray-700 text-left mb-1">
-                            Chọn nhãn hiệu <span className="text-red-500">*</span>
+                            Chọn nhãn hiệu
                         </label>
                         <Select
                             options={formatOptionsNew(brands, "maNhanHieu", "tenNhanHieu")}
@@ -539,14 +513,64 @@ function GCN_NH_CAMEdit() {
                         />
                     </div>
                     <div>
+                        <label className="block text-gray-700 text-left">Ngày nộp YC ghi nhận tuyên thệ</label>
+                        <DatePicker
+                            value={ngayNopYCTuyenThe ? dayjs(ngayNopYCTuyenThe) : null}
+                            onChange={(date) => {
+                                setNgayNopYCTuyenThe(
+                                    date && date.isValid() ? date.format("YYYY-MM-DD") : null
+                                );
+                            }}
+                            format="DD/MM/YYYY"
+                            placeholder="Chọn ngày nộp YC tuyên thệ"
+                            className="mt-1 w-full"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 text-left">Loại tuyên thệ (Affidavit)</label>
+                        <Select
+                            options={AFFIDAVIT_TYPE_OPTIONS}
+                            value={AFFIDAVIT_TYPE_OPTIONS.find(opt => opt.value === loaiTuyenThe) || null}
+                            onChange={(option) => {
+                                const val = option ? option.value : null;
+                                setLoaiTuyenThe(val);
+                                if (ngayGhiNhanTuyenThe && val) {
+                                    setTrangThaiThaiBang(val === "SU_DUNG" ? "6" : "7");
+                                }
+                            }}
+                            placeholder="Chọn loại tuyên thệ"
+                            isClearable
+                            className="w-full mt-1 rounded-lg text-left"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 text-left">Ngày ghi nhận tuyên thệ</label>
+                        <DatePicker
+                            value={ngayGhiNhanTuyenThe ? dayjs(ngayGhiNhanTuyenThe) : null}
+                            onChange={(date) => {
+                                const val = date && date.isValid() ? date.format("YYYY-MM-DD") : null;
+                                setNgayGhiNhanTuyenThe(val);
+                                setHanNopTuyenThe(
+                                    calcNextAffidavitDeadline({ ngayGhiNhanTuyenThe: val, ngayCapBang })
+                                );
+                                if (val && loaiTuyenThe) {
+                                    setTrangThaiThaiBang(loaiTuyenThe === "SU_DUNG" ? "6" : "7");
+                                }
+                            }}
+                            format="DD/MM/YYYY"
+                            placeholder="Chọn ngày ghi nhận tuyên thệ"
+                            className="mt-1 w-full"
+                        />
+                    </div>
+                    <div>
                         <label className="block text-gray-700 text-left">
                             Trạng thái xử lý bằng
                             <span className="text-red-500">*</span>
                         </label>
 
                         <Select
-                            options={statusOptions}
-                            value={statusOptions.find(opt => opt.value === String(trangThaiBang))}
+                            options={GCN_CAM_STATUS_OPTIONS}
+                            value={GCN_CAM_STATUS_OPTIONS.find(opt => opt.value === String(trangThaiBang)) || null}
                             onChange={(option) => setTrangThaiThaiBang(option?.value || "1")}
                             placeholder="Chọn trạng thái bằng"
                             isClearable
@@ -606,12 +630,6 @@ function GCN_NH_CAMEdit() {
                             rows="3"
                         ></textarea>
                     </div>
-                </div>
-                <div className="col-span-2">
-                    <DSVuViec
-                        maHoSo={maHoSo}
-                        onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                    />
                 </div>
                 <div className="flex justify-center gap-4 mt-4">
                     <button

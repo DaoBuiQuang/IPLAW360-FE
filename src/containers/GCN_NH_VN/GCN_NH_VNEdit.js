@@ -608,17 +608,6 @@ function GCN_NH_VNEdit() {
                         ></textarea>
                     </div>
                 </div>
-                <div className="col-span-2">
-                    <DSVuViec
-                        maHoSo={maHoSoVuViec}
-
-                        maDonDangKy={maDonDangKy}
-                        onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                        maHoSoVuViec={maHoSoVuViec}
-                        maUyQuyen={maUyQuyen}
-                        setMaUyQuyen={setMaUyQuyen}
-                    />
-                </div>
                 <div className="flex justify-center gap-4 mt-4">
                     <button
                         className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg"

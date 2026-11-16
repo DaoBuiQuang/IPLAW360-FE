@@ -672,19 +672,6 @@ function ApplicationEdit_KH() {
                             />
                         </div>
                         <div className="col-span-2">
-                            <DSVuViec
-                                maHoSo={maHoSoVuViec}
-                                onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                                maHoSoVuViec={maHoSoVuViec}
-                                giayUyQuyenGoc={giayUyQuyenGoc}
-                                setGiayUyQuyenGoc={setGiayUyQuyenGoc}
-                                maUyQuyen={maUyQuyen}
-                                setMaUyQuyen={setMaUyQuyen}
-                                isKH={isKH}
-                                maDonDangKy={maDonDangKy}
-                            />
-                        </div>
-                        <div className="col-span-2">
                             {loaiDon === 2 && (
                                 <FormSuaDoi
                                     ngayYeuCau={ngayYeuCau}

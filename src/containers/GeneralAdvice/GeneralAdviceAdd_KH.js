@@ -200,14 +200,6 @@ function GeneralAdviceAdd_KH() {
                     </div>
 
                 </div>
-                <div className="col-span-2">
-                    <DSVuViec
-                        maHoSo={maHoSo}
-                        onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                        isGeneralAdvice={isGeneralAdvice}
-                        maHoSoVuViec={maHoSo}
-                    />
-                </div>
                 <div className="flex justify-center gap-4 mt-4">
                     <button className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg" onClick={() => navigate(-1)}>Quay lại</button>
 

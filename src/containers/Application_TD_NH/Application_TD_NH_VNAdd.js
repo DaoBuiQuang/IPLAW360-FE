@@ -796,18 +796,6 @@ function Application_TD_NH_VNAdd() {
                                 </tbody>
 
                             </table>
-                            <div className="col-span-2">
-                                <DSVuViec
-                                    maHoSo={maHoSoVuViec}
-                                    onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                                    maHoSoVuViec={maHoSoVuViec}
-                                    giayUyQuyenGoc={giayUyQuyenGoc}
-                                    setGiayUyQuyenGoc={setGiayUyQuyenGoc}
-                                    maUyQuyen={maUyQuyen}
-                                    setMaUyQuyen={setMaUyQuyen}
-                                    isViewOnly={isViewOnly}
-                                />
-                            </div>
                             <div className="flex gap-3 mb-4">
                                 <Button type="primary" style={{ backgroundColor: "#009999", borderColor: "#009999" }} onClick={() => setIsModalHTOpen(true)}>📄 Xem lịch sử nhận thông báo từ chối thẩm định hình thức</Button>
                                 <Button type="primary" style={{ backgroundColor: "#009999", borderColor: "#009999" }} onClick={() => setIsModalNDOpen(true)}>📄 Xem lịch sử nhân thông báo từ chối thẩm định nội dung</Button>

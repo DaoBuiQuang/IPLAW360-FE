@@ -315,18 +315,6 @@ const ThongTinHoSo = ({
                         </tbody>
 
                     </table>
-                    <div className="col-span-2">
-                        <DSVuViec
-                            maHoSo={maHoSoVuViec}
-                            onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                            maHoSoVuViec={maHoSoVuViec}
-                            giayUyQuyenGoc={giayUyQuyenGoc}
-                            setGiayUyQuyenGoc={setGiayUyQuyenGoc}
-                            maUyQuyen={maUyQuyen}
-                            setMaUyQuyen={setMaUyQuyen}
-                            isViewOnly={isViewOnly}
-                        />
-                    </div>
                 </div>
             </div>
            

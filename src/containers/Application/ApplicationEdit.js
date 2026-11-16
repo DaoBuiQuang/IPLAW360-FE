@@ -885,19 +885,6 @@ function ApplicationEdit() {
                         )}
 
                         <div className="col-span-2">
-                            <DSVuViec
-                                maHoSo={maHoSoVuViec}
-
-                                maDonDangKy={maDonDangKy}
-                                onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                                maHoSoVuViec={maHoSoVuViec}
-                                giayUyQuyenGoc={giayUyQuyenGoc}
-                                setGiayUyQuyenGoc={setGiayUyQuyenGoc}
-                                maUyQuyen={maUyQuyen}
-                                setMaUyQuyen={setMaUyQuyen}
-                            />
-                        </div>
-                        <div className="col-span-2">
                             {loaiDon === 2 && (
                                 <FormSuaDoi
                                     ngayYeuCau={ngayYeuCau}

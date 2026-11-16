@@ -681,17 +681,6 @@ function ApplicationAdd() {
                             />
                         </div>
                     )}
-                    <div className="col-span-2">
-                        <DSVuViec
-                            maHoSo={maHoSoVuViec}
-                            onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                            maHoSoVuViec={maHoSoVuViec}
-                            giayUyQuyenGoc={giayUyQuyenGoc}
-                            setGiayUyQuyenGoc={setGiayUyQuyenGoc}
-                            maUyQuyen={maUyQuyen}
-                            setMaUyQuyen={setMaUyQuyen}
-                        />
-                    </div>
                 </div>
 
                 <div className="flex justify-center gap-4 mt-4">

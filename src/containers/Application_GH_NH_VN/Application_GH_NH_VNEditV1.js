@@ -525,18 +525,6 @@ function Application_GH_NH_VNEditV1() {
                             setNgayGuiBangChoKH={setNgayGuiBangChoKH}
                         />
                     </div>
-                    <div className="col-span-2">
-                        <DSVuViec
-                            maHoSo={maHoSoVuViec}
-                            onVuViecChange={handleVuViecChange} initialVuViecs={vuViecList}
-                            maHoSoVuViec={maHoSoVuViec}
-                            giayUyQuyenGoc={giayUyQuyenGoc}
-                            setGiayUyQuyenGoc={setGiayUyQuyenGoc}
-                            maUyQuyen={maUyQuyen}
-                            setMaUyQuyen={setMaUyQuyen}
-                            tenLoaiDon={tenLoaiDon}
-                        />
-                    </div>
                 </div>
 
                 <div className="flex justify-center gap-4 mt-4">

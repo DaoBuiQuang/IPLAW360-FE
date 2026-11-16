@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import { getGcnCamStatusLabel, getAffidavitTypeLabel } from "../../constants/gcnCamConstants";
 
 function GCN_NH_Info({ data }) {
   const navigate = useNavigate();
@@ -96,7 +97,10 @@ function GCN_NH_Info({ data }) {
                 className="text-indigo-600 font-semibold cursor-pointer hover:underline"
                 onClick={() => {
                   if (idGcnGoc) {
-                    navigate(`/gcn_nhdetail/${idGcnGoc}`);
+                    const detailPath = data.maQuocGia === "KH"
+                      ? `/gcn_nh_camdetail/${idGcnGoc}`
+                      : `/gcn_nhdetail/${idGcnGoc}`;
+                    navigate(detailPath);
                     window.location.reload();
                   }
                 }}
@@ -119,6 +123,10 @@ function GCN_NH_Info({ data }) {
         {renderRow("Ngày nộp đơn", data.ngayNopDon)}
         {renderRow("Ngày cấp bằng", data.ngayCapBang)}
         {renderRow("Ghi chú", data.ghiChu)}
+        {renderRow("Trạng thái xử lý bằng", getGcnCamStatusLabel(data.trangThaiBang))}
+        {renderRow("Ngày nộp YC tuyên thệ", data.ngayNopYCTuyenThe)}
+        {renderRow("Loại tuyên thệ", getAffidavitTypeLabel(data.loaiTuyenThe))}
+        {renderRow("Ngày ghi nhận tuyên thệ", data.ngayGhiNhanTuyenThe)}
         {renderRow("Ngày yêu cầu Affidavit", data?.hanNopTuyenThe)}
          {renderRow("Ngày yêu cầu gia hạn", data.hanGiaHan)}
         {renderRow("Ngày hết hạn", displayNgayHetHan)}
