@@ -1,17 +1,14 @@
 //Chưa đẩy lên 29/09
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import callAPI from "../../utils/api";
 import { showSuccess, showError } from "../../components/commom/Notification";
 import Select from "react-select";
 import { Upload, Button, DatePicker } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
 import dayjs from 'dayjs';
 function GCN_NH_VNEdit() {
     const { id } = useParams();
-    const { t } = useTranslation();
     const navigate = useNavigate();
 
     // State cho form GCN
@@ -36,17 +33,14 @@ function GCN_NH_VNEdit() {
     const [productAndService, setProductAndService] = useState([]);
     const [customers, setCustomers] = useState([]);
     const [partners, setPartners] = useState([]);
-    const [errors, setErrors] = useState({});
+    const [soBangTouched, setSoBangTouched] = useState(false);
     const [maSPDVList, setMaSPDVList] = useState([]);
     const [brands, setBrands] = useState([]);
     const [maNhanHieu, setMaNhanHieu] = useState("");
     const [tenNhanHieu, setTenNhanHieu] = useState("");
     const [hanGiaHanBang, setHanGiaHanBang] = useState(null);
     const [hanNopTuyenThe, setHanNopTuyenThe] = useState(null);
-    const [vuViecList, setVuViecList] = useState([]);
-    const [maHoSoVuViec, setMaHoSoVuViec] = useState("");
-    const [maDonDangKy, setMaDonDangKy] = useState("");
-    const [trangThaiBang, setTrangThaiThaiBang] = useState(null);
+    const [trangThaiBang, setTrangThaiBang] = useState(null);
     const [idGUQ, setIdGUQ] = useState(null);
     const [dsGiayUyQuyen, setDsGiayUyQuyen] = useState([]);
     const statusOptions = [
@@ -54,13 +48,10 @@ function GCN_NH_VNEdit() {
         { value: "2", label: "Đang xử lý gia hạn" },
         { value: "4", label: "Không xử lý gia hạn" },
     ];
-    const isFormValid =
-        soBang.trim() &&
-        soDon.trim() &&
-        idKhachHang &&
-        idDoiTac
-    // Array.isArray(maSPDVList) &&
-    // maSPDVList.length > 0;
+    const hasSoBang = soBang.trim().length > 0;
+    const selectedStatus = statusOptions.find(option => option.value === trangThaiBang)
+        ?? (trangThaiBang === "Đã chuyển quyền" ? { value: trangThaiBang, label: trangThaiBang } : null);
+    const isFormValid = hasSoBang && selectedStatus !== null;
     const fetchDetail = async () => {
         try {
             const response = await callAPI({
@@ -74,6 +65,7 @@ function GCN_NH_VNEdit() {
 
                 // Gán dữ liệu từ API về state
                 setSoBang(item.soBang || "");
+                setTrangThaiBang(item.trangThaiBang == null ? null : String(item.trangThaiBang));
                 setSoDon(item.soDon || "");
                 setIdKhachHang(item.idKhachHang || "");
                 setIdDoiTac(item.idDoiTac || "");
@@ -88,14 +80,13 @@ function GCN_NH_VNEdit() {
                 setNgayNopDon(item.ngayNopDon || null);
                 setNgayCapBang(item.ngayCapBang || null);
                 setNgayHetHanBang(item.ngayHetHanBang || null);
-                setHanGiaHanBang(item.hanGiaHanBang || null);
+                setHanGiaHanBang(item.hanGiaHan || null);
                 setHanNopTuyenThe(item.hanNopTuyenThe || null);
                 setChiTietNhomSPDV(item.chiTietNhomSPDV || "");
                 setMauSac(item.mauSacNH || "");
                 setProductAndService(item.productAndService || []);
                 setDsNhomSPDV(item.dsNhomSPDV || null);
                 setAnhBangBase64(item.anhBang || null);
-                setVuViecList(item.vuViecs || []);
                 setIdGUQ(item.idGUQ || null);
             }
         } catch (error) {
@@ -117,41 +108,6 @@ function GCN_NH_VNEdit() {
         reader.readAsDataURL(file); // đọc file thành base64
         return false; // chặn upload tự động
     };
-    // Validate
-    const validateField = (field, value) => {
-        let error = "";
-        if (!value || (typeof value === "string" && !value.trim())) {
-            if (field === "soBang") error = "Số bằng không được để trống";
-            if (field === "soDon") error = "Số đơn không được để trống";
-            if (field === "idKhachHang") error = "Khách hàng không được để trống";
-            if (field === "idDoiTac") error = "Đối tác không được để trống";
-        }
-        // }
-
-        setErrors((prevErrors) => ({
-            ...prevErrors,
-            [field]: error,
-        }));
-    };
-    useEffect(() => {
-        if (ngayNopDon) {
-            const baseDate = dayjs(ngayNopDon);
-            setNgayHetHanBang(baseDate.add(10, "year").format("YYYY-MM-DD"));
-            setHanGiaHanBang(baseDate.add(9.5, "year").format("YYYY-MM-DD"));
-        } else {
-            setNgayHetHanBang(null);
-            setHanGiaHanBang(null);
-        }
-    }, [ngayNopDon]);
-
-    useEffect(() => {
-        if (ngayCapBang) {
-            const baseDate = dayjs(ngayCapBang);
-            setHanNopTuyenThe(baseDate.add(5, "year").format("YYYY-MM-DD"));
-        } else {
-            setHanNopTuyenThe(null);
-        }
-    }, [ngayCapBang]);
     useEffect(() => {
         const fetchGiayUyQuyen = async () => {
             if (!idKhachHang) return;
@@ -175,13 +131,16 @@ function GCN_NH_VNEdit() {
     }, [idKhachHang]);
     // Submit
     const handleEditGCN = async () => {
+        if (!isFormValid) return;
+
         try {
             const payload = {
                 id,
-                soBang,
+                soBang: soBang.trim(),
+                trangThaiBang,
                 soDon,
-                idKhachHang,
-                idDoiTac,
+                idKhachHang: idKhachHang || null,
+                idDoiTac: idDoiTac || null,
                 maHoSo,
                 ghiChu,
                 dsNhomSPDV: dsNhomSPDV,
@@ -191,12 +150,11 @@ function GCN_NH_VNEdit() {
                 ngayHetHanBang,
                 chiTietNhomSPDV,
                 mauSacNH: mauSac,
-                maNhanHieu,
+                maNhanHieu: maNhanHieu || null,
                 tenNhanHieu,
                 hanGiaHan: hanGiaHanBang,
                 hanNopTuyenThe,
-                linkAnh: anhBang,
-                vuViecs: vuViecList,
+                linkAnh: anhBang ? anhBangBase64 : undefined,
                 idGUQ,
             };
 
@@ -289,9 +247,6 @@ function GCN_NH_VNEdit() {
         }
     };
 
-    const handleVuViecChange = (list) => {
-        setVuViecList(list);
-    }
     return (
         <div className="p-1 bg-gray-100 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-4xl">
@@ -300,56 +255,49 @@ function GCN_NH_VNEdit() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div className="flex-1">
-                        <label className="block text-gray-700 text-left">
+                        <label htmlFor="soBang" className="block text-gray-700 text-left">
                             Số bằng <span className="text-red-500">*</span>
                         </label>
                         <input
+                            id="soBang"
                             type="text"
                             value={soBang}
                             onChange={(e) => {
                                 setSoBang(e.target.value);
-                                validateField("soBang", e.target.value);
+                                setSoBangTouched(true);
                             }}
+                            required
                             placeholder="Nhập số bằng"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                         />
-                        {errors.soBang && (
+                        {soBangTouched && !hasSoBang && (
                             <p className="text-red-500 text-xs mt-1 text-left">
-                                {errors.soBang}
+                                Số bằng không được để trống
                             </p>
                         )}
                     </div>
 
                     <div>
                         <label className="block text-gray-700 text-left">
-                            Số đơn <span className="text-red-500">*</span>
+                            Số đơn
                         </label>
                         <input
                             type="text"
                             value={soDon}
-                            onChange={(e) => {
-                                setSoDon(e.target.value);
-                                validateField("soDon", e.target.value);
-                            }}
+                            onChange={(e) => setSoDon(e.target.value)}
                             placeholder="Nhập số đơn"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                         />
-                        {errors.soDon && (
-                            <p className="text-red-500 text-xs mt-1 text-left">
-                                {errors.soDon}
-                            </p>
-                        )}
                     </div>
                     <div>
                         <label className="block text-gray-700 text-left">Ngày nộp đơn</label>
                         <DatePicker
                             value={ngayNopDon ? dayjs(ngayNopDon) : null}
                             onChange={(date) => {
-                                if (dayjs.isDayjs(date) && date.isValid()) {
-                                    setNgayNopDon(date.format("YYYY-MM-DD"));
-                                } else {
-                                    setNgayNopDon(null);
-                                }
+                                const filingDate = date?.isValid() ? date : null;
+                                setNgayNopDon(filingDate?.format("YYYY-MM-DD") ?? null);
+                                setNgayHetHanBang(filingDate?.add(10, "year").format("YYYY-MM-DD") ?? null);
+                                setHanGiaHanBang(filingDate?.add(9.5, "year").format("YYYY-MM-DD") ?? null);
                             }}
                             format="DD/MM/YYYY"
                             placeholder="Chọn ngày nộp đơn"
@@ -375,9 +323,9 @@ function GCN_NH_VNEdit() {
                         <DatePicker
                             value={ngayCapBang ? dayjs(ngayCapBang) : null}
                             onChange={(date) => {
-                                setNgayCapBang(
-                                    date && date.isValid() ? date.format("YYYY-MM-DD") : null
-                                );
+                                const grantDate = date?.isValid() ? date : null;
+                                setNgayCapBang(grantDate?.format("YYYY-MM-DD") ?? null);
+                                setHanNopTuyenThe(grantDate?.add(5, "year").format("YYYY-MM-DD") ?? null);
                             }}
                             format="DD/MM/YYYY"
                             placeholder="Chọn ngày cấp bằng"
@@ -385,7 +333,7 @@ function GCN_NH_VNEdit() {
                         />
                     </div>
                     <div className="flex-1">
-                        <label className="block text-gray-700 text-left">Khách hàng <span className="text-red-500">*</span></label>
+                        <label className="block text-gray-700 text-left">Khách hàng</label>
                         <Select
                             options={formatOptions(customers, "id", "maKhachHang", "tenKhachHang")}
                             value={idKhachHang ? formatOptions(customers, "id", "maKhachHang", "tenKhachHang").find(opt => opt.id === idKhachHang) : null}
@@ -394,7 +342,6 @@ function GCN_NH_VNEdit() {
                             className="w-full mt-1 rounded-lg text-left"
                             isClearable
                         />
-                        {errors.maKhachHang && <p className="text-red-500 text-xs mt-1 text-left">{errors.idKhachHang}</p>}
                     </div>
                     <div>
                         <label className="block text-gray-700 text-left">Đối tác</label>
@@ -409,7 +356,7 @@ function GCN_NH_VNEdit() {
                     </div>
                     <div className="">
                         <label className="block text-gray-700 text-left mb-1">
-                            Chọn nhãn hiệu <span className="text-red-500">*</span>
+                            Chọn nhãn hiệu
                         </label>
                         <Select
                             options={formatOptionsNew(brands, "maNhanHieu", "tenNhanHieu")}
@@ -423,7 +370,6 @@ function GCN_NH_VNEdit() {
                             onChange={(selectedOption) => {
                                 const value = selectedOption?.value || "";
                                 setMaNhanHieu(value);
-                                validateField("maNhanHieu", value);
 
                                 const found = brands.find((b) => b.maNhanHieu === value);
                                 setTenNhanHieu(found ? found.tenNhanHieu : "");
@@ -432,11 +378,6 @@ function GCN_NH_VNEdit() {
                             placeholder="Chọn nhãn hiệu"
                             className="mt-1 text-left"
                         />
-                        {errors?.maNhanHieu && (
-                            <p className="text-red-500 text-xs mt-1 text-left">
-                                {errors.maNhanHieu}
-                            </p>
-                        )}
                     </div>
                     <div className="w-full">
                         <label className="block text-gray-700 text-left">
@@ -463,7 +404,7 @@ function GCN_NH_VNEdit() {
                         <label className="block text-gray-700 text-left">Danh sách nhóm Sản phẩm dịch vụ</label>
                         <input
                             type="text"
-                            value={dsNhomSPDV}
+                            value={dsNhomSPDV ?? ""}
                             onChange={(e) => setDsNhomSPDV(e.target.value)}
                             placeholder="Nhập mã hồ sơ"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
@@ -540,17 +481,19 @@ function GCN_NH_VNEdit() {
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 text-left">
-                            Trạng thái bằng
+                        <label htmlFor="trangThaiBang" className="block text-gray-700 text-left">
+                            Trạng thái bằng{" "}
                             <span className="text-red-500">*</span>
                         </label>
 
                         <Select
+                            inputId="trangThaiBang"
                             options={statusOptions}
-                            value={statusOptions.find(opt => opt.value === String(trangThaiBang))}
-                            onChange={(option) => setTrangThaiThaiBang(option?.value || "1")}
+                            value={selectedStatus}
+                            onChange={(option) => setTrangThaiBang(option?.value ?? null)}
                             placeholder="Chọn trạng thái bằng"
                             isClearable
+                            required
                             className="w-full mt-1 rounded-lg text-left"
                         />
                     </div>

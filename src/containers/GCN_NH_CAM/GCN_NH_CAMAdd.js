@@ -1,7 +1,6 @@
 //Chưa đẩy lên 29/09
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import callAPI from "../../utils/api";
 import { showSuccess, showError } from "../../components/commom/Notification";
 import Select from "react-select";
@@ -14,7 +13,6 @@ import {
     calcNextAffidavitDeadline,
 } from "../../constants/gcnCamConstants";
 function GCN_NH_CAMAdd() {
-    const { t } = useTranslation();
     const navigate = useNavigate();
 
     // State cho form GCN
@@ -51,8 +49,9 @@ function GCN_NH_CAMAdd() {
     const [ngayGhiNhanTuyenThe, setNgayGhiNhanTuyenThe] = useState(null);
     const [idGUQ, setIdGUQ] = useState(null);
     const [dsGiayUyQuyen, setDsGiayUyQuyen] = useState([]);
-    const isFormValid = Boolean(soBang.trim());
-    const [trangThaiBang, setTrangThaiThaiBang] = useState("1");
+    const [trangThaiBang, setTrangThaiBang] = useState(null);
+    const selectedStatus = GCN_CAM_STATUS_OPTIONS.find(option => option.value === trangThaiBang) ?? null;
+    const isFormValid = Boolean(soBang.trim()) && selectedStatus !== null;
     const handleFileChange = async (file) => {
         setAnhBang(file);
 
@@ -95,7 +94,7 @@ function GCN_NH_CAMAdd() {
 
     useEffect(() => {
         if (ngayGhiNhanTuyenThe && loaiTuyenThe) {
-            setTrangThaiThaiBang(loaiTuyenThe === "SU_DUNG" ? "6" : "7");
+            setTrangThaiBang(loaiTuyenThe === "SU_DUNG" ? "6" : "7");
         }
     }, [ngayGhiNhanTuyenThe, loaiTuyenThe]);
     useEffect(() => {
@@ -121,6 +120,8 @@ function GCN_NH_CAMAdd() {
     }, [idKhachHang]);
     // Submit
     const handleAddGCN = async () => {
+        if (!isFormValid) return;
+
         try {
             const payload = {
                 soBang: soBang.trim(),
@@ -145,7 +146,7 @@ function GCN_NH_CAMAdd() {
                 ngayNopYCTuyenThe: ngayNopYCTuyenThe || null,
                 loaiTuyenThe: loaiTuyenThe || null,
                 ngayGhiNhanTuyenThe: ngayGhiNhanTuyenThe || null,
-                trangThaiBang: trangThaiBang || "1",
+                trangThaiBang,
                 anhBang: anhBangBase64 || null,
                 anhBangBase64: anhBangBase64 || null,
                 idGUQ: idGUQ || null,
@@ -248,10 +249,12 @@ function GCN_NH_CAMAdd() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div className="flex-1">
-                        <label className="block text-gray-700 text-left">
+                        <label htmlFor="soBang" className="block text-gray-700 text-left">
                             Số bằng <span className="text-red-500">*</span>
                         </label>
                         <input
+                            id="soBang"
+                            required
                             type="text"
                             value={soBang}
                             onChange={(e) => {
@@ -398,7 +401,7 @@ function GCN_NH_CAMAdd() {
                         <label className="block text-gray-700 text-left">Danh sách nhóm Sản phẩm dịch vụ</label>
                         <input
                             type="text"
-                            value={dsNhomSPDV}
+                            value={dsNhomSPDV ?? ""}
                             onChange={(e) => setDsNhomSPDV(e.target.value)}
                             placeholder="Nhập mã hồ sơ"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
@@ -514,17 +517,19 @@ function GCN_NH_CAMAdd() {
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 text-left">
-                            Trạng thái xử lý bằng
+                        <label htmlFor="trangThaiBang" className="block text-gray-700 text-left">
+                            Trạng thái bằng{" "}
                             <span className="text-red-500">*</span>
                         </label>
 
                         <Select
+                            inputId="trangThaiBang"
                             options={GCN_CAM_STATUS_OPTIONS}
-                            value={GCN_CAM_STATUS_OPTIONS.find(opt => opt.value === String(trangThaiBang)) || null}
-                            onChange={(option) => setTrangThaiThaiBang(option?.value || "1")}
+                            value={selectedStatus}
+                            onChange={(option) => setTrangThaiBang(option?.value ?? null)}
                             placeholder="Chọn trạng thái bằng"
                             isClearable
+                            required
                             className="w-full mt-1 rounded-lg text-left"
                         />
                     </div>

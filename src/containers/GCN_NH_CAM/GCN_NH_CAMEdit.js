@@ -1,7 +1,6 @@
 //Chưa đẩy lên 29/09
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import callAPI from "../../utils/api";
 import { showSuccess, showError } from "../../components/commom/Notification";
 import Select from "react-select";
@@ -15,7 +14,6 @@ import {
 } from "../../constants/gcnCamConstants";
 function GCN_NH_CAMEdit() {
     const { id } = useParams();
-    const { t } = useTranslation();
     const navigate = useNavigate();
 
     // State cho form GCN
@@ -50,10 +48,11 @@ function GCN_NH_CAMEdit() {
     const [ngayNopYCTuyenThe, setNgayNopYCTuyenThe] = useState(null);
     const [loaiTuyenThe, setLoaiTuyenThe] = useState(null);
     const [ngayGhiNhanTuyenThe, setNgayGhiNhanTuyenThe] = useState(null);
-    const [trangThaiBang, setTrangThaiThaiBang] = useState("1");
+    const [trangThaiBang, setTrangThaiBang] = useState(null);
     const [idGUQ, setIdGUQ] = useState(null);
     const [dsGiayUyQuyen, setDsGiayUyQuyen] = useState([]);
-    const isFormValid = Boolean(soBang.trim());
+    const selectedStatus = GCN_CAM_STATUS_OPTIONS.find(option => option.value === trangThaiBang) ?? null;
+    const isFormValid = Boolean(soBang.trim()) && selectedStatus !== null;
     const fetchDetail = async () => {
         try {
             const response = await callAPI({
@@ -86,7 +85,7 @@ function GCN_NH_CAMEdit() {
                 setNgayNopYCTuyenThe(item.ngayNopYCTuyenThe || null);
                 setLoaiTuyenThe(item.loaiTuyenThe || null);
                 setNgayGhiNhanTuyenThe(item.ngayGhiNhanTuyenThe || null);
-                setTrangThaiThaiBang(item.trangThaiBang ? String(item.trangThaiBang) : "1");
+                setTrangThaiBang(item.trangThaiBang == null ? null : String(item.trangThaiBang).trim());
                 setChiTietNhomSPDV(item.chiTietNhomSPDV || "");
                 setMauSac(item.mauSacNH || "");
                 setProductAndService(item.productAndService || []);
@@ -149,6 +148,8 @@ function GCN_NH_CAMEdit() {
 
     // Submit
     const handleEditGCN = async () => {
+        if (!isFormValid) return;
+
         try {
             const payload = {
                 id,
@@ -174,8 +175,8 @@ function GCN_NH_CAMEdit() {
                 ngayNopYCTuyenThe: ngayNopYCTuyenThe || null,
                 loaiTuyenThe: loaiTuyenThe || null,
                 ngayGhiNhanTuyenThe: ngayGhiNhanTuyenThe || null,
-                trangThaiBang: trangThaiBang || "1",
-                linkAnh: anhBangBase64 || null,
+                trangThaiBang,
+                linkAnh: anhBang ? anhBangBase64 : undefined,
                 idGUQ: idGUQ || null,
             };
 
@@ -275,10 +276,12 @@ function GCN_NH_CAMEdit() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div className="flex-1">
-                        <label className="block text-gray-700 text-left">
+                        <label htmlFor="soBang" className="block text-gray-700 text-left">
                             Số bằng <span className="text-red-500">*</span>
                         </label>
                         <input
+                            id="soBang"
+                            required
                             type="text"
                             value={soBang}
                             onChange={(e) => {
@@ -436,7 +439,7 @@ function GCN_NH_CAMEdit() {
                         <label className="block text-gray-700 text-left">Danh sách nhóm Sản phẩm dịch vụ</label>
                         <input
                             type="text"
-                            value={dsNhomSPDV}
+                            value={dsNhomSPDV ?? ""}
                             onChange={(e) => setDsNhomSPDV(e.target.value)}
                             placeholder="Nhập mã hồ sơ"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
@@ -535,7 +538,7 @@ function GCN_NH_CAMEdit() {
                                 const val = option ? option.value : null;
                                 setLoaiTuyenThe(val);
                                 if (ngayGhiNhanTuyenThe && val) {
-                                    setTrangThaiThaiBang(val === "SU_DUNG" ? "6" : "7");
+                                    setTrangThaiBang(val === "SU_DUNG" ? "6" : "7");
                                 }
                             }}
                             placeholder="Chọn loại tuyên thệ"
@@ -554,7 +557,7 @@ function GCN_NH_CAMEdit() {
                                     calcNextAffidavitDeadline({ ngayGhiNhanTuyenThe: val, ngayCapBang })
                                 );
                                 if (val && loaiTuyenThe) {
-                                    setTrangThaiThaiBang(loaiTuyenThe === "SU_DUNG" ? "6" : "7");
+                                    setTrangThaiBang(loaiTuyenThe === "SU_DUNG" ? "6" : "7");
                                 }
                             }}
                             format="DD/MM/YYYY"
@@ -563,17 +566,19 @@ function GCN_NH_CAMEdit() {
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 text-left">
-                            Trạng thái xử lý bằng
+                        <label htmlFor="trangThaiBang" className="block text-gray-700 text-left">
+                            Trạng thái bằng{" "}
                             <span className="text-red-500">*</span>
                         </label>
 
                         <Select
+                            inputId="trangThaiBang"
                             options={GCN_CAM_STATUS_OPTIONS}
-                            value={GCN_CAM_STATUS_OPTIONS.find(opt => opt.value === String(trangThaiBang)) || null}
-                            onChange={(option) => setTrangThaiThaiBang(option?.value || "1")}
+                            value={selectedStatus}
+                            onChange={(option) => setTrangThaiBang(option?.value ?? null)}
                             placeholder="Chọn trạng thái bằng"
                             isClearable
+                            required
                             className="w-full mt-1 rounded-lg text-left"
                         />
                     </div>
