@@ -15,6 +15,7 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import callAPI from "../../utils/api";
+import { formatStaffSelectLabel } from "../../utils/staffDisplay";
 import { showSuccess, showError, showWarning } from "../../components/commom/Notification";
 function EditVuViecModal({
     isOpen,
@@ -171,7 +172,7 @@ function EditVuViecModal({
 
     const handleSelectLoaiDon = (type) => {
         if (type === "chuyen_quyen") {
-            window.open(`/application_sd_nh_vn_add/${maDonDangKy}`, "_blank");
+            navigate(`/application_sd_nh_vn_add/${maDonDangKy}`);
         } else if (type === "nhan_moi") {
             setIsDangKy(false);
             setIsTiepQuan(false);
@@ -430,7 +431,7 @@ function EditVuViecModal({
                         style={{ width: "100%" }}
                         options={dsNhanSu.map((ns) => ({
                             value: ns.maNhanSu,
-                            label: ns.hoTen ? `${ns.maNhanSu} - ${ns.hoTen}` : ns.tenNhanSu || ns.maNhanSu,
+                            label: formatStaffSelectLabel(ns) || ns.tenNhanSu || ns.maNhanSu,
                         }))}
                     />
                     {/* Đệm chiều cao để cân với vùng lỗi cột bên trái */}

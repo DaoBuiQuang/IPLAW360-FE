@@ -128,7 +128,11 @@ import ContactPersonList from "../containers/ContactPerson/ContactPersonList.js"
 import ContactPersonAdd from "../containers/ContactPerson/ContactPersonAdd.js";
 import ContactPersonEdit from "../containers/ContactPerson/ContactPersonEdit.js";
 import Application_SD_NH_VNList from "../containers/Application_SD_NH_VN/Application_SD_NH_VNList.js";
+import Application_SD_NH_VNDetail from "../containers/Application_SD_NH_VN/Application_SD_NH_VNDetail.js";
+import Application_SD_NH_VNEdit from "../containers/Application_SD_NH_VN/Application_SD_NH_VNEdit.js";
 import Application_SD_NH_KHList from "../containers/Application_SD_NH_KH/Application_SD_NH_KHList.js";
+import Application_SD_NH_KHDetail from "../containers/Application_SD_NH_KH/Application_SD_NH_KHDetail.js";
+import Application_SD_NH_KHEdit from "../containers/Application_SD_NH_KH/Application_SD_NH_KHEdit.js";
 import GCN_NH_VN_SDList from "../containers/GCN_NH_VN_SD/GCN_NH_VN_SDList.js";
 import GCN_NH_CAM_SDList from "../containers/GCN_NH_CAM_SD/GCN_NH_CAM_SDList.js";
 import Application_SD_GCN_NH_KHList from "../containers/GCN_NH_CAM_SD/Application_SD_GCN_NH_KHList.js";
@@ -140,6 +144,13 @@ import Application_VNListReport from "../containers/Report/Application_VNListRep
 import Application_KHListReport from "../containers/Report/Application_KHListReport.js";
 import Application_TD_NH_VNList from "../containers/Application_TD_NH/Application_TD_NH_VNList.js";
 import Application_TD_NH_KHList from "../containers/Application_TD_NH/Application_TD_NH_KHList.js";
+import Application_TD_NH_KHAdd from "../containers/Application_TD_NH/Application_TD_NH_KHAdd.js";
+import Application_CQ_NH_VNDetail from "../containers/Application_CQ_NH/Application_CQ_NH_VNDetail.js";
+import Application_CQ_NH_VNEdit from "../containers/Application_CQ_NH/Application_CQ_NH_VNEdit.js";
+import Application_CQ_NH_KHAdd from "../containers/Application_CQ_NH/Application_CQ_NH_KHAdd.js";
+import Application_CQ_NH_KHList from "../containers/Application_CQ_NH/Application_CQ_NH_KHList.js";
+import Application_CQ_NH_KHDetail from "../containers/Application_CQ_NH/Application_CQ_NH_KHDetail.js";
+import Application_CQ_NH_KHEdit from "../containers/Application_CQ_NH/Application_CQ_NH_KHEdit.js";
 import VuViec_Bill_Full_List_ALL from "../containers/BillFull/VuViec_Bill_Full_List_ALL.js";
 import VuViec_BillDaDuyetList_ALL from "../containers/BillFull/VuViec_BillDaDuyetList_ALL.js";
 import VuViec_BillChuaDuyetList_ALL from "../containers/BillFull/VuViec_BillChuaDuyetList_ALL.js";
@@ -343,12 +354,25 @@ const AppRoutes = ({ notification, setNotification }) => {
 
           <Route path="/application_sd_nh_vn_list" element={<Application_SD_NH_VNList></Application_SD_NH_VNList>} />
           <Route path="/application_sd_nh_vn_add/:maDonDangKy" element={<Application_SD_NH_VNAdd></Application_SD_NH_VNAdd>} />
+          <Route path="/application_sd_nh_vn_detail/:id" element={<Application_SD_NH_VNDetail />} />
+          <Route path="/application_sd_nh_vn_edit/:id" element={<Application_SD_NH_VNEdit />} />
           <Route path="/application_td_nh_vn_add/:maDonDangKy" element={<Application_TD_NH_VNAdd></Application_TD_NH_VNAdd>} />
+          <Route path="/application_td_nh_kh_add/:maDonDangKy" element={<Application_TD_NH_KHAdd />} />
           <Route path="/application_cq_nh_vn_add/:maDonDangKy" element={<Application_CQ_NH_VNAdd></Application_CQ_NH_VNAdd>} />
           <Route path="/application_cq_nh_vnlist" element={<Application_CQ_NH_VNList></Application_CQ_NH_VNList>} />
           <Route path="/application_cq_nh_vn_list" element={<Application_CQ_NH_VNList></Application_CQ_NH_VNList>} />
+          <Route path="/application_cq_nh_vn_detail/:id" element={<Application_CQ_NH_VNDetail />} />
+          <Route path="/application_cq_nh_vn_edit/:id" element={<Application_CQ_NH_VNEdit />} />
+
+          <Route path="/application_cq_nh_kh_add/:maDonDangKy" element={<Application_CQ_NH_KHAdd />} />
+          <Route path="/application_cq_nh_khlist" element={<Application_CQ_NH_KHList />} />
+          <Route path="/application_cq_nh_kh_list" element={<Application_CQ_NH_KHList />} />
+          <Route path="/application_cq_nh_kh_detail/:id" element={<Application_CQ_NH_KHDetail />} />
+          <Route path="/application_cq_nh_kh_edit/:id" element={<Application_CQ_NH_KHEdit />} />
 
           <Route path="/application_sd_nh_kh_add/:maDonDangKy" element={<Application_SD_NH_KHAdd></Application_SD_NH_KHAdd>} />
+          <Route path="/application_sd_nh_kh_detail/:id" element={<Application_SD_NH_KHDetail />} />
+          <Route path="/application_sd_nh_kh_edit/:id" element={<Application_SD_NH_KHEdit />} />
 
           <Route path="/vuviec_bill" element={<VuViec_Bill_VN_FullList></VuViec_Bill_VN_FullList>} />
           <Route path="/vuviec_bill_da_duyet" element={<VuViec_BillList></VuViec_BillList>} />

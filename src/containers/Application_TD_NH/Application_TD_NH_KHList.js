@@ -10,6 +10,7 @@ import { DatePicker, Modal, Spin, Pagination } from 'antd';
 import { useTranslation } from "react-i18next";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
 import { fetchSharedFilterOptions } from "../../utils/filterOptionsHelper";
+import { showInfo } from "../../components/commom/Notification";
 function Application_TD_NH_KHList() {
   const role = useSelector((state) => state.auth.role);
   const { t } = useTranslation();
@@ -86,7 +87,10 @@ function Application_TD_NH_KHList() {
   ];
 
   const allFieldOptions = [
-    { label: "Số Đơn", labelEn: "App No", key: "soDon" },
+    { label: "Số Đơn tách", labelEn: "Divisional App No", key: "soDon" },
+    { label: "Số Đơn gốc", labelEn: "Parent App No", key: "soDonGoc" },
+    { label: "Ngày nộp đơn gốc", labelEn: "Parent Filing Date", key: "ngayNopDonGoc" },
+    { label: "Ngày nộp đơn tách", labelEn: "Filing Date", key: "ngayNopDon" },
     { label: "Mã HSVV", labelEn: "Matter code", key: "maHoSoVuViec" },
     { label: "Ngày yêu cầu tách đơn", key: "ngayYeuCau" },
     { label: "Ngày ghi nhận tách đơn", key: "ngayGhiNhanTachDon" },
@@ -310,7 +314,10 @@ function Application_TD_NH_KHList() {
               Tìm kiếm
             </button>
             <button
-              onClick={() => navigate("/applicationadd_kh")}
+              type="button"
+              onClick={() =>
+                showInfo("Thông báo", "Vui lòng chọn Tách đơn đăng ký trong trang Thông tin Đơn đăng ký.")
+              }
               className="bg-[#009999] hover:bg-[#007a7a] text-white px-5 py-3 rounded-lg shadow-md transition"
             >
               Thêm mới
@@ -552,7 +559,7 @@ function Application_TD_NH_KHList() {
                     }
 
                     const isDateField = [
-                      "ngayNopDon", "ngayHoanThanhHoSoTaiLieu", "ngayKQThamDinhHinhThuc",
+                      "ngayNopDon", "ngayNopDonGoc", "ngayHoanThanhHoSoTaiLieu", "ngayKQThamDinhHinhThuc",
                       "ngayCongBoDon", "ngayKQThamDinhND", "ngayTraLoiKQThamDinhND",
                       "ngayThongBaoCapBang", "ngayNopPhiCapBang", "ngayNhanBang",
                       "ngayCapBang", "ngayHetHanBang", "ngayGuiBangChoKhachHang", "hanNopPhiCapBang",
@@ -591,6 +598,25 @@ function Application_TD_NH_KHList() {
                         </td>
                       );
                     }
+                    if (col.key === "soDonGoc") {
+                      const maDonGoc = app.maDonDangKyGoc;
+                      return (
+                        <td
+                          key={col.key}
+                          className={`p-2 text-table ${
+                            maDonGoc ? "text-indigo-600 cursor-pointer hover:underline font-medium" : "text-gray-500"
+                          }`}
+                          onClick={(e) => {
+                            if (maDonGoc) {
+                              e.stopPropagation();
+                              navigate(`/applicationdetail_kh/${maDonGoc}`);
+                            }
+                          }}
+                        >
+                          {content || maDonGoc || "—"}
+                        </td>
+                      );
+                    }
                     if (col.key === "maDonDangKy") {
                       return (
                         <td
@@ -598,7 +624,7 @@ function Application_TD_NH_KHList() {
                           className={`${commonClass} text-blue-500 cursor-pointer hover:underline`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/applicationdetail/${app.maDonDangKy}`);
+                            navigate(`/applicationdetail_kh/${app.maDonDangKy}`);
                           }}
                         >
                           {app.maDonDangKy}

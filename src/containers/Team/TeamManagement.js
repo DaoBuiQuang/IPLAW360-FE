@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import callAPI from "../../utils/api";
+import { getStaffIdentifier, formatStaffSelectLabel } from "../../utils/staffDisplay";
 
 export default function TeamManagement() {
   const navigate = useNavigate();
@@ -424,6 +425,10 @@ export default function TeamManagement() {
             {teams.map((team) => {
               const members = team.members || [];
               const groupName = team.tenNhom || members[0]?.tenNhom;
+              const managerIdentifier =
+                team.managerEmail ||
+                allStaff.find((s) => s.maNhanSu === team.managerCode)?.email ||
+                team.managerCode;
 
               return (
                 <div
@@ -449,7 +454,7 @@ export default function TeamManagement() {
                             </div>
                             <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
                               <span>Trưởng nhóm: <strong className="text-gray-700">{team.managerName}</strong></span>
-                              <span className="font-mono text-gray-400">({team.managerCode})</span>
+                              <span className="text-gray-400">({managerIdentifier})</span>
                             </p>
                           </>
                         ) : (
@@ -463,7 +468,7 @@ export default function TeamManagement() {
                               </span>
                             </div>
                             <p className="text-xs text-gray-500 mt-0.5">
-                              Mã: <span className="font-mono font-medium text-gray-700">{team.managerCode}</span>
+                              <span className="font-medium text-gray-600">{managerIdentifier}</span>
                             </p>
                           </>
                         )}
@@ -542,9 +547,9 @@ export default function TeamManagement() {
                                   </div>
                                   <div>
                                     <p className="font-semibold text-gray-800 leading-tight">
-                                      {m.hoTen || m.maNhanSu}
+                                      {m.hoTen || getStaffIdentifier(m)}
                                     </p>
-                                    <p className="text-[11px] text-gray-400 font-mono">{m.maNhanSu}</p>
+                                    <p className="text-[11px] text-gray-400">{getStaffIdentifier(m)}</p>
                                   </div>
                                 </div>
                               </td>
@@ -648,7 +653,9 @@ export default function TeamManagement() {
             </label>
             <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-200 text-sm font-medium text-gray-800 flex items-center justify-between">
               <span>{targetTeam?.managerName}</span>
-              <span className="text-xs font-mono text-gray-500">{targetTeam?.managerCode}</span>
+              <span className="text-xs text-gray-500">
+                {targetTeam?.managerEmail || allStaff.find((s) => s.maNhanSu === targetTeam?.managerCode)?.email || targetTeam?.managerCode}
+              </span>
             </div>
           </div>
 
@@ -665,7 +672,7 @@ export default function TeamManagement() {
               onChange={(values) => setSelectedStaffToAdd(values)}
               options={availableStaffToAdd.map((s) => ({
                 value: s.maNhanSu,
-                label: `${s.maNhanSu} - ${s.hoTen} (${s.chucVu || "Nhân viên"})`,
+                label: formatStaffSelectLabel(s, { includeRole: true, roleFallback: "Nhân viên" }),
               }))}
               filterOption={(input, option) =>
                 (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -720,7 +727,9 @@ export default function TeamManagement() {
             </label>
             <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-200 text-sm font-medium text-gray-800 flex items-center justify-between">
               <span>{targetTeam?.managerName}</span>
-              <span className="text-xs font-mono text-gray-500">{targetTeam?.managerCode}</span>
+              <span className="text-xs text-gray-500">
+                {targetTeam?.managerEmail || allStaff.find((s) => s.maNhanSu === targetTeam?.managerCode)?.email || targetTeam?.managerCode}
+              </span>
             </div>
           </div>
 
@@ -737,7 +746,7 @@ export default function TeamManagement() {
               onChange={(values) => setSelectedMembersForSet(values)}
               options={allStaff.map((s) => ({
                 value: s.maNhanSu,
-                label: `${s.maNhanSu} - ${s.hoTen} (${s.chucVu || "Nhân viên"})`,
+                label: formatStaffSelectLabel(s, { includeRole: true, roleFallback: "Nhân viên" }),
               }))}
               filterOption={(input, option) =>
                 (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -786,7 +795,7 @@ export default function TeamManagement() {
         <div className="py-3 text-sm text-gray-600">
           Bạn có chắc chắn muốn xóa nhân sự{" "}
           <strong className="text-gray-900">{memberToDelete?.hoTen}</strong> (
-          <span className="font-mono text-gray-500">{memberToDelete?.maNhanSu}</span>) ra khỏi
+          <span className="text-gray-500">{getStaffIdentifier(memberToDelete)}</span>) ra khỏi
           nhóm này không?
         </div>
       </Modal>
@@ -830,7 +839,7 @@ export default function TeamManagement() {
               }}
               options={allStaff.map((s) => ({
                 value: s.maNhanSu,
-                label: `${s.maNhanSu} - ${s.hoTen} (${s.chucVu || "Nhân viên"})`,
+                label: formatStaffSelectLabel(s, { includeRole: true, roleFallback: "Nhân viên" }),
               }))}
               filterOption={(input, option) =>
                 (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -865,7 +874,7 @@ export default function TeamManagement() {
                 .filter((s) => s.maNhanSu !== newManagerCode)
                 .map((s) => ({
                   value: s.maNhanSu,
-                  label: `${s.maNhanSu} - ${s.hoTen} (${s.chucVu || "Nhân viên"})`,
+                  label: formatStaffSelectLabel(s, { includeRole: true, roleFallback: "Nhân viên" }),
                 }))}
               filterOption={(input, option) =>
                 (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -908,7 +917,9 @@ export default function TeamManagement() {
               <span className="text-base">👔</span>
               <div>
                 <p className="font-bold text-gray-800 text-sm">{teamToDelete?.managerName}</p>
-                <p className="text-xs text-gray-400 font-mono">Mã: {teamToDelete?.managerCode}</p>
+                <p className="text-xs text-gray-400">
+                  {teamToDelete?.managerEmail || allStaff.find((s) => s.maNhanSu === teamToDelete?.managerCode)?.email || teamToDelete?.managerCode}
+                </p>
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-2">

@@ -24,7 +24,8 @@ function FormHoSo({
     daiDienSHTT,
     setDaiDienSHTT,
     nguoiXuLyChinh, setNguoiXuLyChinh,
-    nguoiXuLyPhu, setNguoiXuLyPhu
+    nguoiXuLyPhu, setNguoiXuLyPhu,
+    laDonTiepNhan = false
 }) {
     const navigate = useNavigate();
     const [customers, setCustomers] = useState([]);
@@ -57,11 +58,33 @@ function FormHoSo({
 
     const validateField = (field, value) => {
         let error = "";
-        if (!value || (typeof value === "string" && !value.trim())) {
-            if (field === "maKhachHang") error = "Khách hàng không được để trống";
+        const isEmpty = !value || (typeof value === "string" && !value.trim());
+        if (isEmpty) {
+            if (field === "maKhachHang" && !laDonTiepNhan) {
+                error = "Khách hàng không được để trống";
+            }
+            if (field === "soDon" && laDonTiepNhan) {
+                error = "Số đơn không được để trống";
+            }
         }
         setErrors((prevErrors) => ({ ...prevErrors, [field]: error }));
     };
+
+    useEffect(() => {
+        if (laDonTiepNhan) {
+            setErrors((prev) => ({
+                ...prev,
+                maHoSoVuViec: "",
+                maKhachHang: "",
+                idKhachHang: "",
+            }));
+        } else {
+            setErrors((prev) => ({
+                ...prev,
+                soDon: "",
+            }));
+        }
+    }, [laDonTiepNhan]);
 
     const formatOptions = (data, idKey, valueKey, labelKey) => {
         return data.map(item => ({
@@ -247,7 +270,7 @@ function FormHoSo({
         { value: 1, label: "Đơn gốc" },
         { value: 2, label: "Đơn sửa đổi" },
         { value: 3, label: "Đơn tách" },
-        { value: 4, label: "Đơn chuyển nhượng" }
+        { value: 4, label: "Đơn chuyển quyền sở hữu" }
     ];
     useEffect(() => {
         if (trangThaiVuViec != null && trangThaiVuViec !== undefined) {
@@ -277,7 +300,9 @@ function FormHoSo({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
 
                 <div className="flex-1 relative" ref={maHoSoRef}>
-                    <label className="block text-gray-700 text-left">Mã hồ sơ <span className="text-red-500">*</span></label>
+                    <label className="block text-gray-700 text-left">
+                        Mã hồ sơ {!laDonTiepNhan && <span className="text-red-500">*</span>}
+                    </label>
                     <input
                         type="text"
                         value={maHoSoVuViec}
@@ -310,7 +335,9 @@ function FormHoSo({
                     {errors.maHoSoVuViec && <p className="text-red-500 text-xs mt-1 text-left">{errors.maHoSoVuViec}</p>}
                 </div>
                 <div>
-                    <label className="block text-gray-700 text-left">Loại đơn <span className="text-red-500">*</span></label>
+                    <label className="block text-gray-700 text-left">
+                        Loại đơn {!laDonTiepNhan && <span className="text-red-500">*</span>}
+                    </label>
                     <Select
                         options={loaiDonOptions}
                         value={loaiDon ? loaiDonOptions.find(opt => opt.value === loaiDon) : null}
@@ -354,17 +381,25 @@ function FormHoSo({
                     )} */}
                 </div>
                 <div >
-                    <label className="block text-gray-700 text-left ">Số đơn</label>
+                    <label className="block text-gray-700 text-left ">
+                        Số đơn {laDonTiepNhan && <span className="text-red-500">*</span>}
+                    </label>
                     <input
                         type="text"
                         value={soDon}
                         placeholder="Nhập số đơn"
-                        onChange={(e) => setSoDon(e.target.value)}
+                        onChange={(e) => {
+                            setSoDon(e.target.value);
+                            validateField("soDon", e.target.value);
+                        }}
                         className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                     />
+                    {errors.soDon && <p className="text-red-500 text-xs mt-1 text-left">{errors.soDon}</p>}
                 </div>
                 <div className="flex-1">
-                    <label className="block text-gray-700 text-left">Khách hàng <span className="text-red-500">*</span></label>
+                    <label className="block text-gray-700 text-left">
+                        Khách hàng {!laDonTiepNhan && <span className="text-red-500">*</span>}
+                    </label>
                     <Select
                         options={formatOptions(customers, "id", "maKhachHang", "tenKhachHang")}
                         value={idKhachHang ? formatOptions(customers, "id", "maKhachHang", "tenKhachHang").find(opt => opt.id === idKhachHang) : null}

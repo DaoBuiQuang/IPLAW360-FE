@@ -47,6 +47,10 @@ const FormSuaDoi = ({
   setNgayTuChoi,
   lyDoTuChoi,
   setLyDoTuChoi,
+  suaDoiNoiDungKhac,
+  setSuaDoiNoiDungKhac,
+  ndSuaDoiNoiDungKhac,
+  setNdSuaDoiNoiDungKhac,
 }) => {
   const navigate = useNavigate();
 
@@ -100,7 +104,7 @@ const FormSuaDoi = ({
           <Input
             value={soDonSD}
             onChange={(e) => setSoDonSD(e.target.value)}
-            placeholder="Nhập số đơn"
+            placeholder="Nhập số đơn ghi nhận (SĐxxxx)"
           />
         </div>
 
@@ -124,18 +128,24 @@ const FormSuaDoi = ({
             type="number"
             value={lanSuaDoi || ""}
             onChange={(e) => setLanSuaDoi(e.target.value)}
-            placeholder="Nhập số lần sửa đổi"
+            placeholder="Để trống để hệ thống tự tính"
           />
         </div>
       </div>
 
       {/* Các phần sửa đổi */}
       <div className="mt-4 space-y-3">
+        <div className="text-left font-medium text-gray-700 text-sm">
+          Nội dung yêu cầu sửa đổi <span className="text-red-500">*</span>{" "}
+          <span className="text-xs font-normal text-gray-500">(chọn ít nhất 1 mục)</span>
+        </div>
         {renderSuaDoiItem("Đại diện", suaDoiDaiDien, setSuaDoiDaiDien, ndSuaDoiDaiDien, setNdSuaDoiDaiDien)}
         {renderSuaDoiItem("Tên chủ đơn", suaDoiTenChuDon, setSuaDoiTenChuDon, ndSuaDoiTenChuDon, setNdSuaDoiTenChuDon)}
         {renderSuaDoiItem("Địa chỉ", suaDoiDiaChi, setSuaDoiDiaChi, ndSuaDoiDiaChi, setNdSuaDoiDiaChi)}
         {renderSuaDoiItem("Nhãn", suaNhan, setSuaNhan, ndSuaNhan, setNdSuaNhan)}
         {renderSuaDoiItem("Nhóm SP/DV", suaNhomSPDV, setSuaNhomSPDV, ndSuaNhomSPDV, setNdSuaNhomSPDV)}
+        {typeof setSuaDoiNoiDungKhac === "function" &&
+          renderSuaDoiItem("Nội dung khác", suaDoiNoiDungKhac, setSuaDoiNoiDungKhac, ndSuaDoiNoiDungKhac, setNdSuaDoiNoiDungKhac)}
       </div>
 
       {/* Trạng thái xét duyệt của Cục SHTT */}
@@ -158,6 +168,12 @@ const FormSuaDoi = ({
             }
             if (typeof setDuocGhiNhanSuaDoi === "function") {
               setDuocGhiNhanSuaDoi(val === 1);
+            }
+            if (val !== 1 && typeof setNgayGhiNhanSuaDoi === "function") {
+              setNgayGhiNhanSuaDoi(null);
+            }
+            if (val === 2 && typeof setSoDonSD === "function") {
+              setSoDonSD("");
             }
           }}
           disabled={isEditOnly}

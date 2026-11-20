@@ -20,6 +20,7 @@ import ActivitySelect from "./ActivitySelect";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
 import dayjs from "dayjs";
 import callAPI from "../../utils/api";
+import { formatStaffSelectLabel } from "../../utils/staffDisplay";
 
 const statusMap = { APPROVED: "Đã duyệt" };
 const money = (value) => Number(value || 0).toLocaleString("vi-VN");
@@ -237,7 +238,7 @@ export default function TimesheetOfficework() {
     if (!selectedTeamManager) {
       return allStaffList.map((s) => ({
         value: s.maNhanSu,
-        label: `${s.maNhanSu} - ${s.hoTen} (${s.chucVu || "NV"})`,
+        label: formatStaffSelectLabel(s, { includeRole: true, roleFallback: "NV" }),
       }));
     }
     const team = teamsList.find((t) => t.managerCode === selectedTeamManager);
@@ -247,7 +248,7 @@ export default function TimesheetOfficework() {
       .filter((s) => memberCodes.includes(s.maNhanSu))
       .map((s) => ({
         value: s.maNhanSu,
-        label: `${s.maNhanSu} - ${s.hoTen} (${s.chucVu || "NV"})`,
+        label: formatStaffSelectLabel(s, { includeRole: true, roleFallback: "NV" }),
       }));
   }, [selectedTeamManager, teamsList, allStaffList]);
 
@@ -598,7 +599,11 @@ export default function TimesheetOfficework() {
                         <p className="font-semibold text-gray-800">
                           {row.employee?.hoTen || row.employeeCode}
                         </p>
-                        <p className="text-[10px] font-mono text-gray-400">{row.employeeCode}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {row.employee?.email ||
+                            allStaffList.find((s) => s.maNhanSu === row.employeeCode)?.email ||
+                            row.employeeCode}
+                        </p>
                       </div>
                     </td>
                     <td className="p-3 text-left font-medium text-indigo-600">{row.activity}</td>
@@ -699,7 +704,11 @@ export default function TimesheetOfficework() {
                 <p className="font-semibold text-gray-800 text-sm">
                   {viewingRecord.employee?.hoTen || viewingRecord.employeeCode}
                 </p>
-                <p className="font-mono text-gray-400">{viewingRecord.employeeCode}</p>
+                <p className="text-gray-400">
+                  {viewingRecord.employee?.email ||
+                    allStaffList.find((s) => s.maNhanSu === viewingRecord.employeeCode)?.email ||
+                    viewingRecord.employeeCode}
+                </p>
               </div>
               <div>
                 <span className="text-gray-400">Ngày làm việc:</span>

@@ -331,9 +331,11 @@ function ApplicationList_KH() {
   ];
   const loaiDonOptions = [
     { value: 1, label: "Đơn gốc" },
-    { value: 2, label: "Đơn sửa đổi" },
-    { value: 3, label: "Đơn tách" },
-    { value: 4, label: "Đơn chuyển nhượng" }
+    { value: "DANG_SUA_DOI", label: "Đang sửa đổi" },
+    { value: 2, label: "Đã sửa đổi" },
+    { value: "DANG_CHUYEN_QUYEN", label: "Đang chuyển quyền sở hữu" },
+    { value: 4, label: "Đã chuyển quyền sở hữu" },
+    { value: 3, label: "Đơn tách" }
   ];
   const statusOptions = [
     { value: "1", label: "Đang giải quyết" },
@@ -1233,10 +1235,12 @@ function ApplicationList_KH() {
                           case 0:
                           case 1:
                             text = "Đơn gốc";
-                            badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                            badgeClass = Number(app.donGoc) === 1
+                              ? "bg-gray-200 text-gray-700 border-gray-300"
+                              : "bg-emerald-50 text-emerald-700 border-emerald-200";
                             break;
                           case 2:
-                            text = "Đơn sửa đổi";
+                            text = "Đã sửa đổi";
                             badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
                             break;
                           case 3:
@@ -1245,20 +1249,31 @@ function ApplicationList_KH() {
                             badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
                             break;
                           case 4:
-                            text = "Đơn chuyển nhượng";
-                            badgeClass = "bg-amber-50 text-amber-700 border-amber-200";
+                            text = "Đã chuyển quyền sở hữu";
+                            badgeClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
                             break;
                           default:
-                            text = "Không xác định";
-                            badgeClass = "bg-gray-100 text-gray-600 border-gray-200";
+                            text = "Đơn gốc";
                             break;
                         }
 
                         return (
                           <td key={col.key} className="p-2 text-table">
-                            <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full border ${badgeClass}`}>
-                              {text}
-                            </span>
+                            <div className="flex flex-col items-center justify-center gap-1">
+                              {app.dangSuaDoi && (
+                                <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full border bg-amber-100 text-amber-800 border-amber-300 shadow-sm">
+                                  ⏳ Đang sửa đổi
+                                </span>
+                              )}
+                              {app.dangChuyenQuyen && (
+                                <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full border bg-orange-100 text-orange-800 border-orange-300 shadow-sm">
+                                  ⏳ Đang chuyển quyền
+                                </span>
+                              )}
+                              <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full border ${badgeClass}`}>
+                                {text}
+                              </span>
+                            </div>
                           </td>
                         );
                       }

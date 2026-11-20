@@ -96,7 +96,7 @@ function GCN_GH_NH_VNAdd() {
             });
 
             await showSuccess("Thành công!", "Thêm đơn gia hạn giấy chứng nhận thành công!");
-            navigate(-1);
+            navigate("/application_gh_nh_vn_list");
         } catch (error) {
             console.error("Lỗi khi thêm đơn gia hạn:", error);
             showError("Thất bại!", "Đã xảy ra lỗi khi thêm đơn gia hạn.", error);

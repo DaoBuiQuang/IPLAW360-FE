@@ -15,6 +15,7 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import callAPI from "../../utils/api";
+import { formatStaffSelectLabel } from "../../utils/staffDisplay";
 
 function AddVuViecModal({
   isOpen,
@@ -390,7 +391,7 @@ function AddVuViecModal({
               style={{ width: "100%" }}
               options={dsNhanSu.map((ns) => ({
                 value: ns.maNhanSu,
-                label: ns.hoTen ? `${ns.maNhanSu} - ${ns.hoTen}` : ns.tenNhanSu || ns.maNhanSu,
+                label: formatStaffSelectLabel(ns) || ns.tenNhanSu || ns.maNhanSu,
               }))}
             />
             <div className="min-h-[22px]" />

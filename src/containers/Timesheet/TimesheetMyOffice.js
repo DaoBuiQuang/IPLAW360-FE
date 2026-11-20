@@ -18,6 +18,7 @@ import {
 import KpiSummaryBar from "./KpiSummaryBar";
 import TimesheetMyTime from "./TimesheetMyTime";
 import callAPI from "../../utils/api";
+import { getStaffIdentifier } from "../../utils/staffDisplay";
 import dayjs from "dayjs";
 
 const money = (v) => Number(v || 0).toLocaleString("vi-VN");
@@ -113,6 +114,27 @@ export default function TimesheetMyOffice() {
   // Tự động fallback: nếu không có team nào thì mặc định xem "all_staff"
   const currentMode = (!hasTeams && !userChoseMode) ? "all_staff" : viewMode;
 
+  // Map tra cứu email theo mã nhân sự để hiển thị ưu tiên email
+  const emailByCode = useMemo(() => {
+    const map = {};
+    (fallbackStaff || []).forEach((s) => {
+      const code = s.maNhanSu || s.employeeCode;
+      if (code && s.email) map[code] = s.email;
+    });
+    (officeSummary.allStaff || []).forEach((s) => {
+      const code = s.employeeCode || s.maNhanSu;
+      if (code && s.email) map[code] = s.email;
+    });
+    (teams || []).forEach((t) => {
+      if (t.managerCode && t.managerEmail) map[t.managerCode] = t.managerEmail;
+      (t.members || []).forEach((m) => {
+        const code = m.employeeCode || m.maNhanSu;
+        if (code && m.email) map[code] = m.email;
+      });
+    });
+    return map;
+  }, [fallbackStaff, officeSummary.allStaff, teams]);
+
   // Danh sách toàn bộ nhân viên công ty:
   // 1. Ưu tiên officeSummary.allStaff trả về từ BE
   // 2. Nếu BE chưa có allStaff, trích xuất từ teams hoặc fallbackStaff
@@ -126,10 +148,14 @@ export default function TimesheetMyOffice() {
 
     let rawList = [];
     if (officeSummary.allStaff && Array.isArray(officeSummary.allStaff) && officeSummary.allStaff.length > 0) {
-      rawList = officeSummary.allStaff.map((s) => ({
-        ...s,
-        phongBan: s.phongBan || deptMap[s.employeeCode || s.maNhanSu] || "",
-      }));
+      rawList = officeSummary.allStaff.map((s) => {
+        const code = s.employeeCode || s.maNhanSu;
+        return {
+          ...s,
+          email: s.email || emailByCode[code] || "",
+          phongBan: s.phongBan || deptMap[code] || "",
+        };
+      });
     } else {
       const staffMap = {};
 
@@ -139,6 +165,7 @@ export default function TimesheetMyOffice() {
         if (code) {
           staffMap[code] = {
             employeeCode: code,
+            email: s.email || emailByCode[code] || "",
             hoTen: s.hoTen,
             chucVu: s.chucVu,
             phongBan: s.phongBan,
@@ -159,6 +186,7 @@ export default function TimesheetMyOffice() {
           if (!staffMap[t.managerCode]) {
             staffMap[t.managerCode] = {
               employeeCode: t.managerCode,
+              email: t.managerEmail || emailByCode[t.managerCode] || "",
               hoTen: t.managerName,
               phongBan: deptMap[t.managerCode] || "",
               isManager: true,
@@ -170,6 +198,9 @@ export default function TimesheetMyOffice() {
             };
           } else {
             staffMap[t.managerCode].isManager = true;
+            if (!staffMap[t.managerCode].email && (t.managerEmail || emailByCode[t.managerCode])) {
+              staffMap[t.managerCode].email = t.managerEmail || emailByCode[t.managerCode];
+            }
           }
         }
 
@@ -179,6 +210,7 @@ export default function TimesheetMyOffice() {
             if (!staffMap[code]) {
               staffMap[code] = {
                 employeeCode: code,
+                email: m.email || emailByCode[code] || "",
                 hoTen: m.hoTen,
                 phongBan: m.phongBan || deptMap[code] || "",
                 isManager: false,
@@ -193,6 +225,9 @@ export default function TimesheetMyOffice() {
               staffMap[code].completionRate = Number(m.completionRate || staffMap[code].completionRate || 0);
               staffMap[code].totalAmount = Number(m.totalAmount || staffMap[code].totalAmount || 0);
               staffMap[code].recordCount = Number(m.recordCount || staffMap[code].recordCount || 0);
+              if (!staffMap[code].email && (m.email || emailByCode[code])) {
+                staffMap[code].email = m.email || emailByCode[code];
+              }
               if (!staffMap[code].phongBan && deptMap[code]) {
                 staffMap[code].phongBan = deptMap[code];
               }
@@ -210,7 +245,7 @@ export default function TimesheetMyOffice() {
       const dept = (s.phongBan || deptMap[code] || "").trim().toUpperCase();
       return dept !== "CNTT";
     });
-  }, [officeSummary, fallbackStaff, teams]);
+  }, [officeSummary, fallbackStaff, teams, emailByCode]);
 
   // Lọc và sắp xếp danh sách nhân viên
   const filteredStaff = useMemo(() => {
@@ -220,6 +255,7 @@ export default function TimesheetMyOffice() {
       list = list.filter(
         (s) =>
           (s.hoTen || "").toLowerCase().includes(q) ||
+          (s.email || "").toLowerCase().includes(q) ||
           (s.employeeCode || "").toLowerCase().includes(q) ||
           (s.chucVu || "").toLowerCase().includes(q) ||
           (s.phongBan || "").toLowerCase().includes(q)
@@ -445,13 +481,13 @@ export default function TimesheetMyOffice() {
                                 </p>
                                 <p className="text-[10px] text-gray-500 truncate">
                                   Trưởng nhóm: <strong className="text-gray-700">{team.managerName}</strong>{" "}
-                                  <span className="font-mono text-gray-400">({team.managerCode})</span>
+                                  <span className="text-gray-400">({team.managerEmail || emailByCode[team.managerCode] || team.managerCode})</span>
                                 </p>
                               </>
                             ) : (
                               <>
                                 <p className="truncate font-semibold text-gray-800">{team.managerName}</p>
-                                <p className="text-[10px] text-gray-400 font-mono">({team.managerCode})</p>
+                                <p className="text-[10px] text-gray-400 truncate">({team.managerEmail || emailByCode[team.managerCode] || team.managerCode})</p>
                               </>
                             )}
                           </div>
@@ -525,8 +561,8 @@ export default function TimesheetMyOffice() {
                           </span>
                           <div className="truncate">
                             <p className="truncate font-medium">{staff.hoTen}</p>
-                            <p className="text-[10px] text-gray-400 font-mono">
-                              {staff.employeeCode || staff.maNhanSu}
+                            <p className="text-[10px] text-gray-400 truncate">
+                              {getStaffIdentifier(staff)}
                               {staff.chucVu ? ` • ${staff.chucVu}` : ""}
                             </p>
                           </div>
@@ -769,13 +805,13 @@ export default function TimesheetMyOffice() {
                                           </p>
                                           <p className="text-xs text-gray-500">
                                             Trưởng nhóm: <strong className="text-gray-700">{t.managerName}</strong>{" "}
-                                            <span className="font-mono text-gray-400">({t.managerCode})</span>
+                                            <span className="text-gray-400">({t.managerEmail || emailByCode[t.managerCode] || t.managerCode})</span>
                                           </p>
                                         </>
                                       ) : (
                                         <>
                                           <p className="font-semibold text-gray-800">{t.managerName}</p>
-                                          <p className="text-xs text-gray-400 font-mono">{t.managerCode}</p>
+                                          <p className="text-xs text-gray-400">{t.managerEmail || emailByCode[t.managerCode] || t.managerCode}</p>
                                         </>
                                       )}
                                     </div>
@@ -834,11 +870,11 @@ export default function TimesheetMyOffice() {
                                         </span>
                                         <button
                                           onClick={() =>
-                                            window.open(`/timesheet/myteam?managerCode=${t.managerCode}`, "_blank")
+                                            navigate(`/timesheet/myteam?managerCode=${t.managerCode}`)
                                           }
                                           className="text-xs text-[#009999] hover:underline"
                                         >
-                                          Mở trang MYTEAM ↗
+                                          Mở trang MYTEAM →
                                         </button>
                                       </div>
                                       {(t.members || []).length === 0 ? (
@@ -869,8 +905,8 @@ export default function TimesheetMyOffice() {
                                               <tr key={m.employeeCode} className="hover:bg-gray-50 transition">
                                                 <td className="py-2">
                                                   <span className="font-semibold text-gray-800">{m.hoTen}</span>
-                                                  <span className="text-gray-400 font-mono ml-1.5">
-                                                    ({m.employeeCode})
+                                                  <span className="text-gray-400 ml-1.5">
+                                                    ({m.email || emailByCode[m.employeeCode] || m.employeeCode})
                                                   </span>
                                                 </td>
                                                 <td className="py-2 text-center font-medium text-orange-600">
@@ -996,8 +1032,8 @@ export default function TimesheetMyOffice() {
                                         </span>
                                       )}
                                     </div>
-                                    <p className="text-xs text-gray-400 font-mono">
-                                      {staff.employeeCode || staff.maNhanSu}
+                                    <p className="text-xs text-gray-400">
+                                      {getStaffIdentifier(staff)}
                                     </p>
                                   </div>
                                 </div>

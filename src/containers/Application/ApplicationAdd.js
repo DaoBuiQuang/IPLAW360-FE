@@ -110,18 +110,30 @@ function ApplicationAdd() {
     const [idSoBangOld, setIdSoBangOld] = useState(null);
     const [idGUQ, setIdGUQ] = useState(null);
     const [daiDienSHTT, setDaiDienSHTT] = useState("Công ty tư vấn SHTT IPAC");
+    const [laDonTiepNhan, setLaDonTiepNhan] = useState(false);
     const [errors, setErrors] = useState({});
-    const isFormValid =
-        (maHoSoVuViec || "").trim() !== "" &&
-        ((tenNhanHieu || "").trim() !== "" || (String(maNhanHieuOld || "").trim() !== "")) &&
-        Array.isArray(maSPDVList) &&
-        maSPDVList.length > 0;
+    const hasTenNhanHieu =
+        (tenNhanHieu || "").trim() !== "" || String(maNhanHieuOld || "").trim() !== "";
+    const hasSPDV = Array.isArray(maSPDVList) && maSPDVList.length > 0;
+    const hasSoDon = (soDon || "").trim() !== "";
+    const hasTrangThaiVuViec =
+        trangThaiVuViec !== null &&
+        trangThaiVuViec !== undefined &&
+        String(trangThaiVuViec).trim() !== "";
+
+    const isFormValid = laDonTiepNhan
+        ? hasSoDon && hasTrangThaiVuViec && hasSPDV && hasTenNhanHieu
+        : (maHoSoVuViec || "").trim() !== "" && hasTenNhanHieu && hasSPDV;
 
     const validateField = (field, value) => {
         let error = "";
-        if (field === "maHoSoVuViec" || field === "maNhanHieu") {
+        if (field === "maHoSoVuViec" && !laDonTiepNhan) {
             if (!value || typeof value !== "string" || value.trim() === "") {
-                if (field === "maHoSoVuViec") error = "Mã hồ sơ vụ việc không được để trống";
+                error = "Mã hồ sơ vụ việc không được để trống";
+            }
+        }
+        if (field === "tenNhanHieu" || field === "maNhanHieu") {
+            if (!value || typeof value !== "string" || value.trim() === "") {
                 if (field === "tenNhanHieu") error = "Tên nhãn hiệu không được để trống";
             }
         }
@@ -317,9 +329,10 @@ function ApplicationAdd() {
                 method: "post",
                 endpoint: "/application/add",
                 data: {
-                    maHoSo: maHoSoVuViec,
+                    laDonTiepNhan: laDonTiepNhan,
+                    maHoSo: maHoSoVuViec?.trim() || null,
                     loaiDon: loaiDon,
-                    idKhachHang: idKhachHang,
+                    idKhachHang: idKhachHang || null,
                     idDoiTac: idDoiTac,
                     clientsRef: clientsRef,
                     ngayTiepNhan: ngayTiepNhan,
@@ -328,7 +341,7 @@ function ApplicationAdd() {
                     ngayDongHS: ngayDongHS,
                     ngayRutHS: ngayRutHS,
 
-                    soDon: soDon,
+                    soDon: soDon?.trim() || "",
                     maNhanHieu: maNhanHieuOld,
                     maSPDVList: maSPDVList,
                     trangThaiDon: trangThaiDon,
@@ -411,7 +424,29 @@ function ApplicationAdd() {
                         className="w-20 h-15"
                     />
                 </div>
+                <div className="mb-4 px-3 py-2 rounded-lg border border-teal-200 bg-teal-50/60 flex items-center gap-2.5">
+                    <input
+                        id="laDonTiepNhan"
+                        type="checkbox"
+                        checked={laDonTiepNhan}
+                        onChange={(e) => {
+                            const checked = e.target.checked;
+                            setLaDonTiepNhan(checked);
+                            if (checked) {
+                                setErrors((prev) => ({
+                                    ...prev,
+                                    maHoSoVuViec: "",
+                                }));
+                            }
+                        }}
+                        className="h-4 w-4 accent-[#009999] cursor-pointer"
+                    />
+                    <label htmlFor="laDonTiepNhan" className="cursor-pointer font-semibold text-gray-800 select-none">
+                        Đơn tiếp nhận
+                    </label>
+                </div>
                 <FormHoSo
+                    laDonTiepNhan={laDonTiepNhan}
                     soDon={soDon}
                     setSoDon={setSoDon}
                     loaiDon={loaiDon}
@@ -466,13 +501,12 @@ function ApplicationAdd() {
                         </div>
                         <div>
                             <label className="block text-gray-700 text-left">Bước xử lý</label>
-                            <input
-                                type="text"
-                                value={buocXuLy}
-                                disabled
-                                onChange={(e) => setBuocXuLy(e.target.value)}
-                                className="w-full p-2 mt-1 border rounded-lg text-input h-10 bg-gray-200"
-                            />
+                            <div
+                                className="w-full p-2 mt-1 border rounded-lg text-input bg-gray-200 text-gray-700 text-left whitespace-pre-wrap break-words leading-snug"
+                                style={{ height: "auto", minHeight: "2.5rem" }}
+                            >
+                                {buocXuLy || ""}
+                            </div>
                         </div>
                         <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex flex-col gap-4">

@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 import CaseCodeSelect from "./CaseCodeSelect";
 import ActivitySelect from "./ActivitySelect";
 import callAPI from "../../utils/api";
+import { formatStaffSelectLabel } from "../../utils/staffDisplay";
 
 const statusMap = { APPROVED: "Đã duyệt" };
 const money = (value) => Number(value || 0).toLocaleString("vi-VN");
@@ -235,11 +236,22 @@ export default function TimesheetList() {
               className="text-left"
               options={staffs.map((s) => ({
                 value: s.maNhanSu,
-                label: `${s.maNhanSu} - ${s.hoTen || s.chucVu || ""}`,
+                label: formatStaffSelectLabel(s),
               }))}
-              value={isStaff
-                ? { value: currentMaNhanSu, label: currentStaff?.hoTen ? `${currentMaNhanSu} - ${currentStaff.hoTen}` : currentMaNhanSu }
-                : (filters.employeeCode ? { value: filters.employeeCode, label: filters.employeeCode } : null)}
+              value={(() => {
+                if (isStaff) {
+                  return {
+                    value: currentMaNhanSu,
+                    label: currentStaff ? formatStaffSelectLabel(currentStaff) : currentMaNhanSu,
+                  };
+                }
+                if (!filters.employeeCode) return null;
+                const found = staffs.find((s) => s.maNhanSu === filters.employeeCode);
+                return {
+                  value: filters.employeeCode,
+                  label: found ? formatStaffSelectLabel(found) : filters.employeeCode,
+                };
+              })()}
               onChange={(o) => setFilter("employeeCode", o?.value || "")}
               placeholder={isStaff ? "Nhân sự của tôi" : isManager ? "Tất cả team" : "Chọn nhân sự"}
               isClearable={!isStaff}

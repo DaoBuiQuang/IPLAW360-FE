@@ -25,7 +25,7 @@ const Login = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ username: username.trim(), password }),
             });
 
             if (!response.ok) {
@@ -127,13 +127,13 @@ const Login = () => {
                 <div className="space-y-4" onKeyDown={(e) => e.key === 'Enter' && handleLogin()}>
 
                     <div>
-                        <label className="block text-gray-700 text-left text-sm font-medium mb-1">Tài khoản</label>
+                        <label className="block text-gray-700 text-left text-sm font-medium mb-1">Tài khoản hoặc Email</label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Nhập tài khoản"
+                            placeholder="Nhập tên đăng nhập hoặc email"
                         />
                     </div>
                     <div>
