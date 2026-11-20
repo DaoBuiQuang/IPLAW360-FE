@@ -113,9 +113,12 @@ function Application_SD_NH_KHAdd() {
 
     const [soDonSD, setSoDonSD] = useState("");
     const [ngayYeuCau, setNgayYeuCau] = useState(null);
-    const [lanSuaDoi, setLanSuaDoi] = useState(1);
+    const [lanSuaDoi, setLanSuaDoi] = useState("");
     const [ngayGhiNhanSuaDoi, setNgayGhiNhanSuaDoi] = useState(null);
     const [duocGhiNhanSuaDoi, setDuocGhiNhanSuaDoi] = useState(false);
+    const [trangThaiDuyet, setTrangThaiDuyet] = useState(0);
+    const [ngayTuChoi, setNgayTuChoi] = useState(null);
+    const [lyDoTuChoi, setLyDoTuChoi] = useState("");
     const [moTaSuaDoi, setMoTaSuaDoi] = useState("");
     const [suaDoiDaiDien, setSuaDoiDaiDien] = useState(false);
     const [ndSuaDoiDaiDien, setNdSuaDoiDaiDien] = useState("");
@@ -127,6 +130,10 @@ function Application_SD_NH_KHAdd() {
     const [ndSuaNhan, setNdSuaNhan] = useState("");
     const [suaNhomSPDV, setSuaNhomSPDV] = useState(false);
     const [ndSuaNhomSPDV, setNdSuaNhomSPDV] = useState("");
+    const [suaDoiNoiDungKhac, setSuaDoiNoiDungKhac] = useState(false);
+    const [ndSuaDoiNoiDungKhac, setNdSuaDoiNoiDungKhac] = useState("");
+    const [taiLieuSD, setTaiLieuSD] = useState([]);
+    const [idGUQ, setIdGUQ] = useState(null);
 
     const [errors, setErrors] = useState({});
     const isFormValid =
@@ -364,10 +371,12 @@ function Application_SD_NH_KHAdd() {
                 setDiaChi(response.khachHang?.diaChi || "");
                 setSoDienThoai(response.khachHang?.sdt || "");
 
-                setSoDon(response.soDon)
-                setMaNhanHieu(response.nhanHieu.maNhanHieu);
-                setTenNhanHieu(response.nhanHieu.tenNhanHieu);
-                setLinkAnh(response.nhanHieu.linkAnh);
+                setSoDon(response.soDon);
+                setIdKhachHang(response.idKhachHang || response.khachHang?.id || null);
+                setIdGUQ(response.idGUQ || null);
+                setMaNhanHieu(response.nhanHieu?.maNhanHieu || "");
+                setTenNhanHieu(response.nhanHieu?.tenNhanHieu || "");
+                setLinkAnh(response.nhanHieu?.linkAnh || "");
                 setTrangThaiDon(response.trangThaiDon);
                 setHanTraLoi(formatDate(response.hanTraLoi));
                 setHanXuLy(formatDate(response.hanXuLy));
@@ -407,7 +416,7 @@ function Application_SD_NH_KHAdd() {
                 setNgayCapBang(formatDate(response.ngayCapBang));
                 setNgayHetHanBang(formatDate(response.ngayHetHanBang));
                 setTrangThaiDon(response.trangThaiDon);
-                setTaiLieuList(response.taiLieu)
+                setTaiLieuList(response.taiLieuChuaNop_KH || response.taiLieu || []);
                 setMaUyQuyen(response.maUyQuyen || null);
                 setGiayUyQuyenGoc(response.giayUyQuyenGoc);
 
@@ -422,6 +431,18 @@ function Application_SD_NH_KHAdd() {
     };
 
     const handleApplication = async () => {
+        const hasAnyAmendment = Boolean(
+            suaDoiDaiDien ||
+            suaDoiTenChuDon ||
+            suaDoiDiaChi ||
+            suaNhan ||
+            suaNhomSPDV ||
+            suaDoiNoiDungKhac
+        );
+        if (!hasAnyAmendment) {
+            showError("Thiếu thông tin!", "Vui lòng chọn ít nhất một mục cần sửa đổi.");
+            return;
+        }
         try {
             await callAPI({
                 method: "post",
@@ -429,11 +450,15 @@ function Application_SD_NH_KHAdd() {
                 data: {
                     maHoSo: maHoSoVuViec,
                     maDonDangKyCu: maDonDangKy,
-                    soDonSD,
+                    soDonSD: Number(trangThaiDuyet) === 2 ? null : (soDonSD?.trim() || null),
                     ngayYeuCau,
-                    lanSuaDoi,
-                    ngayGhiNhanSuaDoi,
-                    duocGhiNhanSuaDoi,
+                    lanSuaDoi: lanSuaDoi ? Number(lanSuaDoi) : undefined,
+                    ngayGhiNhanSuaDoi: Number(trangThaiDuyet) === 1 ? ngayGhiNhanSuaDoi : null,
+                    ngayChapThuan: Number(trangThaiDuyet) === 1 ? ngayGhiNhanSuaDoi : null,
+                    duocGhiNhanSuaDoi: Number(trangThaiDuyet) === 1,
+                    trangThaiDuyet: Number(trangThaiDuyet),
+                    ngayTuChoi: Number(trangThaiDuyet) === 2 ? ngayTuChoi : null,
+                    lyDoTuChoi: Number(trangThaiDuyet) === 2 ? lyDoTuChoi : null,
                     moTaSuaDoi,
                     suaDoiDaiDien,
                     ndSuaDoiDaiDien,
@@ -445,10 +470,17 @@ function Application_SD_NH_KHAdd() {
                     ndSuaNhan,
                     suaNhomSPDV,
                     ndSuaNhomSPDV,
+                    suaDoiNoiDungKhac,
+                    ndSuaDoiNoiDungKhac,
+                    taiLieuList: taiLieuSD,
+                    taiLieuSuaDoi: taiLieuSD,
+                    giayUyQuyenGoc,
+                    maUyQuyen,
+                    idGUQ,
                 },
             });
             await showSuccess("Thành công!", "Thêm đơn sửa đổi đơn đăng ký nhãn hiệu thành công!");
-            navigate(-1);
+            navigate("/application_sd_nh_khlist");
         } catch (error) {
             showError("Thất bại!", "Đã xảy ra lỗi.", error);
             console.error("Lỗi khi Thêm đơn sửa đổi đơn đăng ký nhãn hiệu!", error);
@@ -532,7 +564,6 @@ function Application_SD_NH_KHAdd() {
                 />
 
                 <FormSuaDoi
-
                     ngayYeuCau={ngayYeuCau}
                     setNgayYeuCau={setNgayYeuCau}
                     lanSuaDoi={lanSuaDoi}
@@ -543,6 +574,12 @@ function Application_SD_NH_KHAdd() {
                     setNgayGhiNhanSuaDoi={setNgayGhiNhanSuaDoi}
                     duocGhiNhanSuaDoi={duocGhiNhanSuaDoi}
                     setDuocGhiNhanSuaDoi={setDuocGhiNhanSuaDoi}
+                    trangThaiDuyet={trangThaiDuyet}
+                    setTrangThaiDuyet={setTrangThaiDuyet}
+                    ngayTuChoi={ngayTuChoi}
+                    setNgayTuChoi={setNgayTuChoi}
+                    lyDoTuChoi={lyDoTuChoi}
+                    setLyDoTuChoi={setLyDoTuChoi}
                     moTaSuaDoi={moTaSuaDoi}
                     setMoTaSuaDoi={setMoTaSuaDoi}
                     suaDoiDaiDien={suaDoiDaiDien}
@@ -565,15 +602,22 @@ function Application_SD_NH_KHAdd() {
                     setSuaNhomSPDV={setSuaNhomSPDV}
                     ndSuaNhomSPDV={ndSuaNhomSPDV}
                     setNdSuaNhomSPDV={setNdSuaNhomSPDV}
+                    suaDoiNoiDungKhac={suaDoiNoiDungKhac}
+                    setSuaDoiNoiDungKhac={setSuaDoiNoiDungKhac}
+                    ndSuaDoiNoiDungKhac={ndSuaDoiNoiDungKhac}
+                    setNdSuaDoiNoiDungKhac={setNdSuaDoiNoiDungKhac}
                 />
 
                 <div className="col-span-2">
-                    <DocumentSection onTaiLieuChange={handleTaiLieuChange} initialTaiLieus={taiLieuList}
+                    <DocumentSection onTaiLieuChange={setTaiLieuSD} initialTaiLieus={taiLieuSD}
                         maHoSoVuViec={maHoSoVuViec}
                         giayUyQuyenGoc={giayUyQuyenGoc}
                         setGiayUyQuyenGoc={setGiayUyQuyenGoc}
                         maUyQuyen={maUyQuyen}
                         setMaUyQuyen={setMaUyQuyen}
+                        idGUQ={idGUQ}
+                        setIdGUQ={setIdGUQ}
+                        idKhachHang={idKhachHang}
                     />
                 </div>
                 <div className="flex justify-center gap-4 mt-4">

@@ -463,7 +463,7 @@ function Application_TD_NH_VNAdd() {
                 },
             });
             await showSuccess("Thành công!", "Tách đơn đăng ký nhãn hiệu thành công!");
-            navigate(-1);
+            navigate("/application_td_nh_vnlist");
         } catch (error) {
             showError("Thất bại!", "Đã xảy ra lỗi khi tách đơn đăng ký nhãn hiệu.", error);
             console.error("Lỗi khi tách đơn đăng ký nhãn hiệu!", error);
@@ -504,7 +504,7 @@ function Application_TD_NH_VNAdd() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-gray-800 text-sm">
                             {/* Thông tin chung */}
                             <div className="text-left"><span className="font-medium">Mã hồ sơ:</span> {maHoSoVuViec}</div>
-                            <div className="text-left"><span className="font-medium">Loại đơn:</span> {loaiDon === 1 ? "Đơn gốc" : loaiDon === 2 ? "Đơn sửa đổi" : loaiDon === 3 ? "Đơn tách" : loaiDon === 4 ? "Đơn chuyển nhượng" : ""}</div>
+                            <div className="text-left"><span className="font-medium">Loại đơn:</span> {loaiDon === 1 ? "Đơn gốc" : loaiDon === 2 ? "Đơn sửa đổi" : loaiDon === 3 ? "Đơn tách" : loaiDon === 4 ? "Đơn chuyển quyền sở hữu" : ""}</div>
                             <div className="text-left"><span className="font-medium">Client ref's:</span> {clientsRef || noiDungVuViec}</div>
                             <div className="text-left"><span className="font-medium">Mã khách hàng:</span> {maKhachHang}</div>
                             <div className="text-left"><span className="font-medium">Tên khách hàng:</span> {tenKhachHang}</div>

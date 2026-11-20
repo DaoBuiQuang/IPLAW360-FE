@@ -60,7 +60,8 @@ function MenuLeft() {
       location.pathname.startsWith("/applicationedit_kh") ||
       location.pathname.startsWith("/applicationdetail_kh") ||
       location.pathname.startsWith("/application_sd_nh_kh") ||
-      location.pathname.startsWith("/application_td_nh_kh"));
+      location.pathname.startsWith("/application_td_nh_kh") ||
+      location.pathname.startsWith("/application_cq_nh_kh"));
 
   const isGcnKHOpen =
     location.pathname.startsWith("/gcn_nh_cam") ||
@@ -238,7 +239,7 @@ function MenuLeft() {
                         <li>
                           <NavLink to="/application_cq_nh_vnlist" className={navLinkClass}>
                             <FileText size={14} />
-                            <span className="text-left w-full">Đơn chuyển nhượng</span>
+                            <span className="text-left w-full">Đơn chuyển quyền sở hữu</span>
                           </NavLink>
                         </li>
                       </ul>
@@ -406,6 +407,12 @@ function MenuLeft() {
                           <NavLink to="/application_td_nh_khlist" className={navLinkClass}>
                             <FileText size={14} />
                             <span className="text-left w-full">Đơn tách</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/application_cq_nh_khlist" className={navLinkClass}>
+                            <FileText size={14} />
+                            <span className="text-left w-full">Đơn chuyển quyền sở hữu</span>
                           </NavLink>
                         </li>
                       </ul>

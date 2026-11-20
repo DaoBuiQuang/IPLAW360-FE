@@ -90,7 +90,7 @@ function EmployeeList() {
                 fetchEmployees(searchTerm);
               }
             }}
-            placeholder={`🔍 ${t("enterEmployeeName") || "Nhập tên nhân viên hoặc mã..."}`}
+            placeholder="🔍 Nhập tên nhân viên hoặc email..."
             className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
           />
 
@@ -150,7 +150,6 @@ function EmployeeList() {
                     >
                       {staff.hoTen}
                     </span>
-                    <span className="text-xs text-gray-400 font-mono">({staff.maNhanSu})</span>
                   </div>
                 </td>
                 <td className="p-2 text-table">{staff.chucVu || "—"}</td>

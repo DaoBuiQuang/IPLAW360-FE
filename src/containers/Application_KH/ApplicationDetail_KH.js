@@ -3,9 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import callAPI from "../../utils/api.js";
 import DonProgress from "../../components/commom/DonProgess.js";
 import "dayjs/locale/vi";
-import { Table, Modal, Button, Spin } from "antd";
+import dayjs from "dayjs";
+import { Table, Modal, Button, Spin, Radio, DatePicker, Input } from "antd";
 import ExportWordModal from "../../components/ExportFile/ExportWordModal.js";
 import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
+import { showSuccess, showError } from "../../components/commom/Notification.js";
 
 function ApplicationDetail_KH() {
   const navigate = useNavigate();
@@ -92,13 +94,31 @@ function ApplicationDetail_KH() {
   const [soDonUQGoc, setSoDonUQGoc] = useState("");
   const [clientsRef, setClientsRef] = useState(null);
   const [danhSachDonSuaDoi, setDanhSachDonSuaDoi] = useState([]);
+  const [danhSachDonChuyenQuyen, setDanhSachDonChuyenQuyen] = useState([]);
+  const [loaiDon, setLoaiDon] = useState(1);
+  const [maDonDangKyGoc, setMaDonDangKyGoc] = useState(null);
+  const [soDonGoc, setSoDonGoc] = useState(null);
+  const [ngayNopDonGoc, setNgayNopDonGoc] = useState(null);
+  const [dangSuaDoi, setDangSuaDoi] = useState(false);
+  const [dangChuyenQuyen, setDangChuyenQuyen] = useState(false);
   const [donGoc, setDonGoc] = useState(null);
   const [donSuaDoi, setDonSuaDoi] = useState({});
+  const [dsBienDongChoDuyet, setDsBienDongChoDuyet] = useState([]);
+  const [dsDonCon, setDsDonCon] = useState([]);
+  const [quickApproveModalOpen, setQuickApproveModalOpen] = useState(false);
+  const [selectedPendingItem, setSelectedPendingItem] = useState(null);
+  const [quickApproveStatus, setQuickApproveStatus] = useState(1);
+  const [quickApproveSoDon, setQuickApproveSoDon] = useState("");
+  const [quickApproveDate, setQuickApproveDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [quickRejectDate, setQuickRejectDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [quickRejectReason, setQuickRejectReason] = useState("");
+  const [submittingQuickApprove, setSubmittingQuickApprove] = useState(false);
   const isViewOnly = true;
 
   useEffect(() => {
     detailApplication();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maDonDangKy]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -220,10 +240,19 @@ function ApplicationDetail_KH() {
       setSoGUQ(response.GiayUyQuyen?.soGUQ || "");
       setSoDonUQGoc(response.GiayUyQuyen?.soDonGoc || "");
 
-      // Đơn sửa đổi
+      // Đơn sửa đổi, chuyển quyền & biến động
+      setLoaiDon(response.loaiDon ?? 1);
+      setMaDonDangKyGoc(response.maDonDangKyGoc || response.donCha?.maDonDangKy || null);
+      setSoDonGoc(response.soDonGoc || response.donCha?.soDon || null);
+      setNgayNopDonGoc(formatDate(response.ngayNopDonGoc || response.donCha?.ngayNopDon));
+      setDangSuaDoi(Boolean(response.dangSuaDoi));
+      setDangChuyenQuyen(Boolean(response.dangChuyenQuyen));
       setDanhSachDonSuaDoi(response.danhSachDonSuaDoi || []);
-      setDonGoc(response.donGoc || null);
+      setDanhSachDonChuyenQuyen(response.danhSachDonChuyenQuyen || []);
+      setDonGoc(response.donGoc ?? null);
       setDonSuaDoi(response.donSuaDoi || {});
+      setDsBienDongChoDuyet(response.dsBienDongChoDuyet || []);
+      setDsDonCon(response.dsDonCon || []);
     } catch (error) {
       console.error("detailApplication error:", error);
     } finally {
@@ -238,6 +267,57 @@ function ApplicationDetail_KH() {
 
   const handleVuViecChange = (list) => {
     setVuViecList(list);
+  };
+
+  const openQuickApproveModal = (bd) => {
+    setSelectedPendingItem(bd);
+    setQuickApproveStatus(1);
+    setQuickApproveSoDon(bd?.soDon || "");
+    setQuickApproveDate(dayjs().format("YYYY-MM-DD"));
+    setQuickRejectDate(dayjs().format("YYYY-MM-DD"));
+    setQuickRejectReason("");
+    setQuickApproveModalOpen(true);
+  };
+
+  const handleConfirmQuickApprove = async () => {
+    if (!selectedPendingItem?.id) return;
+    setSubmittingQuickApprove(true);
+    try {
+      const isSuaDoi = selectedPendingItem.loaiBienDong === "SUA_DOI";
+      const endpoint = isSuaDoi ? "/application_sd_nh_kh/update" : "/application_cq_nh_kh/update";
+      const st = Number(quickApproveStatus);
+      const cleanSoDon = st === 2 ? null : (quickApproveSoDon.trim() || null);
+      const res = await callAPI({
+        method: "post",
+        endpoint,
+        data: {
+          id: selectedPendingItem.id,
+          trangThaiDuyet: st,
+          soDon: cleanSoDon,
+          soDonSD: cleanSoDon,
+          soDonChuyenQuyen: cleanSoDon,
+          duocGhiNhanSuaDoi: st === 1,
+          ngayChapThuan: st === 1 ? quickApproveDate : null,
+          ngayGhiNhanSuaDoi: st === 1 ? quickApproveDate : null,
+          ngayGhiNhanCQ: st === 1 ? quickApproveDate : null,
+          ngayTuChoi: st === 2 ? quickRejectDate : null,
+          lyDoTuChoi: st === 2 ? quickRejectReason : null,
+        },
+      });
+      await showSuccess("Thành công", "Đã cập nhật kết quả xét duyệt!");
+      setQuickApproveModalOpen(false);
+      const maMoi = res?.maDonDangKyMoi || res?.donMoi?.maDonDangKy;
+      if (Number(quickApproveStatus) === 1 && maMoi) {
+        navigate(`/applicationdetail_kh/${maMoi}`);
+      } else {
+        detailApplication();
+      }
+    } catch (error) {
+      console.error("Lỗi khi xét duyệt nhanh:", error);
+      showError("Thất bại", "Không thể cập nhật kết quả xét duyệt.", error);
+    } finally {
+      setSubmittingQuickApprove(false);
+    }
   };
 
   return (
@@ -258,10 +338,131 @@ function ApplicationDetail_KH() {
         </div>
 
         <Spin spinning={loading} tip="Loading..." size="large">
+          {/* Banner cảnh báo đơn gốc đã đóng băng */}
+          {Number(donGoc) === 1 && (
+            <div className="mb-4 p-4 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 text-left">
+              <div className="font-semibold text-base text-gray-800">
+                🔒 Đơn đăng ký này đã đóng băng (Lưu lịch sử)
+              </div>
+              <p className="text-sm mt-1">
+                Đơn này đã được Cục chấp thuận sửa đổi / chuyển quyền sở hữu và toàn bộ quy trình thẩm định đã được chuyển giao sang đơn mới.
+              </p>
+              {Array.isArray(dsDonCon) && dsDonCon.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {dsDonCon.map((con, idx) => (
+                    <button
+                      key={con.maDonDangKy || idx}
+                      type="button"
+                      onClick={() => navigate(`/applicationdetail_kh/${con.maDonDangKy}`)}
+                      className="px-3 py-1 text-xs font-semibold rounded bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      ➔ Xem đơn mới: {con.soDon || con.maDonDangKy} ({con.loaiBienDong})
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Banner có tờ khai Đang sửa đổi / Đang chuyển quyền sở hữu chờ Cục xét duyệt */}
+          {Array.isArray(dsBienDongChoDuyet) && dsBienDongChoDuyet.length > 0 && (
+            <div className="mb-4 p-4 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 text-left space-y-2">
+              <div className="font-semibold text-base">
+                ⏳ Đơn đang có Tờ khai sửa đổi / chuyển quyền sở hữu chờ Cục xét duyệt:
+              </div>
+              {dsBienDongChoDuyet.map((bd, idx) => {
+                const detailUrl =
+                  bd.loaiBienDong === "CHUYEN_QUYEN"
+                    ? `/application_cq_nh_kh_detail/${bd.id}`
+                    : `/application_sd_nh_kh_detail/${bd.id}`;
+                return (
+                <div
+                  key={bd.id || idx}
+                  className="flex flex-col md:flex-row md:items-center md:justify-between bg-white p-3 rounded border border-amber-200 gap-2"
+                >
+                  <div className="text-sm">
+                    <span className="font-semibold text-amber-800">[{bd.tenBienDong || "Đơn sửa đổi"}]</span>{" "}
+                    Số tờ khai:{" "}
+                    <b
+                      className="text-blue-600 underline cursor-pointer"
+                      onClick={() => navigate(detailUrl)}
+                      title="Xem chi tiết tờ khai"
+                    >
+                      {bd.soDon || "—"}
+                    </b>{" "}
+                    | Ngày nộp YC:{" "}
+                    <b>{bd.ngayYeuCau ? formatDateVN(bd.ngayYeuCau) : "—"}</b> | Lần:{" "}
+                    <b>{bd.lanBienDong || 1}</b>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate(detailUrl)}
+                      className="px-3 py-1.5 text-xs font-semibold rounded bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                    >
+                      👁️ Xem tờ khai
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openQuickApproveModal(bd)}
+                      className="px-3 py-1.5 text-xs font-semibold rounded bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                    >
+                      ⚖️ Xét duyệt (Chấp thuận / Từ chối)
+                    </button>
+                  </div>
+                </div>
+                );
+              })}
+            </div>
+          )}
+
           <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-gray-800 text-sm">
               {/* Thông tin chung – giống VN */}
               <div className="text-left"><span className="font-medium">Mã hồ sơ:</span> {maHoSoVuViec}</div>
+              <div className="text-left flex items-center gap-2 flex-wrap">
+                <span className="font-medium">Loại đơn:</span>
+                {dangSuaDoi && (
+                  <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                    ⏳ Đang sửa đổi
+                  </span>
+                )}
+                {dangChuyenQuyen && (
+                  <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 border border-orange-300">
+                    ⏳ Đang chuyển quyền
+                  </span>
+                )}
+                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  {Number(loaiDon) === 1 || Number(loaiDon) === 0
+                    ? "Đơn gốc"
+                    : Number(loaiDon) === 2
+                    ? "Đã sửa đổi"
+                    : Number(loaiDon) === 3 || Number(loaiDon) === 5
+                    ? "Đơn tách"
+                    : Number(loaiDon) === 4
+                    ? "Đã chuyển quyền sở hữu"
+                    : "Đơn gốc"}
+                </span>
+              </div>
+              {(maDonDangKyGoc || soDonGoc) && (
+                <>
+                  <div className="text-left">
+                    <span className="font-medium">Số đơn gốc:</span>{" "}
+                    <span
+                      className="text-indigo-600 font-semibold cursor-pointer hover:underline"
+                      onClick={() => maDonDangKyGoc && navigate(`/applicationdetail_kh/${maDonDangKyGoc}`)}
+                    >
+                      {soDonGoc || maDonDangKyGoc}
+                    </span>
+                  </div>
+                  <div className="text-left">
+                    <span className="font-medium">Ngày nộp đơn gốc:</span>{" "}
+                    <span className="font-semibold text-gray-800">
+                      {ngayNopDonGoc ? formatDateVN(ngayNopDonGoc) : "—"}
+                    </span>
+                  </div>
+                </>
+              )}
               <div className="text-left"><span className="font-medium">Client ref's:</span> {clientsRef}</div>
               <div className="text-left"><span className="font-medium">Mã khách hàng:</span> {maKhachHang}</div>
               <div className="text-left"><span className="font-medium">Tên khách hàng:</span> {tenKhachHang}</div>
@@ -424,12 +625,38 @@ function ApplicationDetail_KH() {
                               </div>
                             )}
 
-                            {item.ngayGhiNhanSuaDoi && (
+                            {Number(item.trangThaiDuyet) === 1 && item.ngayGhiNhanSuaDoi && (
                               <div className="flex">
                                 <span className="w-32 font-medium">{formatDateVN(item.ngayGhiNhanSuaDoi)}</span>
                                 <span>
                                   Ngày ghi nhận sửa đổi lần{" "}
                                   {item.lanSuaDoi ?? index + 1}
+                                </span>
+                              </div>
+                            )}
+                          </React.Fragment>
+                        ))}
+                    {Array.isArray(danhSachDonChuyenQuyen) &&
+                      danhSachDonChuyenQuyen
+                        .slice()
+                        .sort((a, b) => (a.lanChuyenQuyen || 0) - (b.lanChuyenQuyen || 0))
+                        .map((item, index) => (
+                          <React.Fragment key={`cq_${item.id || index}`}>
+                            {item.ngayYeuCau && (
+                              <div className="flex">
+                                <span className="w-32 font-medium">{formatDateVN(item.ngayYeuCau)}</span>
+                                <span>
+                                  Ngày yêu cầu chuyển quyền sở hữu lần{" "}
+                                  {item.lanChuyenQuyen ?? index + 1}
+                                </span>
+                              </div>
+                            )}
+                            {Number(item.trangThaiDuyet) === 1 && item.ngayGhiNhanCQ && (
+                              <div className="flex">
+                                <span className="w-32 font-medium">{formatDateVN(item.ngayGhiNhanCQ)}</span>
+                                <span>
+                                  Ngày ghi nhận chuyển quyền sở hữu lần{" "}
+                                  {item.lanChuyenQuyen ?? index + 1}
                                 </span>
                               </div>
                             )}
@@ -561,13 +788,42 @@ function ApplicationDetail_KH() {
               In Word: Thông tin Đơn Đăng Ký
             </button>
 
-            <button
-              onClick={handleApplicationEdit}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
-            >
-              Sửa thông tin đơn
-            </button>
+            {Number(donGoc) !== 1 && (
+              <button
+                onClick={handleApplicationEdit}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
+              >
+                Sửa thông tin đơn
+              </button>
+            )}
           </div>
+          {Number(donGoc) !== 1 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex flex-wrap gap-4 items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/application_sd_nh_kh_add/${maDonDangKy}`)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                >
+                  <span>Sửa đổi đơn đăng ký</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/application_td_nh_kh_add/${maDonDangKy}`)}
+                  className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                >
+                  <span>Tách đơn đăng ký</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/application_cq_nh_kh_add/${maDonDangKy}`)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                >
+                  <span>Chuyển quyền sở hữu</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           <ExportWordModal
             open={openModal}
@@ -601,6 +857,90 @@ function ApplicationDetail_KH() {
             fileName={`ThongDonDangKy_${maDonDangKy}`}
           />
         </div>
+
+        <Modal
+          title="⚖️ Cập nhật kết quả xét duyệt của Cục"
+          open={quickApproveModalOpen}
+          onOk={handleConfirmQuickApprove}
+          onCancel={() => setQuickApproveModalOpen(false)}
+          confirmLoading={submittingQuickApprove}
+          okText="Xác nhận lưu"
+          cancelText="Hủy"
+          width={620}
+        >
+          {selectedPendingItem && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-3 rounded border text-sm">
+                <div>
+                  Loại tờ khai: <b>{selectedPendingItem.tenBienDong || "Đơn sửa đổi"}</b>
+                </div>
+                <div>
+                  Số tờ khai: <b>{selectedPendingItem.soDon || "—"}</b>
+                </div>
+              </div>
+              <Radio.Group
+                value={Number(quickApproveStatus)}
+                onChange={(e) => setQuickApproveStatus(Number(e.target.value))}
+                className="flex flex-col gap-2"
+              >
+                <Radio value={1}>✅ Được chấp thuận</Radio>
+                <Radio value={2}>❌ Từ chối</Radio>
+              </Radio.Group>
+              {Number(quickApproveStatus) === 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {selectedPendingItem.loaiBienDong === "CHUYEN_QUYEN"
+                        ? "Số đơn ghi nhận chuyển giao"
+                        : "Số đơn ghi nhận sửa đổi"}
+                    </label>
+                    <Input
+                      value={quickApproveSoDon}
+                      onChange={(e) => setQuickApproveSoDon(e.target.value)}
+                      placeholder={
+                        selectedPendingItem.loaiBienDong === "CHUYEN_QUYEN"
+                          ? "Nhập số đơn ghi nhận (CĐxxxx)"
+                          : "Nhập số đơn ghi nhận (SĐxxxx)"
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ngày ghi nhận
+                    </label>
+                    <DatePicker
+                      value={quickApproveDate ? dayjs(quickApproveDate) : null}
+                      onChange={(d) => setQuickApproveDate(d ? d.format("YYYY-MM-DD") : null)}
+                      format="DD/MM/YYYY"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              )}
+              {Number(quickApproveStatus) === 2 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngày từ chối</label>
+                    <DatePicker
+                      value={quickRejectDate ? dayjs(quickRejectDate) : null}
+                      onChange={(d) => setQuickRejectDate(d ? d.format("YYYY-MM-DD") : null)}
+                      format="DD/MM/YYYY"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Lý do từ chối</label>
+                    <Input
+                      value={quickRejectReason}
+                      onChange={(e) => setQuickRejectReason(e.target.value)}
+                      placeholder="Nhập lý do từ chối"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </Modal>
 
         {/* GIỮ NGUYÊN: Modal lịch sử thẩm định (1 bảng) */}
         <Modal

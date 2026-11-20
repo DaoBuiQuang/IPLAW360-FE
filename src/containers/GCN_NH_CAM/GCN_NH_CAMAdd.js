@@ -403,7 +403,7 @@ function GCN_NH_CAMAdd() {
                             type="text"
                             value={dsNhomSPDV ?? ""}
                             onChange={(e) => setDsNhomSPDV(e.target.value)}
-                            placeholder="Nhập mã hồ sơ"
+                            placeholder="Nhập danh sách nhóm SPDV"
                             className="w-full p-2 mt-1 border rounded-lg text-input h-10"
                         />
                     </div>

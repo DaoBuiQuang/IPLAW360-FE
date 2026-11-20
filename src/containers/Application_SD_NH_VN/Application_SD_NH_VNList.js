@@ -29,6 +29,7 @@ function Application_SD_NH_VNList() {
   const [approvalModalOpen, setApprovalModalOpen] = useState(false);
   const [approvalRecord, setApprovalRecord] = useState(null);
   const [approvalStatus, setApprovalStatus] = useState(0);
+  const [approvalSoDon, setApprovalSoDon] = useState("");
   const [approvalDate, setApprovalDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [rejectDate, setRejectDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [rejectReason, setRejectReason] = useState("");
@@ -104,6 +105,8 @@ function Application_SD_NH_VNList() {
   const allFieldOptions = [
     { label: "Số Đơn sửa đổi", labelEn: "Amendment No", key: "soDonSD" },
     { label: "Trạng thái xét duyệt", labelEn: "Approval Status", key: "trangThaiDuyet" },
+    { label: "Số đơn được sửa đổi", labelEn: "Amended Application No", key: "soDonGoc" },
+    { label: "Nội dung sửa đổi", labelEn: "Amended Items", key: "noiDungSuaDoi" },
     { label: "Mã HSVV", labelEn: "Matter code", key: "maHoSoVuViec" },
     { label: "Ngày yêu cầu sửa đổi", key: "ngayYeuCau" },
     { label: "Ngày ghi nhận sửa đổi", key: "ngayGhiNhanSuaDoi" },
@@ -180,7 +183,12 @@ function Application_SD_NH_VNList() {
         maSPDVList: overrides.selectedProductAndService !== undefined ? overrides.selectedProductAndService : selectedProductAndService,
         trangThaiDon: overrides.selectedTrangThaiDon !== undefined ? overrides.selectedTrangThaiDon : selectedTrangThaiDon,
         trangThaiDuyet: overrides.selectedTrangThaiDuyetFilter !== undefined ? overrides.selectedTrangThaiDuyetFilter : selectedTrangThaiDuyetFilter,
-        fields: overrides.selectedFields !== undefined ? overrides.selectedFields : selectedFields,
+        fields: [
+          ...new Set([
+            ...(overrides.selectedFields !== undefined ? overrides.selectedFields : selectedFields),
+            "suaDoiDaiDien", "suaDoiTenChuDon", "suaDoiDiaChi", "suaNhan", "suaNhomSPDV", "suaDoiNoiDungKhac",
+          ]),
+        ],
         filterCondition: customFilterCondition || filterCondition,
         pageIndex: page,
         pageSize: size,
@@ -473,6 +481,7 @@ function Application_SD_NH_VNList() {
   const openApprovalModal = (app) => {
     setApprovalRecord(app);
     setApprovalStatus(Number(app.trangThaiDuyet ?? 0));
+    setApprovalSoDon(app.soDonSD || app.soDon || "");
     setApprovalDate(
       app.ngayChapThuan || app.ngayGhiNhanSuaDoi
         ? dayjs(app.ngayChapThuan || app.ngayGhiNhanSuaDoi).format("YYYY-MM-DD")
@@ -495,17 +504,20 @@ function Application_SD_NH_VNList() {
     }
     setSubmittingApproval(true);
     try {
+      const st = Number(approvalStatus);
       await callAPI({
         method: "post",
         endpoint: "/application_sd_nh_vn/update",
         data: {
           id: approvalRecord.idDonSuaDoi || approvalRecord.id,
-          trangThaiDuyet: Number(approvalStatus),
-          duocGhiNhanSuaDoi: Number(approvalStatus) === 1,
-          ngayChapThuan: Number(approvalStatus) === 1 ? approvalDate : null,
-          ngayGhiNhanSuaDoi: Number(approvalStatus) === 1 ? approvalDate : null,
-          ngayTuChoi: Number(approvalStatus) === 2 ? rejectDate : null,
-          lyDoTuChoi: Number(approvalStatus) === 2 ? rejectReason : null,
+          trangThaiDuyet: st,
+          soDonSD: st === 2 ? null : (approvalSoDon.trim() || null),
+          soDon: st === 2 ? null : (approvalSoDon.trim() || null),
+          duocGhiNhanSuaDoi: st === 1,
+          ngayChapThuan: st === 1 ? approvalDate : null,
+          ngayGhiNhanSuaDoi: st === 1 ? approvalDate : null,
+          ngayTuChoi: st === 2 ? rejectDate : null,
+          lyDoTuChoi: st === 2 ? rejectReason : null,
           moTa: approvalNote,
         },
       });
@@ -842,6 +854,13 @@ function Application_SD_NH_VNList() {
                       "ngayYeuCau", "ngayGhiNhanSuaDoi"
                     ];
 
+                    if (col.key === "ngayGhiNhanSuaDoi" && Number(app.trangThaiDuyet) !== 1) {
+                      return (
+                        <td key={col.key} className={commonClass}>
+                          —
+                        </td>
+                      );
+                    }
                     if (isDateField.includes(col.key)) {
                       return (
                         <td key={col.key} className={commonClass}>
@@ -850,21 +869,67 @@ function Application_SD_NH_VNList() {
                       );
                     }
                     if (col.key === "soDonSD") {
-                      const targetMaDon = app.maDonDangKy || app.maDonDangKyGoc;
+                      const targetId = app.idDonSuaDoi || app.id;
                       return (
                         <td
                           key={col.key}
                           className={`p-2 text-table font-semibold ${
-                            targetMaDon ? "text-blue-500 cursor-pointer hover:underline" : "text-gray-800"
+                            targetId ? "text-blue-500 cursor-pointer hover:underline" : "text-gray-800"
                           }`}
                           onClick={(e) => {
-                            if (targetMaDon) {
+                            if (targetId) {
                               e.stopPropagation();
-                              navigate(`/applicationdetail/${targetMaDon}`);
+                              navigate(`/application_sd_nh_vn_detail/${targetId}`);
                             }
                           }}
                         >
-                          {app.soDonSD || app.soDon || app.soDonGoc || "—"}
+                          {Number(app.trangThaiDuyet) === 2 ? "—" : (app.soDonSD || app.soDon || "—")}
+                        </td>
+                      );
+                    }
+                    if (col.key === "soDonGoc") {
+                      return (
+                        <td
+                          key={col.key}
+                          className={`p-2 text-table ${
+                            app.maDonDangKyGoc ? "text-indigo-600 cursor-pointer hover:underline font-medium" : "text-gray-700"
+                          }`}
+                          onClick={(e) => {
+                            if (app.maDonDangKyGoc) {
+                              e.stopPropagation();
+                              navigate(`/applicationdetail/${app.maDonDangKyGoc}`);
+                            }
+                          }}
+                        >
+                          {app.soDonGoc || app.maDonDangKyGoc || "—"}
+                        </td>
+                      );
+                    }
+                    if (col.key === "noiDungSuaDoi") {
+                      const tags = [
+                        app.suaDoiTenChuDon && "Tên chủ đơn",
+                        app.suaDoiDiaChi && "Địa chỉ",
+                        app.suaDoiDaiDien && "Đại diện",
+                        app.suaNhan && "Nhãn",
+                        app.suaNhomSPDV && "Nhóm SP/DV",
+                        app.suaDoiNoiDungKhac && "Nội dung khác",
+                      ].filter(Boolean);
+                      return (
+                        <td key={col.key} className={commonClass}>
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            {tags.length > 0 ? (
+                              tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-blue-50 text-blue-700 border border-blue-200"
+                                >
+                                  {tag}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </div>
                         </td>
                       );
                     }
@@ -873,9 +938,14 @@ function Application_SD_NH_VNList() {
                       return (
                         <td key={col.key} className="p-2 text-table">
                           <div className="flex flex-col items-center gap-1">
-                            {st === 0 && (
+                            {st === 0 && !app.dangChoTraLoiCuc && (
                               <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
                                 ⏳ Chưa chấp thuận
+                              </span>
+                            )}
+                            {st === 0 && app.dangChoTraLoiCuc && (
+                              <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 border border-orange-300">
+                                ⚠️ Chờ trả lời Cục{app.soLanThongBaoCuc ? ` (Lần ${app.soLanThongBaoCuc})` : ""}
                               </span>
                             )}
                             {st === 1 && (
@@ -885,7 +955,7 @@ function Application_SD_NH_VNList() {
                             )}
                             {st === 2 && (
                               <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700 border border-red-300">
-                                ❌ Từ chối
+                                ❌ Từ chối{app.tuDongTuChoi ? " (Quá hạn)" : ""}
                               </span>
                             )}
                             {st === 2 && app.lyDoTuChoi && (
@@ -1037,39 +1107,35 @@ function Application_SD_NH_VNList() {
                       );
                     }
                     if (col.key === "hanTraLoi") {
-                      if (app.trangThaiVuViec === "5") {
-                        return <td key={col.key} className="p-2 font-semibold"></td>;
+                      const st = Number(app.trangThaiDuyet ?? 0);
+                      if (st === 2 && app.tuDongTuChoi) {
+                        return (
+                          <td key={col.key} className="p-2 font-semibold text-red-600">
+                            Quá hạn trả lời
+                          </td>
+                        );
                       }
+                      if (st !== 0 || !app.hanTraLoi) {
+                        return <td key={col.key} className="p-2 text-table"></td>;
+                      }
+                      const diffDays = dayjs(app.hanTraLoi).startOf("day").diff(dayjs().startOf("day"), "day");
                       let text = "";
                       let textColor = "";
-
-                      if (app.hanTraLoi) {
-                        const today = new Date();
-                        const hanTraLoiDate = new Date(app.hanTraLoi);
-
-                        if (!isNaN(hanTraLoiDate.getTime())) {
-                          // Tính số ngày còn lại (so sánh ở mức ngày, tránh lệch giờ)
-                          const diffTime = hanTraLoiDate.setHours(0, 0, 0, 0) - today.setHours(0, 0, 0, 0);
-                          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                          if (diffDays < 0) {
-                            text = `Quá hạn ${Math.abs(diffDays)} ngày`;
-                            textColor = "text-red-600";
-                          } else if (diffDays <= 7) {
-                            text = `Còn ${diffDays} ngày`;
-                            textColor = "text-orange-500";
-                          } else {
-                            text = `Còn ${diffDays} ngày`;
-                            textColor = "text-emerald-600";
-                          }
-                        }
+                      if (diffDays < 0) {
+                        text = `Quá hạn ${Math.abs(diffDays)} ngày`;
+                        textColor = "text-red-600";
+                      } else if (diffDays === 0) {
+                        text = "Hạn là hôm nay";
+                        textColor = "text-orange-600";
+                      } else if (diffDays <= 7) {
+                        text = `Còn ${diffDays} ngày`;
+                        textColor = "text-orange-500";
+                      } else {
+                        text = `Còn ${diffDays} ngày`;
+                        textColor = "text-emerald-600";
                       }
-
                       return (
-                        <td
-                          key={col.key}
-                          className={`p-2 font-semibold ${textColor} ${colIndex < columns.length - 1 ? "" : ""}`}
-                        >
+                        <td key={col.key} className={`p-2 font-semibold ${textColor}`}>
                           {text}
                         </td>
                       );
@@ -1139,6 +1205,15 @@ function Application_SD_NH_VNList() {
                   <td className="p-2 text-table">
                     {(role === "admin" || role === "staff") && (
                       <div className="hidden group-hover:flex gap-2 absolute right-2 top-1/2 -translate-y-1/2 bg-white p-1 rounded shadow-md z-10">
+                        {(app.idDonSuaDoi || app.id) && (
+                          <button
+                            className="px-3 py-1 bg-teal-100 text-teal-700 rounded-md hover:bg-teal-200"
+                            onClick={() => navigate(`/application_sd_nh_vn_detail/${app.idDonSuaDoi || app.id}`)}
+                            title="Xem chi tiết tờ khai sửa đổi"
+                          >
+                            👁️
+                          </button>
+                        )}
                         <button
                           className="px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
                           onClick={() => openApprovalModal(app)}
@@ -1146,10 +1221,11 @@ function Application_SD_NH_VNList() {
                         >
                           ⚖️ Duyệt
                         </button>
-                        {(app.maDonDangKy || app.maDonDangKyGoc) && (
+                        {(app.idDonSuaDoi || app.id) && (
                           <button
                             className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                            onClick={() => navigate(`/applicationedit/${app.maDonDangKy || app.maDonDangKyGoc}`)}
+                            onClick={() => navigate(`/application_sd_nh_vn_edit/${app.idDonSuaDoi || app.id}`)}
+                            title="Chỉnh sửa tờ khai sửa đổi"
                           >
                             📝
                           </button>
@@ -1253,16 +1329,28 @@ function Application_SD_NH_VNList() {
             </div>
 
             {Number(approvalStatus) === 1 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ngày ghi nhận sửa đổi
-                </label>
-                <DatePicker
-                  value={approvalDate ? dayjs(approvalDate) : null}
-                  onChange={(d) => setApprovalDate(d ? d.format("YYYY-MM-DD") : null)}
-                  format="DD/MM/YYYY"
-                  className="w-full"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Số đơn ghi nhận sửa đổi
+                  </label>
+                  <Input
+                    value={approvalSoDon}
+                    onChange={(e) => setApprovalSoDon(e.target.value)}
+                    placeholder="Nhập số đơn ghi nhận (SĐxxxx)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ngày ghi nhận sửa đổi
+                  </label>
+                  <DatePicker
+                    value={approvalDate ? dayjs(approvalDate) : null}
+                    onChange={(d) => setApprovalDate(d ? d.format("YYYY-MM-DD") : null)}
+                    format="DD/MM/YYYY"
+                    className="w-full"
+                  />
+                </div>
               </div>
             )}
 

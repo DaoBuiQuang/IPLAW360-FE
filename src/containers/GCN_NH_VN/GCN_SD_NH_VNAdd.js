@@ -102,7 +102,7 @@ function GCN_SD_NH_VNAdd() {
             });
 
             await showSuccess("Thành công!", "Thêm đơn sửa đổi giấy chứng nhận thành công!");
-            navigate(-1);
+            navigate("/application_sd_gcn_nh_vnlist");
         } catch (error) {
             console.error("Lỗi khi thêm đơn sửa đổi GCN:", error);
             showError("Thất bại!", "Đã xảy ra lỗi khi thêm đơn sửa đổi giấy chứng nhận.", error);

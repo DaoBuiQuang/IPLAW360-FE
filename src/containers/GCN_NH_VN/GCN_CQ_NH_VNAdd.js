@@ -104,7 +104,7 @@ function GCN_CQ_NH_VNAdd() {
             });
 
             await showSuccess("Thành công!", "Tạo đơn chuyển quyền sở hữu giấy chứng nhận thành công!");
-            navigate(-1);
+            navigate("/gcn_cq_nh_vnlist");
         } catch (error) {
             console.error("Lỗi khi tạo đơn chuyển quyền GCN:", error);
             showError("Thất bại!", "Đã xảy ra lỗi khi tạo đơn chuyển quyền sở hữu.", error);

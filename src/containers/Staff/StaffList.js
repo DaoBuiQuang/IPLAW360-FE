@@ -128,7 +128,7 @@ function StaffList() {
                 fetchStaffs(searchTerm);
               }
             }}
-            placeholder={`🔍 ${t("enterEmployeeName")}`}
+            placeholder="🔍 Nhập tên, email hoặc tên đăng nhập..."
             className="p-3 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 search-input"
           />
 
@@ -156,11 +156,11 @@ function StaffList() {
         <thead className="bg-[#009999] text-white">
           <tr className="text-white text-center font-semibold">
             <th className="p-2 text-white font-semibold">{t("no")}</th>
-            <th className="p-2 text-white font-semibold">{t("employeeCode")}</th>
+            <th className="p-2 text-white font-semibold">Tên đăng nhập</th>
             <th className="p-2 text-white font-semibold">{t("fullName")}</th>
             <th className="p-2 text-white font-semibold">{t("position")}</th>
             <th className="p-2 text-white font-semibold">{t("department")}</th>
-            <th className="p-2 text-white font-semibold">{t("username")}</th>
+            <th className="p-2 text-white font-semibold">Email</th>
             <th className="p-2 text-white font-semibold">{t("role")}</th>
             <th className="p-2 text-center">Thao tác</th>
           </tr>
@@ -172,12 +172,12 @@ function StaffList() {
               <td className="p-2 text-table text-blue-500 cursor-pointer hover:underline" onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/staffdetail/${staff.maNhanSu}`);
-              }}>{staff.maNhanSu}</td>
+              }}>{staff.Username || staff.maNhanSu}</td>
               <td className="p-2 text-table">{staff.hoTen}</td>
               <td className="p-2 text-table">{staff.chucVu}</td>
               <td className="p-2 text-table">{staff.phongBan || "—"}</td>
-              <td className="p-2 text-table">
-                {staff.Username ? staff.Username : "Chưa có tài khoản"}
+              <td className="p-2 text-table text-gray-600">
+                {staff.email || "—"}
               </td>
               <td className="p-2 text-table">
                 {staff.Role ? (
@@ -289,8 +289,8 @@ function StaffList() {
       >
         <div className="py-3 space-y-4">
           <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 text-xs text-gray-600 space-y-1">
-            <p>Nhân sự: <strong className="text-gray-900">{staffToUpdateRole?.hoTen}</strong> ({staffToUpdateRole?.maNhanSu})</p>
-            <p>Tài khoản đăng nhập: <strong className="text-gray-900">{staffToUpdateRole?.Username}</strong></p>
+            <p>Nhân sự: <strong className="text-gray-900">{staffToUpdateRole?.hoTen}</strong> ({staffToUpdateRole?.email || staffToUpdateRole?.Username || staffToUpdateRole?.maNhanSu})</p>
+            <p>Tên đăng nhập: <strong className="text-gray-900">{staffToUpdateRole?.Username || staffToUpdateRole?.maNhanSu}</strong></p>
             <p>Vai trò hiện tại: <strong className="text-[#009999] uppercase">{staffToUpdateRole?.Role || "Chưa có"}</strong></p>
           </div>
 

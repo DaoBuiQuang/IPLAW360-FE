@@ -94,6 +94,7 @@ function ApplicationDetailTest() {
     const [quickApproveModalOpen, setQuickApproveModalOpen] = useState(false);
     const [selectedPendingItem, setSelectedPendingItem] = useState(null);
     const [quickApproveStatus, setQuickApproveStatus] = useState(1);
+    const [quickApproveSoDon, setQuickApproveSoDon] = useState("");
     const [quickApproveDate, setQuickApproveDate] = useState(dayjs().format("YYYY-MM-DD"));
     const [quickRejectDate, setQuickRejectDate] = useState(dayjs().format("YYYY-MM-DD"));
     const [quickRejectReason, setQuickRejectReason] = useState("");
@@ -103,6 +104,7 @@ function ApplicationDetailTest() {
     const [soGUQ, setSoGUQ] = useState("");
     const [soDonUQGoc, setSoDonUQGoc] = useState("");
     const [danhSachDonSuaDoi, setDanhSachDonSuaDoi] = useState([]);
+    const [danhSachDonChuyenQuyen, setDanhSachDonChuyenQuyen] = useState([]);
     const formatVietnameseDate = (date = new Date()) => {
         const d = date.getDate();
         const m = date.getMonth() + 1;
@@ -231,6 +233,7 @@ function ApplicationDetailTest() {
                 setSoGUQ(response.GiayUyQuyen?.soGUQ || "");
                 setSoDonUQGoc(response.GiayUyQuyen?.soDonGoc || "");
                 setDanhSachDonSuaDoi(response.danhSachDonSuaDoi || []);
+                setDanhSachDonChuyenQuyen(response.danhSachDonChuyenQuyen || []);
             }
         } catch (error) {
             console.error("Lỗi khi gọi API chi tiết đơn:", error);
@@ -271,6 +274,7 @@ function ApplicationDetailTest() {
     const openQuickApproveModal = (bd) => {
         setSelectedPendingItem(bd);
         setQuickApproveStatus(1);
+        setQuickApproveSoDon(bd?.soDon || "");
         setQuickApproveDate(dayjs().format("YYYY-MM-DD"));
         setQuickRejectDate(dayjs().format("YYYY-MM-DD"));
         setQuickRejectReason("");
@@ -283,24 +287,30 @@ function ApplicationDetailTest() {
         try {
             const isSuaDoi = selectedPendingItem.loaiBienDong === "SUA_DOI";
             const endpoint = isSuaDoi ? "/application_sd_nh_vn/update" : "/application_cq_nh_vn/update";
+            const st = Number(quickApproveStatus);
+            const cleanSoDon = st === 2 ? null : (quickApproveSoDon.trim() || null);
             const res = await callAPI({
                 method: "post",
                 endpoint,
                 data: {
                     id: selectedPendingItem.id,
-                    trangThaiDuyet: Number(quickApproveStatus),
-                    duocGhiNhanSuaDoi: Number(quickApproveStatus) === 1,
-                    ngayChapThuan: Number(quickApproveStatus) === 1 ? quickApproveDate : null,
-                    ngayGhiNhanSuaDoi: Number(quickApproveStatus) === 1 ? quickApproveDate : null,
-                    ngayGhiNhanCQ: Number(quickApproveStatus) === 1 ? quickApproveDate : null,
-                    ngayTuChoi: Number(quickApproveStatus) === 2 ? quickRejectDate : null,
-                    lyDoTuChoi: Number(quickApproveStatus) === 2 ? quickRejectReason : null,
+                    trangThaiDuyet: st,
+                    soDon: cleanSoDon,
+                    soDonSD: cleanSoDon,
+                    soDonChuyenQuyen: cleanSoDon,
+                    duocGhiNhanSuaDoi: st === 1,
+                    ngayChapThuan: st === 1 ? quickApproveDate : null,
+                    ngayGhiNhanSuaDoi: st === 1 ? quickApproveDate : null,
+                    ngayGhiNhanCQ: st === 1 ? quickApproveDate : null,
+                    ngayTuChoi: st === 2 ? quickRejectDate : null,
+                    lyDoTuChoi: st === 2 ? quickRejectReason : null,
                 },
             });
             await showSuccess("Thành công", "Đã cập nhật kết quả xét duyệt của Cục SHTT!");
             setQuickApproveModalOpen(false);
-            if (Number(quickApproveStatus) === 1 && res?.maDonDangKyMoi) {
-                navigate(`/applicationdetail/${res.maDonDangKyMoi}`);
+            const maMoi = res?.maDonDangKyMoi || res?.donMoi?.maDonDangKy;
+            if (Number(quickApproveStatus) === 1 && maMoi) {
+                navigate(`/applicationdetail/${maMoi}`);
                 window.location.reload();
             } else {
                 detailApplication();
@@ -334,7 +344,7 @@ function ApplicationDetailTest() {
                                 🔒 Đơn đăng ký này đã đóng băng (Lưu lịch sử)
                             </div>
                             <p className="text-sm mt-1">
-                                Đơn này đã được Cục chấp thuận sửa đổi / chuyển nhượng và toàn bộ quy trình thẩm định đã được chuyển giao sang đơn kế thừa mới.
+                                Đơn này đã được Cục chấp thuận sửa đổi / chuyển quyền sở hữu và toàn bộ quy trình thẩm định đã được chuyển giao sang đơn mới.
                             </p>
                             {Array.isArray(dsDonCon) && dsDonCon.length > 0 && (
                                 <div className="mt-2 flex flex-wrap gap-2">
@@ -348,7 +358,7 @@ function ApplicationDetailTest() {
                                             }}
                                             className="px-3 py-1 text-xs font-semibold rounded bg-blue-600 text-white hover:bg-blue-700"
                                         >
-                                            ➔ Xem đơn kế thừa: {con.soDon || con.maDonDangKy} ({con.loaiBienDong})
+                                            ➔ Xem đơn mới: {con.soDon || con.maDonDangKy} ({con.loaiBienDong})
                                         </button>
                                     ))}
                                 </div>
@@ -356,24 +366,48 @@ function ApplicationDetailTest() {
                         </div>
                     )}
 
-                    {/* Banner có tờ khai Đang sửa đổi / Đang chuyển quyền chờ Cục xét duyệt */}
+                    {/* Banner có tờ khai Đang sửa đổi / Đang chuyển quyền sở hữu chờ Cục xét duyệt */}
                     {Array.isArray(dsBienDongChoDuyet) && dsBienDongChoDuyet.length > 0 && (
                         <div className="mb-4 p-4 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 text-left space-y-2">
                             <div className="font-semibold text-base">
-                                ⏳ Đơn đang có Tờ khai sửa đổi / chuyển nhượng chờ Cục SHTT xét duyệt:
+                                ⏳ Đơn đang có Tờ khai sửa đổi / chuyển quyền sở hữu chờ Cục SHTT xét duyệt:
                             </div>
-                            {dsBienDongChoDuyet.map((bd, idx) => (
+                            {dsBienDongChoDuyet.map((bd, idx) => {
+                                const detailUrl =
+                                    bd.loaiBienDong === "SUA_DOI"
+                                        ? `/application_sd_nh_vn_detail/${bd.id}`
+                                        : bd.loaiBienDong === "CHUYEN_QUYEN"
+                                        ? `/application_cq_nh_vn_detail/${bd.id}`
+                                        : null;
+                                return (
                                 <div
                                     key={bd.id || idx}
                                     className="flex flex-col md:flex-row md:items-center md:justify-between bg-white p-3 rounded border border-amber-200 gap-2"
                                 >
                                     <div className="text-sm">
                                         <span className="font-semibold text-amber-800">[{bd.tenBienDong}]</span>{" "}
-                                        Số tờ khai: <b>{bd.soDon || "—"}</b> | Ngày nộp YC:{" "}
+                                        Số tờ khai:{" "}
+                                        <b
+                                            className={detailUrl ? "text-blue-600 underline cursor-pointer" : ""}
+                                            onClick={() => detailUrl && navigate(detailUrl)}
+                                            title={detailUrl ? "Xem chi tiết tờ khai" : ""}
+                                        >
+                                            {bd.soDon || "—"}
+                                        </b>{" "}
+                                        | Ngày nộp YC:{" "}
                                         <b>{bd.ngayYeuCau ? formatDateVN(bd.ngayYeuCau) : "—"}</b> | Lần:{" "}
                                         <b>{bd.lanBienDong || 1}</b>
                                     </div>
                                     <div className="flex gap-2">
+                                        {detailUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => navigate(detailUrl)}
+                                                className="px-3 py-1.5 text-xs font-semibold rounded bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                                            >
+                                                👁️ Xem tờ khai
+                                            </button>
+                                        )}
                                         <button
                                             type="button"
                                             onClick={() => openQuickApproveModal(bd)}
@@ -383,7 +417,8 @@ function ApplicationDetailTest() {
                                         </button>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
 
@@ -412,7 +447,7 @@ function ApplicationDetailTest() {
                                         : Number(loaiDon) === 3 || Number(loaiDon) === 5
                                         ? "Đơn tách"
                                         : Number(loaiDon) === 4
-                                        ? "Đã chuyển nhượng"
+                                        ? "Đã chuyển quyền sở hữu"
                                         : "Đơn gốc"}
                                 </span>
                             </div>
@@ -622,12 +657,38 @@ function ApplicationDetailTest() {
                                                             </div>
                                                         )}
 
-                                                        {item.ngayGhiNhanSuaDoi && (
+                                                        {Number(item.trangThaiDuyet) === 1 && item.ngayGhiNhanSuaDoi && (
                                                             <div className="flex">
                                                                 <span className="w-32 font-medium">{formatDateVN(item.ngayGhiNhanSuaDoi)}</span>
                                                                 <span>
                                                                     Ngày ghi nhận sửa đổi lần{" "}
                                                                     {item.lanSuaDoi ?? index + 1}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </React.Fragment>
+                                                ))}
+                                        {Array.isArray(danhSachDonChuyenQuyen) &&
+                                            danhSachDonChuyenQuyen
+                                                .slice()
+                                                .sort((a, b) => (a.lanChuyenQuyen || 0) - (b.lanChuyenQuyen || 0))
+                                                .map((item, index) => (
+                                                    <React.Fragment key={`cq_${item.id || index}`}>
+                                                        {item.ngayYeuCau && (
+                                                            <div className="flex">
+                                                                <span className="w-32 font-medium">{formatDateVN(item.ngayYeuCau)}</span>
+                                                                <span>
+                                                                    Ngày yêu cầu chuyển quyền sở hữu lần{" "}
+                                                                    {item.lanChuyenQuyen ?? index + 1}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        {Number(item.trangThaiDuyet) === 1 && item.ngayGhiNhanCQ && (
+                                                            <div className="flex">
+                                                                <span className="w-32 font-medium">{formatDateVN(item.ngayGhiNhanCQ)}</span>
+                                                                <span>
+                                                                    Ngày ghi nhận chuyển quyền sở hữu lần{" "}
+                                                                    {item.lanChuyenQuyen ?? index + 1}
                                                                 </span>
                                                             </div>
                                                         )}
@@ -769,21 +830,21 @@ function ApplicationDetailTest() {
                         <div className="flex flex-wrap gap-4 items-center justify-center">
                             <button
                                 type="button"
-                                onClick={() => window.open(`/application_sd_nh_vn_add/${maDonDangKy}`, "_blank")}
+                                onClick={() => navigate(`/application_sd_nh_vn_add/${maDonDangKy}`)}
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
                             >
                                 <span>Sửa đổi đơn đăng ký</span>
                             </button>
                             <button
                                 type="button"
-                                onClick={() => window.open(`/application_td_nh_vn_add/${maDonDangKy}`, "_blank")}
+                                onClick={() => navigate(`/application_td_nh_vn_add/${maDonDangKy}`)}
                                 className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
                             >
                                 <span>Tách đơn đăng ký</span>
                             </button>
                             <button
                                 type="button"
-                                onClick={() => window.open(`/application_cq_nh_vn_add/${maDonDangKy}`, "_blank")}
+                                onClick={() => navigate(`/application_cq_nh_vn_add/${maDonDangKy}`)}
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
                             >
                                 <span>Chuyển quyền sở hữu</span>
@@ -861,16 +922,34 @@ function ApplicationDetailTest() {
                             </Radio.Group>
 
                             {Number(quickApproveStatus) === 1 && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Ngày ghi nhận
-                                    </label>
-                                    <DatePicker
-                                        value={quickApproveDate ? dayjs(quickApproveDate) : null}
-                                        onChange={(d) => setQuickApproveDate(d ? d.format("YYYY-MM-DD") : null)}
-                                        format="DD/MM/YYYY"
-                                        className="w-full"
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {selectedPendingItem.loaiBienDong === "CHUYEN_QUYEN"
+                                                ? "Số đơn ghi nhận chuyển giao"
+                                                : "Số đơn ghi nhận sửa đổi"}
+                                        </label>
+                                        <Input
+                                            value={quickApproveSoDon}
+                                            onChange={(e) => setQuickApproveSoDon(e.target.value)}
+                                            placeholder={
+                                                selectedPendingItem.loaiBienDong === "CHUYEN_QUYEN"
+                                                    ? "Nhập số đơn ghi nhận (CĐxxxx)"
+                                                    : "Nhập số đơn ghi nhận (SĐxxxx)"
+                                            }
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Ngày ghi nhận
+                                        </label>
+                                        <DatePicker
+                                            value={quickApproveDate ? dayjs(quickApproveDate) : null}
+                                            onChange={(d) => setQuickApproveDate(d ? d.format("YYYY-MM-DD") : null)}
+                                            format="DD/MM/YYYY"
+                                            className="w-full"
+                                        />
+                                    </div>
                                 </div>
                             )}
 

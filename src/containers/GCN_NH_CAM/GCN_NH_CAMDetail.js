@@ -121,6 +121,7 @@ function GCN_NH_CAMDetail() {
       });
       await showSuccess("Thành công!", "Thêm đơn gia hạn thành công!");
       setShowFormGiaHan(false);
+      navigate("/application_gh_nh_kh_list");
     } catch (error) {
       showError("Thất bại!", "Không thể thêm đơn gia hạn.", error);
       console.error("Lỗi khi thêm đơn gia hạn:", error);
@@ -154,7 +155,7 @@ function GCN_NH_CAMDetail() {
         },
       });
       await showSuccess("Thành công!", "Thêm đơn sửa đổi giấy chứng nhận nhãn hiệu thành công!");
-      navigate(-1);
+      navigate("/application_sd_gcn_nh_khlist");
     } catch (error) {
       showError("Thất bại!", "Đã xảy ra lỗi.", error);
       console.error("Lỗi khi Thêm đơn sửa đổi giấy chứng nhận nhãn hiệu!", error);

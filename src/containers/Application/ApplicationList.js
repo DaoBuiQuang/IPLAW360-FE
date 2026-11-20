@@ -318,8 +318,8 @@ function ApplicationList() {
     { value: 1, label: "Đơn gốc" },
     { value: "DANG_SUA_DOI", label: "Đang sửa đổi" },
     { value: 2, label: "Đã sửa đổi" },
-    { value: "DANG_CHUYEN_QUYEN", label: "Đang chuyển nhượng" },
-    { value: 4, label: "Đã chuyển nhượng" },
+    { value: "DANG_CHUYEN_QUYEN", label: "Đang chuyển quyền sở hữu" },
+    { value: 4, label: "Đã chuyển quyền sở hữu" },
     { value: 3, label: "Đơn tách" },
   ];
   const statusOptions = [
@@ -1247,7 +1247,7 @@ function ApplicationList() {
                             baseBadgeClass = "bg-purple-50 text-purple-700 border-purple-200";
                             break;
                           case 4:
-                            baseText = "Đã chuyển nhượng";
+                            baseText = "Đã chuyển quyền sở hữu";
                             baseBadgeClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
                             break;
                           default:

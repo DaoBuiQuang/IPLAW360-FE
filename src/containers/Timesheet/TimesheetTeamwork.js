@@ -21,6 +21,7 @@ import CaseCodeSelect from "./CaseCodeSelect";
 import ActivitySelect from "./ActivitySelect";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
 import callAPI from "../../utils/api";
+import { getStaffIdentifier, formatStaffSelectLabel } from "../../utils/staffDisplay";
 
 const statusMap = { APPROVED: "Đã duyệt" };
 const money = (value) => Number(value || 0).toLocaleString("vi-VN");
@@ -117,11 +118,12 @@ export default function TimesheetTeamwork() {
           const tList = res?.teams || [];
           const mgrs = tList.map((t) => {
             const groupName = t.tenNhom || t.members?.[0]?.tenNhom;
+            const mgrId = getStaffIdentifier({ email: t.managerEmail, maNhanSu: t.managerCode });
             return {
               value: t.managerCode,
               label: groupName
                 ? `${groupName} — ${t.managerName} (${(t.members || []).length} TV)`
-                : `${t.managerCode} - ${t.managerName} (${(t.members || []).length} TV)`,
+                : `${t.managerName} (${mgrId}) — ${(t.members || []).length} TV`,
             };
           });
           setManagersList(mgrs);
@@ -308,11 +310,11 @@ export default function TimesheetTeamwork() {
                         {teamInfo.manager.tenNhom || teamMembersList[0]?.tenNhom}
                       </span>
                       <span>
-                        Trưởng nhóm: <strong className="text-gray-700">{teamInfo.manager.hoTen}</strong> ({teamInfo.manager.maNhanSu}) — {teamMembersList.length} thành viên
+                        Trưởng nhóm: <strong className="text-gray-700">{teamInfo.manager.hoTen}</strong> ({getStaffIdentifier(teamInfo.manager)}) — {teamMembersList.length} thành viên
                       </span>
                     </>
                   ) : (
-                    `Nhóm phụ trách bởi: ${teamInfo.manager.hoTen} (${teamInfo.manager.maNhanSu}) — ${teamMembersList.length} thành viên`
+                    `Nhóm phụ trách bởi: ${teamInfo.manager.hoTen} (${getStaffIdentifier(teamInfo.manager)}) — ${teamMembersList.length} thành viên`
                   )
                 ) : (
                   "Bảng tổng hợp chi tiết time record của tất cả thành viên trong nhóm"
@@ -411,7 +413,7 @@ export default function TimesheetTeamwork() {
               onChange={(val) => handleFieldSearch("employeeCode", val || "")}
               options={teamMembersList.map((m) => ({
                 value: m.maNhanSu,
-                label: `${m.maNhanSu} - ${m.hoTen} (${m.chucVu || "TV"})`,
+                label: formatStaffSelectLabel(m, { includeRole: true, roleFallback: "TV" }),
               }))}
             />
           </div>
@@ -629,7 +631,11 @@ export default function TimesheetTeamwork() {
                         <p className="font-semibold text-gray-800">
                           {row.employee?.hoTen || row.employeeCode}
                         </p>
-                        <p className="text-[10px] font-mono text-gray-400">{row.employeeCode}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {row.employee?.email ||
+                            teamMembersList.find((m) => m.maNhanSu === row.employeeCode)?.email ||
+                            row.employeeCode}
+                        </p>
                       </div>
                     </td>
                     <td className="p-3 text-left font-medium text-indigo-600">{row.activity}</td>
@@ -730,7 +736,11 @@ export default function TimesheetTeamwork() {
                 <p className="font-semibold text-gray-800 text-sm">
                   {viewingRecord.employee?.hoTen || viewingRecord.employeeCode}
                 </p>
-                <p className="font-mono text-gray-400">{viewingRecord.employeeCode}</p>
+                <p className="text-gray-400">
+                  {viewingRecord.employee?.email ||
+                    teamMembersList.find((m) => m.maNhanSu === viewingRecord.employeeCode)?.email ||
+                    viewingRecord.employeeCode}
+                </p>
               </div>
               <div>
                 <span className="text-gray-400">Ngày làm việc:</span>

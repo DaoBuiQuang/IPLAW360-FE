@@ -8,6 +8,7 @@ import CaseCodeSelect from "./CaseCodeSelect";
 import ActivitySelect from "./ActivitySelect";
 import dayjs from "dayjs";
 import callAPI from "../../utils/api";
+import { formatStaffSelectLabel } from "../../utils/staffDisplay";
 import { showSuccess } from "../../components/commom/Notification";
 
 const emptyValues = {
@@ -273,8 +274,8 @@ export default function TimesheetForm({ mode = "add", initialValues = emptyValue
           <Field label="Nhân sự" required error={errors.employeeCode}>
             <Select
               className="text-left w-full"
-              options={employeeOptions.map((staff) => ({ value: staff.maNhanSu, label: `${staff.maNhanSu} - ${staff.hoTen}` }))}
-              value={selectedStaff ? { value: selectedStaff.maNhanSu, label: `${selectedStaff.maNhanSu} - ${selectedStaff.hoTen}` } : null}
+              options={employeeOptions.map((staff) => ({ value: staff.maNhanSu, label: formatStaffSelectLabel(staff) }))}
+              value={selectedStaff ? { value: selectedStaff.maNhanSu, label: formatStaffSelectLabel(selectedStaff) } : null}
               onChange={(option) => setField("employeeCode", option?.value || "")}
               placeholder="Nhân sự của tôi"
               isDisabled={mode === "add" || timesheetOnly}

@@ -70,7 +70,7 @@ function Application_VNListReport() {
     { value: 1, label: "Đơn gốc" },
     { value: 2, label: "Đơn sửa đổi" },
     { value: 3, label: "Đơn tách" },
-    { value: 4, label: "Đơn chuyển nhượng" },
+    { value: 4, label: "Đơn chuyển quyền sở hữu" },
   ];
 
   const statusOptions = [

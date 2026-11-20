@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import SearchCreatableSelect from "../../components/commom/SearchCreatableSelect";
 import callAPI from "../../utils/api";
+import { getStaffIdentifier, formatStaffSelectLabel } from "../../utils/staffDisplay";
 
 const FILTER_STORAGE_KEY = "timesheetMatterFilters";
 const STATE_STORAGE_KEY = "timesheetMatterState";
@@ -155,7 +156,7 @@ export default function TimesheetMatter() {
         .then((res) => {
           const list = (res?.teams || []).map((t) => ({
             value: t.managerCode,
-            label: `${t.managerCode} - ${t.managerName}`,
+            label: `${t.managerName} (${getStaffIdentifier({ email: t.managerEmail, maNhanSu: t.managerCode })})`,
           }));
           setManagerOptions(list);
         })
@@ -167,7 +168,7 @@ export default function TimesheetMatter() {
           setStaffOptions(
             raw.map((s) => ({
               value: s.maNhanSu,
-              label: `${s.maNhanSu} - ${s.hoTen}`,
+              label: formatStaffSelectLabel(s),
             }))
           );
         })

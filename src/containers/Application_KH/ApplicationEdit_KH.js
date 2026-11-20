@@ -16,7 +16,6 @@ import BrandBasicForm from "../../components/BrandBasicForm.js";
 import { Spin } from "antd";
 import FormHoSo from "../../components/commom/FormHoSo.js";
 import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
-import FormSuaDoi from "../../components/commom/FormSuaDoi.js";
 import FormTachDon from "../../components/commom/FormTachDon.js";
 function ApplicationEdit_KH() {
     const navigate = useNavigate();
@@ -81,26 +80,7 @@ function ApplicationEdit_KH() {
     const [maUyQuyen, setMaUyQuyen] = useState(null);
     const [brands, setBrands] = useState([]);
     const [productAndService, setProductAndService] = useState([]);
-
-
-    //Đơn sửa đổi
-    const [idDonSuaDoi, setIdDonSuaDoi] = useState(null);
-    const [soDonSD, setSoDonSD] = useState("");
-    const [ngayYeuCau, setNgayYeuCau] = useState(null);
-    const [lanSuaDoi, setLanSuaDoi] = useState(1);
-    const [ngayGhiNhanSuaDoi, setNgayGhiNhanSuaDoi] = useState(null);
-    const [duocGhiNhanSuaDoi, setDuocGhiNhanSuaDoi] = useState(false);
-    const [moTaSuaDoi, setMoTaSuaDoi] = useState("");
-    const [suaDoiDaiDien, setSuaDoiDaiDien] = useState(false);
-    const [ndSuaDoiDaiDien, setNdSuaDoiDaiDien] = useState("");
-    const [suaDoiTenChuDon, setSuaDoiTenChuDon] = useState(false);
-    const [ndSuaDoiTenChuDon, setNdSuaDoiTenChuDon] = useState("");
-    const [suaDoiDiaChi, setSuaDoiDiaChi] = useState(false);
-    const [ndSuaDoiDiaChi, setNdSuaDoiDiaChi] = useState("");
-    const [suaNhan, setSuaNhan] = useState(false);
-    const [ndSuaNhan, setNdSuaNhan] = useState("");
-    const [suaNhomSPDV, setSuaNhomSPDV] = useState(false);
-    const [ndSuaNhomSPDV, setNdSuaNhomSPDV] = useState("");
+    const [donGoc, setDonGoc] = useState(0);
     const [maDonDangKyGoc, setMaDonDangKyGoc] = useState(null);
 
     // Đơn tách
@@ -298,25 +278,9 @@ function ApplicationEdit_KH() {
                 setMaUyQuyen(response.maUyQuyen || null);
                 setVuViecList(response.vuViec);
                 setDaiDienSHTT(response.daiDienSHTT || null);
-                setIdGUQ(response.idGUQ || null);   
-                if (response.donSuaDoi) {
-                    setIdDonSuaDoi(response.donSuaDoi.id || null);
-                    setSoDonSD(response.donSuaDoi.soDon || "");
-                    setNgayYeuCau(response.donSuaDoi.ngayYeuCau ? formatDate(response.donSuaDoi.ngayYeuCau) : null);
-                    setLanSuaDoi(response.donSuaDoi.lanSuaDoi ?? 1);
-                    setNgayGhiNhanSuaDoi(response.donSuaDoi.ngayGhiNhanSuaDoi ? formatDate(response.donSuaDoi.ngayGhiNhanSuaDoi) : null);
-                    setDuocGhiNhanSuaDoi(response.donSuaDoi.duocGhiNhanSuaDoi ?? false);
-                    setMoTaSuaDoi(response.donSuaDoi.moTa || "");
-                    setSuaDoiDaiDien(response.donSuaDoi.suaDoiDaiDien ?? false);
-                    setNdSuaDoiDaiDien(response.donSuaDoi.ndSuaDoiDaiDien || "");
-                    setSuaDoiTenChuDon(response.donSuaDoi.suaDoiTenChuDon ?? false);
-                    setNdSuaDoiTenChuDon(response.donSuaDoi.ndSuaDoiTenChuDon || "");
-                    setSuaDoiDiaChi(response.donSuaDoi.suaDoiDiaChi ?? false);
-                    setNdSuaDoiDiaChi(response.donSuaDoi.ndSuaDoiDiaChi || "");
-                    setSuaNhan(response.donSuaDoi.suaNhan ?? false);
-                    setNdSuaNhan(response.donSuaDoi.ndSuaNhan || "");
-                    setSuaNhomSPDV(response.donSuaDoi.suaNhomSPDV ?? false);
-                    setNdSuaNhomSPDV(response.donSuaDoi.ndSuaNhomSPDV || "");
+                setIdGUQ(response.idGUQ || null);
+                setDonGoc(response.donGoc || 0);
+                if (response.donSuaDoi?.maDonDangKyGoc) {
                     setMaDonDangKyGoc(response.donSuaDoi.maDonDangKyGoc);
                 }
                 if (response.donTach) {
@@ -392,25 +356,6 @@ function ApplicationEdit_KH() {
                     vuViecs: vuViecList,
                     idGUQ: idGUQ,
                     daiDienSHTT: daiDienSHTT,
-                    donSuaDoi: {
-                        id: idDonSuaDoi || null, // 🟢 thêm dòng này
-                        soDon: soDonSD || "",
-                        ngayYeuCau: ngayYeuCau || null,
-                        lanSuaDoi: lanSuaDoi ?? 1,
-                        ngayGhiNhanSuaDoi: ngayGhiNhanSuaDoi || null,
-                        duocGhiNhanSuaDoi: duocGhiNhanSuaDoi ?? false,
-                        moTa: moTaSuaDoi || "",
-                        suaDoiDaiDien: suaDoiDaiDien ?? false,
-                        ndSuaDoiDaiDien: ndSuaDoiDaiDien || "",
-                        suaDoiTenChuDon: suaDoiTenChuDon ?? false,
-                        ndSuaDoiTenChuDon: ndSuaDoiTenChuDon || "",
-                        suaDoiDiaChi: suaDoiDiaChi ?? false,
-                        ndSuaDoiDiaChi: ndSuaDoiDiaChi || "",
-                        suaNhan: suaNhan ?? false,
-                        ndSuaNhan: ndSuaNhan || "",
-                        suaNhomSPDV: suaNhomSPDV ?? false,
-                        ndSuaNhomSPDV: ndSuaNhomSPDV || ""
-                    },
                     donTach: {
                         id: idDonTach,
                         soDon: soDonTD || "",
@@ -447,8 +392,8 @@ function ApplicationEdit_KH() {
             {/* <DonProgress trangThaiDon={trangThaiDon} /> */}
             <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-4xl">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold text-gray-700">
-                        📌 Cập nhập đơn đăng ký nhãn hiệu mới
+                    <h2 className="text-2xl font-semibold text-gray-700 uppercase">
+                        📌 Cập nhật đơn đăng ký nhãn hiệu Campuchia
                     </h2>
                     <img
                         src="https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_Cambodia.svg"
@@ -520,13 +465,12 @@ function ApplicationEdit_KH() {
                             </div>
                             <div>
                                 <label className="block text-gray-700 text-left">Bước xử lý</label>
-                                <input
-                                    type="text"
-                                    value={buocXuLy}
-                                    disabled
-                                    onChange={(e) => setBuocXuLy(e.target.value)}
-                                    className="w-full p-2 mt-1 border rounded-lg text-input h-10 bg-gray-200"
-                                />
+                                <div
+                                    className="w-full p-2 mt-1 border rounded-lg text-input bg-gray-200 text-gray-700 text-left whitespace-pre-wrap break-words leading-snug"
+                                    style={{ height: "auto", minHeight: "2.5rem" }}
+                                >
+                                    {buocXuLy || ""}
+                                </div>
                             </div>
                             <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Cột trái: Ngày nộp đơn + Danh sách sản phẩm dịch vụ */}
@@ -672,46 +616,6 @@ function ApplicationEdit_KH() {
                             />
                         </div>
                         <div className="col-span-2">
-                            {loaiDon === 2 && (
-                                <FormSuaDoi
-                                    ngayYeuCau={ngayYeuCau}
-                                    setNgayYeuCau={setNgayYeuCau}
-                                    lanSuaDoi={lanSuaDoi}
-                                    setLanSuaDoi={setLanSuaDoi}
-                                    soDonSD={soDonSD}
-                                    setSoDonSD={setSoDonSD}
-                                    ngayGhiNhanSuaDoi={ngayGhiNhanSuaDoi}
-                                    setNgayGhiNhanSuaDoi={setNgayGhiNhanSuaDoi}
-                                    duocGhiNhanSuaDoi={duocGhiNhanSuaDoi}
-                                    setDuocGhiNhanSuaDoi={setDuocGhiNhanSuaDoi}
-                                    moTaSuaDoi={moTaSuaDoi}
-                                    setMoTaSuaDoi={setMoTaSuaDoi}
-                                    suaDoiDaiDien={suaDoiDaiDien}
-                                    setSuaDoiDaiDien={setSuaDoiDaiDien}
-                                    ndSuaDoiDaiDien={ndSuaDoiDaiDien}
-                                    setNdSuaDoiDaiDien={setNdSuaDoiDaiDien}
-                                    suaDoiTenChuDon={suaDoiTenChuDon}
-                                    setSuaDoiTenChuDon={setSuaDoiTenChuDon}
-                                    ndSuaDoiTenChuDon={ndSuaDoiTenChuDon}
-                                    setNdSuaDoiTenChuDon={setNdSuaDoiTenChuDon}
-                                    suaDoiDiaChi={suaDoiDiaChi}
-                                    setSuaDoiDiaChi={setSuaDoiDiaChi}
-                                    ndSuaDoiDiaChi={ndSuaDoiDiaChi}
-                                    setNdSuaDoiDiaChi={setNdSuaDoiDiaChi}
-                                    suaNhan={suaNhan}
-                                    setSuaNhan={setSuaNhan}
-                                    ndSuaNhan={ndSuaNhan}
-                                    setNdSuaNhan={setNdSuaNhan}
-                                    suaNhomSPDV={suaNhomSPDV}
-                                    setSuaNhomSPDV={setSuaNhomSPDV}
-                                    ndSuaNhomSPDV={ndSuaNhomSPDV}
-                                    setNdSuaNhomSPDV={setNdSuaNhomSPDV}
-                                    maDonDangKyGoc={maDonDangKyGoc}
-                                    isEditOnly={isEditOnly}
-                                />
-                            )}
-                        </div>
-                        <div className="col-span-2">
                             {loaiDon === 3 && (
                                 <FormTachDon
                                     soDonTD={soDonTD}
@@ -738,7 +642,9 @@ function ApplicationEdit_KH() {
                 </Spin>
                 <div className="flex justify-center gap-4 mt-4">
                     <button onClick={() => navigate(-1)} className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg">Quay lại</button>
-                    <button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Lưu thông tin</button>
+                    {Number(donGoc) !== 1 && (
+                        <button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Lưu thông tin</button>
+                    )}
                 </div>
                 <div className="mt-4">
                     {/* <ExportWordButton

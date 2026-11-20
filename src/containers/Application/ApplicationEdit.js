@@ -20,7 +20,6 @@ import BrandBasicForm from "../../components/BrandBasicForm";
 import { Spin } from "antd";
 import FormHoSo from "../../components/commom/FormHoSo.js";
 import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
-import FormSuaDoi from "../../components/commom/FormSuaDoi.js";
 import useVietnamTrademarkDeadlines from "../../utils/useVietnamTrademarkDeadlines";
 function ApplicationEdit() {
     const navigate = useNavigate();
@@ -114,26 +113,6 @@ function ApplicationEdit() {
     const [brands, setBrands] = useState([]);
     const [productAndService, setProductAndService] = useState([]);
     const [idSoBangOld, setIdSoBangOld] = useState(null);
-
-    //Đơn sửa đổi
-    const [idDonSuaDoi, setIdDonSuaDoi] = useState(null);
-    const [soDonSD, setSoDonSD] = useState("");
-    const [ngayYeuCau, setNgayYeuCau] = useState(null);
-    const [lanSuaDoi, setLanSuaDoi] = useState(1);
-    const [ngayGhiNhanSuaDoi, setNgayGhiNhanSuaDoi] = useState(null);
-    const [duocGhiNhanSuaDoi, setDuocGhiNhanSuaDoi] = useState(false);
-    const [moTaSuaDoi, setMoTaSuaDoi] = useState("");
-    const [suaDoiDaiDien, setSuaDoiDaiDien] = useState(false);
-    const [ndSuaDoiDaiDien, setNdSuaDoiDaiDien] = useState("");
-    const [suaDoiTenChuDon, setSuaDoiTenChuDon] = useState(false);
-    const [ndSuaDoiTenChuDon, setNdSuaDoiTenChuDon] = useState("");
-    const [suaDoiDiaChi, setSuaDoiDiaChi] = useState(false);
-    const [ndSuaDoiDiaChi, setNdSuaDoiDiaChi] = useState("");
-    const [suaNhan, setSuaNhan] = useState(false);
-    const [ndSuaNhan, setNdSuaNhan] = useState("");
-    const [suaNhomSPDV, setSuaNhomSPDV] = useState(false);
-    const [ndSuaNhomSPDV, setNdSuaNhomSPDV] = useState("");
-    const [maDonDangKyGoc, setMaDonDangKyGoc] = useState(null);
 
     // Đơn tách
     const [idDonTach, setIdDonTach] = useState(null);
@@ -429,27 +408,6 @@ function ApplicationEdit() {
                 setTrangThaiVuViec(String(response.trangThaiVuViec || "1"));
                 setDonGoc(response.donGoc || null);
                 setIdGUQ(response.idGUQ || null);
-                //Đơn sửa đổi
-                if (response.donSuaDoi) {
-                    setIdDonSuaDoi(response.donSuaDoi.id || null);
-                    setSoDonSD(response.donSuaDoi.soDon || "");
-                    setNgayYeuCau(response.donSuaDoi.ngayYeuCau ? formatDate(response.donSuaDoi.ngayYeuCau) : null);
-                    setLanSuaDoi(response.donSuaDoi.lanSuaDoi ?? 1);
-                    setNgayGhiNhanSuaDoi(response.donSuaDoi.ngayGhiNhanSuaDoi ? formatDate(response.donSuaDoi.ngayGhiNhanSuaDoi) : null);
-                    setDuocGhiNhanSuaDoi(response.donSuaDoi.duocGhiNhanSuaDoi ?? false);
-                    setMoTaSuaDoi(response.donSuaDoi.moTa || "");
-                    setSuaDoiDaiDien(response.donSuaDoi.suaDoiDaiDien ?? false);
-                    setNdSuaDoiDaiDien(response.donSuaDoi.ndSuaDoiDaiDien || "");
-                    setSuaDoiTenChuDon(response.donSuaDoi.suaDoiTenChuDon ?? false);
-                    setNdSuaDoiTenChuDon(response.donSuaDoi.ndSuaDoiTenChuDon || "");
-                    setSuaDoiDiaChi(response.donSuaDoi.suaDoiDiaChi ?? false);
-                    setNdSuaDoiDiaChi(response.donSuaDoi.ndSuaDoiDiaChi || "");
-                    setSuaNhan(response.donSuaDoi.suaNhan ?? false);
-                    setNdSuaNhan(response.donSuaDoi.ndSuaNhan || "");
-                    setSuaNhomSPDV(response.donSuaDoi.suaNhomSPDV ?? false);
-                    setNdSuaNhomSPDV(response.donSuaDoi.ndSuaNhomSPDV || "");
-                    setMaDonDangKyGoc(response.donSuaDoi.maDonDangKyGoc);
-                }
                 if (response.donTach) {
                     setIdDonTach(response.donTach.id);
                     setSoDonTD(response.donTach.soDon || "");
@@ -541,25 +499,6 @@ function ApplicationEdit() {
                     idSoBangOld: idSoBangOld,
                     idGUQ: idGUQ || null,
                     daiDienSHTT: daiDienSHTT,
-                    donSuaDoi: {
-                        id: idDonSuaDoi || null, // 🟢 thêm dòng này
-                        soDon: soDonSD || "",
-                        ngayYeuCau: ngayYeuCau || null,
-                        lanSuaDoi: lanSuaDoi ?? 1,
-                        ngayGhiNhanSuaDoi: ngayGhiNhanSuaDoi || null,
-                        duocGhiNhanSuaDoi: duocGhiNhanSuaDoi ?? false,
-                        moTa: moTaSuaDoi || "",
-                        suaDoiDaiDien: suaDoiDaiDien ?? false,
-                        ndSuaDoiDaiDien: ndSuaDoiDaiDien || "",
-                        suaDoiTenChuDon: suaDoiTenChuDon ?? false,
-                        ndSuaDoiTenChuDon: ndSuaDoiTenChuDon || "",
-                        suaDoiDiaChi: suaDoiDiaChi ?? false,
-                        ndSuaDoiDiaChi: ndSuaDoiDiaChi || "",
-                        suaNhan: suaNhan ?? false,
-                        ndSuaNhan: ndSuaNhan || "",
-                        suaNhomSPDV: suaNhomSPDV ?? false,
-                        ndSuaNhomSPDV: ndSuaNhomSPDV || ""
-                    },
                     donTach: {
                         id: idDonTach,
                         soDon: soDonTD || "",
@@ -682,13 +621,12 @@ function ApplicationEdit() {
                             </div>
                             <div>
                                 <label className="block text-gray-700 text-left">Bước xử lý</label>
-                                <input
-                                    type="text"
-                                    value={buocXuLy}
-                                    disabled
-                                    onChange={(e) => setBuocXuLy(e.target.value)}
-                                    className="w-full p-2 mt-1 border rounded-lg text-input h-10 bg-gray-200"
-                                />
+                                <div
+                                    className="w-full p-2 mt-1 border rounded-lg text-input bg-gray-200 text-gray-700 text-left whitespace-pre-wrap break-words leading-snug"
+                                    style={{ height: "auto", minHeight: "2.5rem" }}
+                                >
+                                    {buocXuLy || ""}
+                                </div>
                             </div>
                             <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Cột trái: Ngày nộp đơn + Danh sách sản phẩm dịch vụ */}
@@ -883,47 +821,6 @@ function ApplicationEdit() {
                                 />
                             </div>
                         )}
-
-                        <div className="col-span-2">
-                            {loaiDon === 2 && (
-                                <FormSuaDoi
-                                    ngayYeuCau={ngayYeuCau}
-                                    setNgayYeuCau={setNgayYeuCau}
-                                    lanSuaDoi={lanSuaDoi}
-                                    setLanSuaDoi={setLanSuaDoi}
-                                    soDonSD={soDonSD}
-                                    setSoDonSD={setSoDonSD}
-                                    ngayGhiNhanSuaDoi={ngayGhiNhanSuaDoi}
-                                    setNgayGhiNhanSuaDoi={setNgayGhiNhanSuaDoi}
-                                    duocGhiNhanSuaDoi={duocGhiNhanSuaDoi}
-                                    setDuocGhiNhanSuaDoi={setDuocGhiNhanSuaDoi}
-                                    moTaSuaDoi={moTaSuaDoi}
-                                    setMoTaSuaDoi={setMoTaSuaDoi}
-                                    suaDoiDaiDien={suaDoiDaiDien}
-                                    setSuaDoiDaiDien={setSuaDoiDaiDien}
-                                    ndSuaDoiDaiDien={ndSuaDoiDaiDien}
-                                    setNdSuaDoiDaiDien={setNdSuaDoiDaiDien}
-                                    suaDoiTenChuDon={suaDoiTenChuDon}
-                                    setSuaDoiTenChuDon={setSuaDoiTenChuDon}
-                                    ndSuaDoiTenChuDon={ndSuaDoiTenChuDon}
-                                    setNdSuaDoiTenChuDon={setNdSuaDoiTenChuDon}
-                                    suaDoiDiaChi={suaDoiDiaChi}
-                                    setSuaDoiDiaChi={setSuaDoiDiaChi}
-                                    ndSuaDoiDiaChi={ndSuaDoiDiaChi}
-                                    setNdSuaDoiDiaChi={setNdSuaDoiDiaChi}
-                                    suaNhan={suaNhan}
-                                    setSuaNhan={setSuaNhan}
-                                    ndSuaNhan={ndSuaNhan}
-                                    setNdSuaNhan={setNdSuaNhan}
-                                    suaNhomSPDV={suaNhomSPDV}
-                                    setSuaNhomSPDV={setSuaNhomSPDV}
-                                    ndSuaNhomSPDV={ndSuaNhomSPDV}
-                                    setNdSuaNhomSPDV={setNdSuaNhomSPDV}
-                                    maDonDangKyGoc={maDonDangKyGoc}
-                                    isEditOnly={isEditOnly}
-                                />
-                            )}
-                        </div>
                     </div>
                 </Spin>
                 <div className="flex justify-center gap-4 mt-4">

@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import KpiSummaryBar from "./KpiSummaryBar";
 import TimesheetMyTime from "./TimesheetMyTime";
 import callAPI from "../../utils/api";
+import { getStaffIdentifier, formatStaffSelectLabel } from "../../utils/staffDisplay";
 import dayjs from "dayjs";
 
 const money = (v) => Number(v || 0).toLocaleString("vi-VN");
@@ -94,11 +95,12 @@ export default function TimesheetMyTeam() {
           const teams = res?.teams || [];
           const mgrs = teams.map((t) => {
             const groupName = t.tenNhom || t.members?.[0]?.tenNhom;
+            const mgrId = getStaffIdentifier({ email: t.managerEmail, maNhanSu: t.managerCode });
             return {
               value: t.managerCode,
               label: groupName
                 ? `${groupName} — ${t.managerName} (${(t.members || []).length} TV)`
-                : `${t.managerCode} - ${t.managerName} (${(t.members || []).length} TV)`,
+                : `${t.managerName} (${mgrId}) — ${(t.members || []).length} TV`,
             };
           });
           setManagersList(mgrs);
@@ -311,10 +313,10 @@ export default function TimesheetMyTeam() {
               managerInfo.tenNhom ? (
                 <>
                   <span className="font-bold text-gray-800 text-base block mb-0.5">{managerInfo.tenNhom}</span>
-                  <span>Trưởng nhóm: <strong className="text-gray-700">{managerInfo.hoTen}</strong> ({managerInfo.maNhanSu}) — {managerInfo.chucVu || "Trưởng nhóm"}</span>
+                  <span>Trưởng nhóm: <strong className="text-gray-700">{managerInfo.hoTen}</strong> ({getStaffIdentifier(managerInfo)}) — {managerInfo.chucVu || "Trưởng nhóm"}</span>
                 </>
               ) : (
-                `Trưởng nhóm: ${managerInfo.hoTen} (${managerInfo.maNhanSu}) — ${managerInfo.chucVu || "Trưởng nhóm"}`
+                `Trưởng nhóm: ${managerInfo.hoTen} (${getStaffIdentifier(managerInfo)}) — ${managerInfo.chucVu || "Trưởng nhóm"}`
               )
             ) : (
               "Theo dõi chỉ số KPI và tiến độ báo cáo công việc của các nhân viên trong team"
@@ -488,7 +490,7 @@ export default function TimesheetMyTeam() {
                         </div>
                         <div>
                           <h3 className="font-bold text-gray-800 text-sm leading-tight">{m.hoTen}</h3>
-                          <p className="text-xs font-mono text-gray-500 mt-0.5">{m.maNhanSu}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{getStaffIdentifier(m)}</p>
                         </div>
                       </div>
                       <span
@@ -569,7 +571,7 @@ export default function TimesheetMyTeam() {
                           </div>
                           <div>
                             <p className="font-semibold text-gray-800 text-sm">{m.hoTen}</p>
-                            <p className="text-[11px] font-mono text-gray-400">{m.maNhanSu}</p>
+                            <p className="text-[11px] text-gray-400">{getStaffIdentifier(m)}</p>
                           </div>
                         </div>
                       </td>
@@ -729,7 +731,7 @@ export default function TimesheetMyTeam() {
             onChange={(val) => setMemberToAdd(val)}
             options={allStaffList.map((s) => ({
               value: s.maNhanSu,
-              label: `${s.maNhanSu} - ${s.hoTen} (${s.chucVu || "Nhân viên"})`,
+              label: formatStaffSelectLabel(s, { includeRole: true, roleFallback: "Nhân viên" }),
             }))}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())

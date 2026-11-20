@@ -486,13 +486,12 @@ function ApplicationKD_VNEdit() {
                             </div>
                             <div>
                                 <label className="block text-gray-700 text-left">Bước xử lý</label>
-                                <input
-                                    type="text"
-                                    value={buocXuLy}
-                                    disabled
-                                    onChange={(e) => setBuocXuLy(e.target.value)}
-                                    className="w-full p-2 mt-1 border rounded-lg text-input h-10 bg-gray-200"
-                                />
+                                <div
+                                    className="w-full p-2 mt-1 border rounded-lg text-input bg-gray-200 text-gray-700 text-left whitespace-pre-wrap break-words leading-snug"
+                                    style={{ height: "auto", minHeight: "2.5rem" }}
+                                >
+                                    {buocXuLy || ""}
+                                </div>
                             </div>
                             <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Cột trái: Ngày nộp đơn + Danh sách sản phẩm dịch vụ */}
