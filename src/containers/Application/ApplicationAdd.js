@@ -19,6 +19,7 @@ import BrandBasicForm from "../../components/BrandBasicForm";
 import FormHoSo from "../../components/commom/FormHoSo.js";
 import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
 import useVietnamTrademarkDeadlines from "../../utils/useVietnamTrademarkDeadlines";
+import useVietnamTrademarkOutcomeDeadlines from "../../utils/useVietnamTrademarkOutcomeDeadlines";
 function ApplicationAdd() {
     const navigate = useNavigate();
 
@@ -89,6 +90,18 @@ function ApplicationAdd() {
     const [ngayNhanKQYKien, setNgayNhanKQYKien] = useState(null);
     const [ketQuaYKien, setKetQuaYKien] = useState(null);
     const [hanNopPhiCapBang, setHanNopPhiCapBang] = useState(null);
+
+    const responseMonths = useVietnamTrademarkOutcomeDeadlines({
+        filingDate: ngayNopDon,
+        contentResultDate: ngayKQThamDinhND,
+        grantNoticeDate: ngayThongBaoCapBang,
+        grantAccepted: trangThaiCapBang,
+        opinionResultDate: ngayNhanKQYKien,
+        opinionAccepted: ketQuaYKien,
+        setResponseDeadline: setNgayTraLoiKQThamDinhND_DuKien,
+        setFeeDeadline: setHanNopPhiCapBang,
+        setOpinionDeadline: setHanNopYKien,
+    });
 
     const [ngayNopPhiCapBang, setNgayNopPhiCapBang] = useState(null);
     const [ngayNhanBang, setNgayNhanBang] = useState(null);
@@ -238,13 +251,7 @@ function ApplicationAdd() {
         }
 
         if (ngayKQThamDinhND) {
-            // if (!ngayTraLoiKQThamDinhND_DuKien) {
-            const duKien = dayjs(ngayKQThamDinhND).add(3, 'month').format('YYYY-MM-DD');
-            setNgayTraLoiKQThamDinhND_DuKien(duKien);
-            // }
             setDaChonNgayThamDinhNoiDung(true);
-        } else {
-            setNgayTraLoiKQThamDinhND_DuKien(null);
         }
 
         if (
@@ -254,35 +261,6 @@ function ApplicationAdd() {
             setDaChonNgayTraLoiThamDinhNoiDung(true);
             updateTrangThaiDon("Hoàn tất nhận bằng");
         }
-
-        // const baseNgay = ngayNhanKQYKien || ngayThongBaoCapBang;
-        if (trangThaiCapBang === true) {
-            const baseNgay = ngayThongBaoCapBang;
-            if (ngayThongBaoCapBang && !hanNopPhiCapBang) {
-                const han = dayjs(baseNgay).add(3, 'month').format('YYYY-MM-DD');
-                setHanNopPhiCapBang(han);
-            } else if (!baseNgay) {
-                setHanNopPhiCapBang(null);
-            }
-        } else if (trangThaiCapBang === false) {
-            const baseNgay = ngayNhanKQYKien;
-
-            if (ketQuaYKien === true && ngayNhanKQYKien && !hanNopPhiCapBang) {
-                const han = dayjs(baseNgay).add(3, 'month').format('YYYY-MM-DD');
-                setHanNopPhiCapBang(han);
-            } else if (!baseNgay || ketQuaYKien !== true) {
-                setHanNopPhiCapBang(null);
-            }
-
-            // 👉 Thêm xử lý hanNopYKien khi trạng thái cấp bằng là false
-            if (ngayThongBaoCapBang) {
-                const hanYKien = dayjs(ngayThongBaoCapBang).add(3, 'month').format('YYYY-MM-DD');
-                setHanNopYKien(hanYKien);
-            } else {
-                setHanNopYKien(null);
-            }
-        }
-
 
         if (ngayNhanBang) {
             setDaChonHoanTatThuTucNhapBang(true);
@@ -638,6 +616,7 @@ function ApplicationAdd() {
                     {daChonNgayCongBoDon && (
                         <div className="col-span-2">
                             <ContentReview
+                                responseMonths={responseMonths}
                                 ngayKQThamDinhND_DuKien={ngayKQThamDinhND_DuKien}
                                 setNgayKQThamDinhND_DuKien={setNgayKQThamDinhND_DuKien}
                                 ngayKQThamDinhND={ngayKQThamDinhND}

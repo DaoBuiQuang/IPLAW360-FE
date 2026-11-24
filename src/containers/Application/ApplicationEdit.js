@@ -21,6 +21,7 @@ import { Spin } from "antd";
 import FormHoSo from "../../components/commom/FormHoSo.js";
 import DSVuViec from "../../components/VuViecForm/DSVuViec.js";
 import useVietnamTrademarkDeadlines from "../../utils/useVietnamTrademarkDeadlines";
+import useVietnamTrademarkOutcomeDeadlines from "../../utils/useVietnamTrademarkOutcomeDeadlines";
 function ApplicationEdit() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -94,6 +95,20 @@ function ApplicationEdit() {
     const [ngayNhanKQYKien, setNgayNhanKQYKien] = useState(null);
     const [ketQuaYKien, setKetQuaYKien] = useState(null);
     const [hanNopPhiCapBang, setHanNopPhiCapBang] = useState(null);
+
+    const responseMonths = useVietnamTrademarkOutcomeDeadlines({
+        filingDate: ngayNopDon,
+        contentResultDate: ngayKQThamDinhND,
+        grantNoticeDate: ngayThongBaoCapBang,
+        grantAccepted: trangThaiCapBang,
+        opinionResultDate: ngayNhanKQYKien,
+        opinionAccepted: ketQuaYKien,
+        setResponseDeadline: setNgayTraLoiKQThamDinhND_DuKien,
+        setFeeDeadline: setHanNopPhiCapBang,
+        setOpinionDeadline: setHanNopYKien,
+        ready: applicationLoaded,
+        preserveOnLoad: true,
+    });
 
     const [ngayNopPhiCapBang, setNgayNopPhiCapBang] = useState(null);
     const [ngayNhanBang, setNgayNhanBang] = useState(null);
@@ -253,13 +268,7 @@ function ApplicationEdit() {
         }
 
         if (ngayKQThamDinhND) {
-            // if (!ngayTraLoiKQThamDinhND_DuKien) {
-            const duKien = dayjs(ngayKQThamDinhND).add(3, 'month').format('YYYY-MM-DD');
-            setNgayTraLoiKQThamDinhND_DuKien(duKien);
-            // }
             setDaChonNgayThamDinhNoiDung(true);
-        } else {
-            setNgayTraLoiKQThamDinhND_DuKien(null);
         }
 
         if (
@@ -270,31 +279,6 @@ function ApplicationEdit() {
             updateTrangThaiDon("Hoàn tất nhận bằng");
         }
 
-        // const baseNgay = ngayNhanKQYKien || ngayThongBaoCapBang;
-        if (trangThaiCapBang === true) {
-            const baseNgay = ngayThongBaoCapBang;
-            if (ngayThongBaoCapBang && !hanNopPhiCapBang) {
-                const han = dayjs(baseNgay).add(3, 'month').format('YYYY-MM-DD');
-                setHanNopPhiCapBang(han);
-            } else if (!baseNgay) {
-                setHanNopPhiCapBang(null);
-            }
-        } else if (trangThaiCapBang === false) {
-            const baseNgay = ngayNhanKQYKien;
-
-            if (ketQuaYKien === true && ngayNhanKQYKien && !hanNopPhiCapBang) {
-                const han = dayjs(baseNgay).add(3, 'month').format('YYYY-MM-DD');
-                setHanNopPhiCapBang(han);
-            } else if (!baseNgay || ketQuaYKien !== true) {
-                setHanNopPhiCapBang(null);
-            }
-            if (ngayThongBaoCapBang) {
-                const hanYKien = dayjs(ngayThongBaoCapBang).add(3, 'month').format('YYYY-MM-DD');
-                setHanNopYKien(hanYKien);
-            } else {
-                setHanNopYKien(null);
-            }
-        }
         if (ngayNhanBang) {
             setDaChonHoanTatThuTucNhapBang(true);
             updateTrangThaiDon("Gửi bằng cho khách hàng");
@@ -742,6 +726,7 @@ function ApplicationEdit() {
                         {daChonNgayCongBoDon && (
                             <div className="col-span-2">
                                 <ContentReview
+                                    responseMonths={responseMonths}
                                     ngayKQThamDinhND_DuKien={ngayKQThamDinhND_DuKien}
                                     setNgayKQThamDinhND_DuKien={setNgayKQThamDinhND_DuKien}
                                     ngayKQThamDinhND={ngayKQThamDinhND}

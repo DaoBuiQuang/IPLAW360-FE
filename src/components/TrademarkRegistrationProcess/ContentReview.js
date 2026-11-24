@@ -13,7 +13,8 @@ const ContentReview = ({
     setNgayKQThamDinhND_DK_SauKN,
     buocXuLy,
     setBuocXuLy,
-    isViewOnly
+    isViewOnly,
+    responseMonths,
 }) => {
     const [daDat, setDaDat] = useState(false);
     const [daKNThanhCong, setDaKNThanhCong] = useState(false);
@@ -44,9 +45,22 @@ const ContentReview = ({
             }
         });
     }, [lichSuThamDinhND]);
+    const previousResponseMonths = useRef(responseMonths);
+    useEffect(() => {
+        if (previousResponseMonths.current === responseMonths) return;
+        previousResponseMonths.current = responseMonths;
+        setLichSuThamDinhND(rows => rows.map(row => ({
+            ...row,
+            hanTraLoi: row.ngayNhanThongBaoTuChoiTD
+                ? dayjs(row.ngayNhanThongBaoTuChoiTD).add(responseMonths, 'month')
+                    .add(row.giaHan ? 3 : 0, 'month').format('YYYY-MM-DD')
+                : null,
+        })));
+    }, [responseMonths, setLichSuThamDinhND]);
+
     const handleFailure = () => {
         const today = dayjs();
-        const hanTraLoi = today.add(2, 'month').format('YYYY-MM-DD');
+        const hanTraLoi = today.add(responseMonths ?? 2, 'month').format('YYYY-MM-DD');
 
         setLichSuThamDinhND(prev => [
             ...prev,
@@ -80,7 +94,7 @@ const ContentReview = ({
         updated[index][field] = value;
         if (field === "ngayNhanThongBaoTuChoiTD") {
             if (value) {
-                const newHan = dayjs(value).add(3, 'month').format('YYYY-MM-DD');
+                const newHan = dayjs(value).add(responseMonths ?? 3, 'month').format('YYYY-MM-DD');
                 updated[index].hanTraLoi = newHan;
             } else {
                 updated[index].hanTraLoi = null;
